@@ -4,7 +4,10 @@ settings:
   CURRENT_PROJECT_VERSION: 1
 options:
   bundleIdPrefix: com.Kapal-Lawd
-# packages:
+packages:
+  SDBeaconScanner:
+    url: https://github.com/SagarSDagdu/SDBeaconScanner.git
+    from: 0.0.2
 targets:
   Kapal-Lawd:
     type: application
@@ -18,7 +21,8 @@ targets:
       PRODUCT_BUNDLE_IDENTIFIER: com.Kapal-Lawd.Kapal-Lawd
       INFOPLIST_FILE: Kapal-Lawd/Info.plist
       GENERATE_INFOPLIST_FILE: true
-    # dependencies: 
+    dependencies:
+        - package: SDBeaconScanner
   Kapal-LawdTests:
     type: bundle.unit-test
     platform: iOS
