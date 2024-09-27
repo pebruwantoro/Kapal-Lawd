@@ -1,0 +1,29 @@
+[
+  {
+    "UUID": "venue-001",
+    "name": "City Museum",
+    "location": "Downtown",
+    "type": "Museum",
+    "sound_name": "welcome_sound.mp3",
+    "created_at": "2023-09-25T10:00:00Z",
+    "created_by": "user-001",
+    "updated_at": "2023-09-26T12:00:00Z",
+    "updated_by": "user-002",
+    "deleted_at": null,
+    "deleted_by": null
+  },
+  {
+    "UUID": "venue-002",
+    "name": "Art Gallery",
+    "location": "Uptown",
+    "type": "Gallery",
+    "sound_name": "gallery_intro.mp3",
+    "created_at": "2023-09-20T09:30:00Z",
+    "created_by": "user-003",
+    "updated_at": "2023-09-23T14:45:00Z",
+    "updated_by": "user-001",
+    "deleted_at": null,
+    "deleted_by": null
+  }
+]
+

@@ -1,0 +1,27 @@
+[
+  {
+    "UUID": "user-001",
+    "username": "admin123",
+    "password": "hashed_password_1",
+    "email": "admin@example.com",
+    "name": "Admin User",
+    "role": "admin"
+  },
+  {
+    "UUID": "user-002",
+    "username": "curator01",
+    "password": "hashed_password_2",
+    "email": "curator01@example.com",
+    "name": "Curator One",
+    "role": "curator"
+  },
+  {
+    "UUID": "user-003",
+    "username": "curator02",
+    "password": "hashed_password_3",
+    "email": "curator02@example.com",
+    "name": "Curator Two",
+    "role": "curator"
+  }
+]
+

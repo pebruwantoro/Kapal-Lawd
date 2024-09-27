@@ -1,0 +1,13 @@
+[
+  {
+    "UUID": "room-001",
+    "venues_id": "venue-001",
+    "name": "Egyptian Exhibit"
+  },
+  {
+    "UUID": "room-002",
+    "venues_id": "venue-002",
+    "name": "Contemporary Art Room"
+  }
+]
+
