@@ -14,7 +14,9 @@ targets:
     platform: iOS
     info:
         path: Kapal-Lawd/Info.plist
-        properties: {}
+        properties:
+          Privacy - Location Always and When In Use Usage Description: "Your app needs access to your location to provide personalized services even when the app is in the background."
+          Privacy - Location When In Use Usage Description: "Your app needs access to your location to provide personalized services when the app is in use."
     sources: [Kapal-Lawd]
     resources: [Resources]
     settings:

@@ -5,42 +5,33 @@
 //  Created by Romi Fadhurohman Nabil on 19/09/24.
 //
 
-import Foundation
-import AVKit
-import Combine
+import AVFoundation
+import SwiftUI
 
 class AudioPlayerViewModel: ObservableObject {
-    private var player: AVPlayer?
-    private var playerItem: AVPlayerItem?
-    @Published var isPlaying = false
-    @Published var currentSongTitle: String?
-
+    private var audioPlayer: AVAudioPlayer?
+    @Published var isPlaying: Bool = false
+    
     func startPlayback(songTitle: String) {
-        guard let url = Bundle.main.url(forResource: songTitle, withExtension: "mp3") else {
-            print("Audio file not found")
-            return
+        if let path = Bundle.main.path(forResource: songTitle, ofType: "mp3") {
+            let url = URL(fileURLWithPath: path)
+            do {
+                audioPlayer = try AVAudioPlayer(contentsOf: url)
+                audioPlayer?.play()
+                isPlaying = true
+                print("Memulai playback \(songTitle)")
+            } catch {
+                print("Error memulai playback: \(error.localizedDescription)")
+            }
         }
-        let playerItem = AVPlayerItem(url: url)
-        self.playerItem = playerItem
-        self.player = AVPlayer(playerItem: playerItem)
-        self.player?.play()
-        self.isPlaying = true
-        self.currentSongTitle = songTitle
     }
-
-    func pausePlayback() {
-        self.player?.pause()
-        self.isPlaying = false
-    }
-
-    func resumePlayback() {
-        self.player?.play()
-        self.isPlaying = true
-    }
-
+    
     func stopPlayback() {
-        self.player?.pause()
-        self.player?.seek(to: CMTime.zero)
-        self.isPlaying = false
+        if audioPlayer?.isPlaying == true {
+            audioPlayer?.stop()
+            isPlaying = false
+            print("Menghentikan playback")
+        }
     }
 }
+

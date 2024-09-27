@@ -5,53 +5,74 @@
 //  Created by Syafrie Bachtiar on 18/09/24.
 //
 
-import Foundation
 import CoreLocation
-import Combine
 
-class IBeaconDetector: NSObject, CLLocationManagerDelegate, ObservableObject {
-    let locationManager = CLLocationManager()
-    let uuidString = "39B39463-B2EF-444E-A1C5-0921641A338F"
-    var constraint: CLBeaconIdentityConstraint!
-    
+class IBeaconDetector: NSObject, ObservableObject, CLLocationManagerDelegate {
     @Published var proximity: CLProximity = .unknown
+    private var locationManager: CLLocationManager?
+    private let beaconUUID = UUID(uuidString: "8E44B286-6125-4222-817F-E3DCF3225D2F")
+    private let beaconIdentifier = "Beacon1"
     
     override init() {
         super.init()
+        locationManager = CLLocationManager()
+        locationManager?.delegate = self
         
-        if let uuid = UUID(uuidString: uuidString) {
-            constraint = CLBeaconIdentityConstraint(uuid: uuid)
-            let beaconRegion = CLBeaconRegion(beaconIdentityConstraint: constraint, identifier: "kCBAdvDataAppleBeaconKey")
-            
-            locationManager.delegate = self
-            locationManager.requestAlwaysAuthorization()
-            locationManager.startMonitoring(for: beaconRegion)
-            locationManager.startRangingBeacons(satisfying: beaconRegion.beaconIdentityConstraint)
-            print("correct beacon ID")
+        // Minta izin untuk "Always Authorization"
+        if CLLocationManager.authorizationStatus() != .authorizedAlways {
+            locationManager?.requestAlwaysAuthorization()
+        }
+        
+        // Aktifkan untuk pemindaian lokasi secara berkelanjutan
+        locationManager?.allowsBackgroundLocationUpdates = true
+        
+        startMonitoring()
+    }
+    
+    func startMonitoring() {
+        guard let beaconUUID = beaconUUID else { return }
+        
+        // Buat region untuk beacon
+        let beaconRegion = CLBeaconRegion(uuid: beaconUUID, identifier: beaconIdentifier)
+        
+        // Mulai monitor dan ranging untuk region
+        locationManager?.startMonitoring(for: beaconRegion)
+        locationManager?.startRangingBeacons(in: beaconRegion)
+        
+        // Pastikan aplikasi terus melakukan pemindaian lokasi di background
+        locationManager?.startUpdatingLocation()
+    }
+    
+    func locationManager(_ manager: CLLocationManager, didRangeBeacons beacons: [CLBeacon], in region: CLBeaconRegion) {
+        if let nearestBeacon = beacons.first {
+            proximity = nearestBeacon.proximity
         } else {
-            print("Invalid UUID string")
+            proximity = .unknown
         }
     }
     
     func locationManager(_ manager: CLLocationManager, didEnterRegion region: CLRegion) {
-        if region is CLBeaconRegion {
-            print("Entered beacon region!")
+        // Ketika masuk ke region beacon, mulai ranging
+        if let beaconRegion = region as? CLBeaconRegion {
+            locationManager?.startRangingBeacons(in: beaconRegion)
         }
     }
-    
+
     func locationManager(_ manager: CLLocationManager, didExitRegion region: CLRegion) {
-        if region is CLBeaconRegion {
-            print("Exited beacon region!")
+        // Hentikan ranging saat keluar dari region beacon
+        if let beaconRegion = region as? CLBeaconRegion {
+            locationManager?.stopRangingBeacons(in: beaconRegion)
         }
     }
     
-    func locationManager(_ manager: CLLocationManager, didRange beacons: [CLBeacon], satisfying beaconConstraint: CLBeaconIdentityConstraint) {
-        print(beacons.count)
-        if let beacon = beacons.first {
-            self.proximity = beacon.proximity
-            print("check proximity")
+    func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
+        // Tetap kosong, cukup untuk menjaga aplikasi tetap berjalan di background
+    }
+    
+    func locationManager(_ manager: CLLocationManager, didChangeAuthorization status: CLAuthorizationStatus) {
+        // Pastikan izin "Always" telah diberikan
+        if status == .authorizedAlways {
+            startMonitoring()
         }
     }
 }
-
-
