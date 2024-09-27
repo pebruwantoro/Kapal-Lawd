@@ -14,6 +14,7 @@ class AudioPlayerViewModel: ObservableObject {
     private var playerItem: AVPlayerItem?
     @Published var isPlaying = false
     @Published var currentSongTitle: String?
+    private var beaconLocalRepo = JSONBeaconsRepository()
 
     func startPlayback(songTitle: String) {
         guard let url = Bundle.main.url(forResource: songTitle, withExtension: "mp3") else {
@@ -42,5 +43,14 @@ class AudioPlayerViewModel: ObservableObject {
         self.player?.pause()
         self.player?.seek(to: CMTime.zero)
         self.isPlaying = false
+    }
+    
+    func fetchDataBeacon() -> [Beacons]{
+        let result = beaconLocalRepo.fetchListBeacons()
+        let errorHandler = result.1
+        if let errorHandler = errorHandler {
+            print("error")
+        }
+        return result.0
     }
 }

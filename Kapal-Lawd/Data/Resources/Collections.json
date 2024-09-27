@@ -1,0 +1,19 @@
+[
+  {
+    "UUID": "collection-001",
+    "rooms_id": "room-001",
+    "name": "Ancient Egypt",
+    "beacon_id": "beacon-001",
+    "long_contents": "This collection features artifacts from Ancient Egypt, including mummies, sculptures, and papyrus scrolls.",
+    "short_contents": "Explore the wonders of Ancient Egypt."
+  },
+  {
+    "UUID": "collection-002",
+    "rooms_id": "room-002",
+    "name": "Modern Art",
+    "beacon_id": "beacon-002",
+    "long_contents": "A diverse collection showcasing modern art from the 20th century to contemporary works.",
+    "short_contents": "Experience the evolution of modern art."
+  }
+]
+
