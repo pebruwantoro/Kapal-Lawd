@@ -11,3 +11,8 @@ cd ..
 
 # Generate the Xcode project
 xcodegen generate
+
+# See all project
+ls
+
+xcodebuild -project ./Kapal-Lawd.xcodeproj -scheme ./Kapal-Lawd.xcodeproj -resolvePackageDependencies -verbose
