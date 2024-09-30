@@ -9,14 +9,14 @@ brew install xcodegen
 cd ..
 
 # Generate the Xcode project
-xcodegen generate
+# xcodegen generate
 
-mkdir -p Kapal-Lawd.xcodeproj/project.xcworkspace/xcshareddata/swiftpm
+# mkdir -p Kapal-Lawd.xcodeproj/project.xcworkspace/xcshareddata/swiftpm
 
-ls -la
-ls $(pwd)/Kapal-Lawd.xcodeproj/project.xcworkspace/xcshareddata/swiftpm
-cat $(pwd)/Kapal-Lawd.xcodeproj/project.xcworkspace/xcshareddata/swiftpm/Package.resolved
+# ls -la
+# ls $(pwd)/Kapal-Lawd.xcodeproj/project.xcworkspace/xcshareddata/swiftpm
+# cat $(pwd)/Kapal-Lawd.xcodeproj/project.xcworkspace/xcshareddata/swiftpm/Package.resolved
 
 
-# Resolve Swift package dependencies
-xcodebuild -project Kapal-Lawd.xcodeproj -scheme Kapal-Lawd -resolvePackageDependencies -verbose
+# # Resolve Swift package dependencies
+# xcodebuild -project Kapal-Lawd.xcodeproj -scheme Kapal-Lawd -resolvePackageDependencies -verbose
