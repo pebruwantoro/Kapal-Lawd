@@ -10,11 +10,9 @@ cd ..
 xcodegen generate
 
 ls -la
-
-cat ./Kapal-Lawd.xcodeproj/project.xcworkspace/xcshareddata/swiftpm/Package.resolved
+ls $(pwd)/Kapal-Lawd.xcodeproj/project.xcworkspace/xcshareddata/swiftpm
+cat $(pwd)/Kapal-Lawd.xcodeproj/project.xcworkspace/xcshareddata/swiftpm/Package.resolved
 
 
 # Resolve Swift package dependencies
 xcodebuild -project Kapal-Lawd.xcodeproj -scheme Kapal-Lawd -resolvePackageDependencies
-
-xcodebuild -project Kapal-Lawd.xcodeproj -scheme Kapal-Lawd -verbose
