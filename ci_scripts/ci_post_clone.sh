@@ -1,21 +1,19 @@
-#!/bin/sh
+#!/bin/bash
 
-# Install Xcodegen
+# Exit immediately if a command exits with a non-zero status
+set -e
+
+# Change to the project directory
+cd "$(dirname "$0")"
+
+# Install XcodeGen if it's not already installed
 if ! command -v xcodegen &> /dev/null; then
+    echo "XcodeGen not found. Installing..."
     brew install xcodegen
 fi
 
-echo "Current Directory: $(pwd)"
-ls -la
+# Generate the Xcode project using XcodeGen
+echo "Generating Xcode project..."
+xcodegen
 
-# Go to Project Directory
-cd ..
-
-echo "Current Directory: $(pwd)"
-ls -la
-
-# Generate the Xcode project
-if ! xcodegen generate; then
-    echo "Failed to generate Xcode project."
-    exit 1
-fi
+# Any other post-clone setup tasks can be added here
