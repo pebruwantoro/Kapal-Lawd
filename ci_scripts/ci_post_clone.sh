@@ -28,11 +28,11 @@ if [ ! -d "Kapal-Lawd.xcodeproj" ]; then
     exit 1
 fi
 
-chmod -R u+rwx ./Kapal-Lawd.xcodeproj
+chmod chmod 775 Kapal-Lawd.xcodeproj
 echo "Current Directory: $(pwd)"
 ls -la
 
-echo "TEST echo: $(pwd/Kapal-Lawd.xcodeproj/project.xcworkspace/xcshareddata/swiftpm)"
+echo "TEST echo: $(./Kapal-Lawd.xcodeproj/project.xcworkspace/xcshareddata/swiftpm)"
 
 # Check if Package.resolved exists
 if [ ! -f "./Kapal-Lawd.xcodeproj/project.xcworkspace/xcshareddata/swiftpm/Package.resolved" ]; then
