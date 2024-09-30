@@ -13,10 +13,23 @@ fi
 echo "Generating Xcode project..."
 xcodegen
 
-# Any other post-clone setup tasks can be added here
 # Navigate to the project directory
 cd Kapal-Lawd.xcodeproj
 
 # Create the xcshareddata/swiftpm directory if it doesn't exist
 mkdir -p project.xcworkspace/xcshareddata/swiftpm
 
+# Resolve package dependencies to generate Package.resolved
+echo "Resolving package dependencies..."
+xcodebuild -resolvePackageDependencies -project Kapal-Lawd.xcodeproj -scheme Kapal-Lawd
+
+# Check if Package.resolved was created
+if [ -f "project.xcworkspace/xcshareddata/swiftpm/Package.resolved" ]; then
+    echo "Package.resolved generated successfully."
+else
+    echo "Failed to generate Package.resolved."
+    exit 1
+fi
+
+# List files to verify the structure
+ls -la project.xcworkspace/xcshareddata/swiftpm

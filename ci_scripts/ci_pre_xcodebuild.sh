@@ -11,6 +11,3 @@ else
     echo "Resolving packages..."
     xcodebuild -resolvePackageDependencies -project Kapal-Lawd.xcodeproj
 fi
-
-# Set up any environment variables needed for the build
-export DEVELOPMENT_TEAM="U5CZ6K98KV"  # Replace with your actual team ID
