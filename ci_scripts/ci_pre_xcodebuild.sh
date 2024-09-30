@@ -1,0 +1,1 @@
+xcodebuild -resolvePackageDependencies -project ./Kapal-Lawd.xcodeproj
