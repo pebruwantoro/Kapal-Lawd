@@ -28,8 +28,6 @@ if [ ! -d "Kapal-Lawd.xcodeproj" ]; then
     exit 1
 fi
 
-chown -R tc:tc Kapal-Lawd.xcodeproj
-
 echo "Current Directory: $(pwd)"
 ls -la
 
@@ -37,6 +35,8 @@ ls -la Kapal-Lawd.xcodeproj
 ls -la Kapal-Lawd.xcodeproj/project.xcworkspace
 ls -la Kapal-Lawd.xcodeproj/project.xcworkspace/xcshareddata
 ls -la Kapal-Lawd.xcodeproj/project.xcworkspace/xcshareddata/swiftpm
+
+mkdir ./Kapal-Lawd.xcodeproj/project.xcworkspace/xcshareddata/swiftpm
 
 
 # Resolve package dependencies

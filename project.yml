@@ -7,7 +7,6 @@ options:
 packages:
   SDBeaconScanner:
     url: https://github.com/SagarSDagdu/SDBeaconScanner.git
-    from: 0.0.2
 targets:
   Kapal-Lawd:
     type: application
