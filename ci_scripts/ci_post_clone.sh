@@ -9,7 +9,7 @@ brew install xcodegen
 cd ..
 
 # Generate the Xcode project
-# xcodegen generate
+xcodegen generate
 
 # mkdir -p Kapal-Lawd.xcodeproj/project.xcworkspace/xcshareddata/swiftpm
 
