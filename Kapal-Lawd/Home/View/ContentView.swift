@@ -12,7 +12,7 @@ import AVFoundation
 struct ContentView: View {
     @StateObject var beaconScanner = IBeaconDetector()
     @State private var proximityText: String = "No Beacon Detected"
-    @StateObject private var ap = AudioPlayerViewModel()
+    @StateObject private var avManager = AVManager.shared
     
     var body: some View {
         VStack {
@@ -22,43 +22,47 @@ struct ContentView: View {
                 .onReceive(beaconScanner.$proximity) { proximity in
                     print(proximity.rawValue)
                     switch proximity {
-                    case .immediate:
-                        proximityText = "Dekat sekali"
-                        if !ap.isPlaying {
-                            ap.startPlayback(songTitle: "dreams")  // Ganti dengan lagu yang diinginkan
-                        }
-                    case .near:
-                        proximityText = "Dekat"
-                        if !ap.isPlaying {
-                            ap.startPlayback(songTitle: "dreams")
-                        }
-                    case .far:
-                        proximityText = "Jauh"
-                        ap.stopPlayback()
-                    case .unknown:
-                        proximityText = "Tidak diketahui"
-                        ap.stopPlayback()
-                    @unknown default:
-                        proximityText = "Tidak diketahui"
-                        ap.stopPlayback()
-            Text("Now Playing: \(avManager.currentSongTitle ?? "None")")
-
-            // Audio Player Controls
-            HStack {
-                Button(action: {
-                    if avManager.isPlaying {
-                        avManager.pausePlayback()
-                    } else {
-                        avManager.startPlayback(songTitle: "welcome")
+                        case .immediate:
+                            proximityText = "Dekat sekali"
+                            if !avManager.isPlaying {
+                                avManager.startPlayback(songTitle: "dreams")  // Ganti dengan lagu yang diinginkan
+                            }
+                        case .near:
+                            proximityText = "Dekat"
+                            if !avManager.isPlaying {
+                                avManager.startPlayback(songTitle: "dreams")
+                            }
+                        case .far:
+                            proximityText = "Jauh"
+                            avManager.stopPlayback()
+                        case .unknown:
+                            proximityText = "Tidak diketahui"
+                            avManager.stopPlayback()
+                        @unknown default:
+                            proximityText = "Tidak diketahui"
+                        avManager.stopPlayback()
                     }
+                    
+                Text("Now Playing: \(avManager.currentSongTitle ?? "None")")
+                
+                // Audio Player Controls
+                HStack {
+                    Button("", action: {
+                        if avManager.isPlaying {
+                            avManager.pausePlayback()
+                        } else {
+                            avManager.startPlayback(songTitle: "welcome")
+                        }
+                    })
                 }
-        }
-        .onAppear {
-            configureAudioSession()
+                .onAppear {
+                        configureAudioSession()
+                }
+            }
         }
     }
     
-    // Mengonfigurasi sesi audio agar bisa diputar di latar belakang
+//  Mengonfigurasi sesi audio agar bisa diputar di latar belakang
     private func configureAudioSession() {
         do {
             let session = AVAudioSession.sharedInstance()
@@ -68,17 +72,11 @@ struct ContentView: View {
 
             // Aktifkan sesi audio
             try session.setActive(true)
-            
+
             print("Audio session berhasil diatur.")
         } catch {
             print("Gagal mengatur sesi audio: \(error.localizedDescription)")
         }
-        .padding()
-    }
-}
-
-struct ContentView_Previews: PreviewProvider {
-    static var previews: some View {
-        ContentView()
+//                    .padding()
     }
 }
