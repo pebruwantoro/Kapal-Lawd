@@ -5,12 +5,6 @@ if ! command -v xcodegen &> /dev/null; then
     brew install xcodegen
 fi
 
-# Check if xcodebuild is available
-if ! command -v xcodebuild &> /dev/null; then
-    echo "xcodebuild is not installed. Please install Xcode command line tools."
-    exit 1
-fi
-
 echo "Current Directory: $(pwd)"
 ls -la
 
