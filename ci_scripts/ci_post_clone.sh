@@ -36,9 +36,6 @@ ls -la Kapal-Lawd.xcodeproj/project.xcworkspace
 ls -la Kapal-Lawd.xcodeproj/project.xcworkspace/xcshareddata
 ls -la Kapal-Lawd.xcodeproj/project.xcworkspace/xcshareddata/swiftpm
 
-mkdir ./Kapal-Lawd.xcodeproj/project.xcworkspace/xcshareddata/swiftpm
-
-
 # Resolve package dependencies
 xcodebuild -resolvePackageDependencies -project ./Kapal-Lawd.xcodeproj -scheme Kapal-Lawd -allowProvisioningUpdates
 
