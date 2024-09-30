@@ -6,8 +6,14 @@ then
     brew install xcodegen
 fi
 
+echo "Current Directory: $(pwd)"
+ls -la
+
 # Go to Project Directory
 cd ..
+
+echo "Current Directory: $(pwd)"
+ls -la
 
 # Generate the Xcode project
 xcodegen generate
