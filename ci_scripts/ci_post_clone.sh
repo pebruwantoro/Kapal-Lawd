@@ -1,7 +1,5 @@
 #!/bin/sh
 
-brew update
-
 # Install Xcodegen
 if ! command -v xcodegen &> /dev/null
 then
@@ -13,3 +11,6 @@ cd ..
 
 # Generate the Xcode project
 xcodegen generate
+
+# See all project
+ls
