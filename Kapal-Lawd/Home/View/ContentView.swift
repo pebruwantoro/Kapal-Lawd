@@ -5,6 +5,7 @@
 //  Created by Doni Pebruwantoro on 18/09/24.
 //
 
+
 import SwiftUI
 import AVFoundation
 
@@ -63,6 +64,7 @@ struct ContentView: View {
         } catch {
             print("Gagal mengatur sesi audio: \(error.localizedDescription)")
         }
+        .padding()
     }
 }
 

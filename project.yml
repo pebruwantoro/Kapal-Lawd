@@ -47,4 +47,3 @@ schemes:
       targets:
       - name: Kapal-LawdTests
       gatherCoverageData: true
-
