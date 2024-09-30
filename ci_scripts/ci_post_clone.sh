@@ -30,6 +30,7 @@ fi
 
 chmod 775 Kapal-Lawd.xcodeproj
 sudo chown -R tc:tc Kapal-Lawd.xcodeproj
+
 echo "Current Directory: $(pwd)"
 ls -la
 
