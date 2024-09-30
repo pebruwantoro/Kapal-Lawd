@@ -10,7 +10,5 @@ cd ..
 xcodegen generate
 
 # Resolve Swift package dependencies and create the Package.resolved file
-xcodebuild -resolvePackageDependencies -project Kapal-Lawd.xcodeproj
-
-# Ensure package dependencies are correctly set
-xcodebuild build -project Kapal-Lawd.xcodeproj -scheme Kapal-Lawd
+xcodebuild -resolvePackageDependencies -project Kapal-Lawd.xcodeproj \
+    -disableAutomaticPackageResolution NO
