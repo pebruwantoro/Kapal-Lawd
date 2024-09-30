@@ -9,7 +9,7 @@ cd ..
 # Generate the Xcode project
 xcodegen generate
 
-cat Kapal-Lawd.xcodeproj/project.xcworkspace/xcshareddata/swiftpm/Package.resolved
+cat ./Kapal-Lawd.xcodeproj/project.xcworkspace/xcshareddata/swiftpm/Package.resolved
 
 
 # Resolve Swift package dependencies
