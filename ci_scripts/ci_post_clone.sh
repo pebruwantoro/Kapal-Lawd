@@ -21,10 +21,10 @@ ls Kapal-Lawd.xcodeproj
 echo "Check file on project.xcworkspace"
 ls Kapal-Lawd.xcodeproj/project.xcworkspace 
 
-# mkdir Kapal-Lawd.xcodeproj/project.xcworkspace/xcshareddata
-
 echo "Check file on xcshareddata"
 ls Kapal-Lawd.xcodeproj/project.xcworkspace/xcshareddata
+
+mkdir Kapal-Lawd.xcodeproj/project.xcworkspace/xcshareddata
 
 mkdir Kapal-Lawd.xcodeproj/project.xcworkspace/xcshareddata/swiftpm
 
