@@ -41,6 +41,15 @@ struct ContentView: View {
                     @unknown default:
                         proximityText = "Tidak diketahui"
                         ap.stopPlayback()
+            Text("Now Playing: \(avManager.currentSongTitle ?? "None")")
+
+            // Audio Player Controls
+            HStack {
+                Button(action: {
+                    if avManager.isPlaying {
+                        avManager.pausePlayback()
+                    } else {
+                        avManager.startPlayback(songTitle: "welcome")
                     }
                 }
         }

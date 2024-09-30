@@ -17,6 +17,16 @@ targets:
         properties:
           Privacy - Location Always and When In Use Usage Description: "Your app needs access to your location to provide personalized services even when the app is in the background."
           Privacy - Location When In Use Usage Description: "Your app needs access to your location to provide personalized services when the app is in use."
+          NSLocationWhenInUseUsageDescription: "Your app needs access to your location to provide personalized services even when the app is in the background."
+          NSLocationAlwaysAndWhenInUseUsageDescription: "Your app needs access to your location to provide personalized services even when the app is in the background."
+          NSBluetoothAlwaysUsageDescription: "This app requires continuous access to Bluetooth for background monitoring."
+          NSBluetoothPeripheralUsageDescription: "This app requires access to Bluetooth for connecting to peripherals."
+          UIBackgroundModes:
+            - location
+            - audio
+            - bluetooth-central
+          UILaunchScreen:
+            UIImageName: ""
     sources: [Kapal-Lawd]
     resources: [Resources]
     settings:

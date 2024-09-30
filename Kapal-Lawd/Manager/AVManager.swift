@@ -69,8 +69,8 @@ extension AVManager {
         nowPlayingInfo[MPMediaItemPropertyTitle] = songTitle
 
         if let playerItem = self.playerItem {
-//            let duration = CMTimeGetSeconds(playerItem.asset.duration)
-//            nowPlayingInfo[MPMediaItemPropertyPlaybackDuration] = duration
+            let duration = CMTimeGetSeconds(playerItem.asset.duration)
+            nowPlayingInfo[MPMediaItemPropertyPlaybackDuration] = duration
             nowPlayingInfo[MPNowPlayingInfoPropertyElapsedPlaybackTime] = CMTimeGetSeconds(playerItem.currentTime())
             nowPlayingInfo[MPNowPlayingInfoPropertyPlaybackRate] = self.isPlaying ? 1.0 : 0.0
         }

@@ -2,8 +2,33 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
+<<<<<<< HEAD
 	<key>NSBluetoothPeripheralUsageDescription</key>
 	<string>acc bluetooth</string>
+=======
+	<key>CFBundleDevelopmentRegion</key>
+	<string>$(DEVELOPMENT_LANGUAGE)</string>
+	<key>CFBundleExecutable</key>
+	<string>$(EXECUTABLE_NAME)</string>
+	<key>CFBundleIdentifier</key>
+	<string>$(PRODUCT_BUNDLE_IDENTIFIER)</string>
+	<key>CFBundleInfoDictionaryVersion</key>
+	<string>6.0</string>
+	<key>CFBundleName</key>
+	<string>$(PRODUCT_NAME)</string>
+	<key>CFBundlePackageType</key>
+	<string>APPL</string>
+	<key>CFBundleShortVersionString</key>
+	<string>1.0</string>
+	<key>CFBundleVersion</key>
+	<string>1</string>
+	<key>NSBluetoothAlwaysUsageDescription</key>
+	<string>This app requires continuous access to Bluetooth for background monitoring.</string>
+	<key>NSBluetoothPeripheralUsageDescription</key>
+	<string>This app requires access to Bluetooth for connecting to peripherals.</string>
+	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
+	<string>Your app needs access to your location to provide personalized services even when the app is in the background.</string>
+>>>>>>> 2979edd (fixing-setting-xcode-and-project.yml-file)
 	<key>NSLocationWhenInUseUsageDescription</key>
 	<string>acc location</string>
 	<key>NSLocationAlwaysUsageDescription</key>
@@ -16,7 +41,10 @@
 	<array>
 		<string>audio</string>
 		<string>bluetooth-central</string>
+<<<<<<< HEAD
 		<string>location</string>
+=======
+>>>>>>> 2979edd (fixing-setting-xcode-and-project.yml-file)
 	</array>
 </dict>
 </plist>
