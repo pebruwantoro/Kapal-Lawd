@@ -6,6 +6,8 @@ if ! command -v xcodegen &> /dev/null; then
     brew install xcodegen
 fi
 
+ls .
+
 # Change to the project directory
 cd ..
 
@@ -13,11 +15,19 @@ cd ..
 echo "Generating Xcode project..."
 xcodegen
 
-# Create the xcshareddata/swiftpm directory if it doesn't exist
-mkdir -p Kapal-Lawd.xcodeproj/project.xcworkspace/xcshareddata/swiftpm
+ls Kapal-Lawd.xcodeproj
 
-# List files to verify the structure
-ls -la Kapal-Lawd.xcodeproj/project.xcworkspace/xcshareddata/swiftpm
+mkdir Kapal-Lawd.xcodeproj/project.xcworkspace
+
+ls Kapal-Lawd.xcodeproj/project.xcworkspace 
+
+mkdir Kapal-Lawd.xcodeproj/project.xcworkspace/xcshareddata
+
+ls Kapal-Lawd.xcodeproj/project.xcworkspace/xcshareddata
+
+mkdir Kapal-Lawd.xcodeproj/project.xcworkspace/xcshareddata/swiftpm
+
+touch Kapal-Lawd.xcodeproj/project.xcworkspace/xcshareddata/swiftpm/Package.resolved
 
 # Resolve package dependencies to generate Package.resolved
 echo "Resolving package dependencies..."
