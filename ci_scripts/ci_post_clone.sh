@@ -71,7 +71,7 @@ echo "Current Directory: $(pwd)"
 ls -la
 
 # Generate the Xcode project
-if ! xcodegen generate; then
+if ! xcodegen generate --verbose; then
     echo "Failed to generate Xcode project."
     exit 1
 fi
