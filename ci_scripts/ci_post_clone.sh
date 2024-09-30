@@ -21,11 +21,9 @@ if [ ! -d "Kapal-Lawd.xcodeproj" ]; then
     exit 1
 fi
 
-# Navigate to the project's directory (if needed)
-cd Kapal-Lawd.xcodeproj
-
 # Resolve package dependencies
-xcodebuild -resolvePackageDependencies -project Kapal-Lawd.xcodeproj -scheme Kapal-Lawd -verbose
+#xcodebuild -resolvePackageDependencies -project Kapal-Lawd.xcodeproj -scheme Kapal-Lawd -verbose
+xcodebuild -resolvePackageDependencies -project ./Kapal-Lawd.xcodeproj -scheme Kapal-Lawd -verbose
 
 # Confirm resolution status
 if [ $? -ne 0 ]; then
