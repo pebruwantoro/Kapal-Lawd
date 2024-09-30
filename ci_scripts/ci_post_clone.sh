@@ -22,8 +22,10 @@ if [ ! -d "Kapal-Lawd.xcodeproj" ]; then
 fi
 
 # Resolve package dependencies
-#xcodebuild -resolvePackageDependencies -project Kapal-Lawd.xcodeproj -scheme Kapal-Lawd -verbose
-xcodebuild -resolvePackageDependencies -project ./Kapal-Lawd.xcodeproj -scheme Kapal-Lawd -verbose
+xcodebuild -resolvePackageDependencies -project ./Kapal-Lawd.xcodeproj -scheme Kapal-Lawd
+
+# Build the project
+xcodebuild -project ./Kapal-Lawd.xcodeproj -scheme Kapal-Lawd -verbose
 
 # Confirm resolution status
 if [ $? -ne 0 ]; then
