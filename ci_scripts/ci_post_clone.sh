@@ -28,22 +28,18 @@ if [ ! -d "Kapal-Lawd.xcodeproj" ]; then
     exit 1
 fi
 
-chmod 775 Kapal-Lawd.xcodeproj
 chown -R tc:tc Kapal-Lawd.xcodeproj
 
 echo "Current Directory: $(pwd)"
 ls -la
 
-ls -ls Kapal-Lawd.xcodeproj/project.xcworkspace/xcshareddata/swiftpm
+ls -la Kapal-Lawd.xcodeproj
+ls -la Kapal-Lawd.xcodeproj/project.xcworkspace
+ls -la Kapal-Lawd.xcodeproj/project.xcworkspace/xcshareddata
+ls -la Kapal-Lawd.xcodeproj/project.xcworkspace/xcshareddata/swiftpm
 
-# Check if Package.resolved exists
-if [ ! -f "./Kapal-Lawd.xcodeproj/project.xcworkspace/xcshareddata/swiftpm/Package.resolved" ]; then
-    echo "Package.resolved not found. Generating it..."
-    xcodebuild -resolvePackageDependencies -project ./Kapal-Lawd.xcodeproj -scheme Kapal-Lawd
-fi
 
 # Resolve package dependencies
-#xcodebuild -resolvePackageDependencies -project ./Kapal-Lawd.xcodeproj -scheme Kapal-Lawd
 xcodebuild -resolvePackageDependencies -project ./Kapal-Lawd.xcodeproj -scheme Kapal-Lawd -allowProvisioningUpdates
 
 # Build the project
@@ -54,6 +50,3 @@ if [ $? -ne 0 ]; then
     echo "Failed to resolve package dependencies."
     exit 1
 fi
-
-# List project contents
-ls
