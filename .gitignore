@@ -2,8 +2,12 @@
 #
 # gitignore contributors: remember to update Global/Xcode.gitignore, Objective-C.gitignore & Swift.gitignore
 # Project
-**/*.xcodeproj
-**/*.xcworkspace
+# **/*.xcodeproj
+**/xcuserdata
+*.xcworkspacedata
+*.pbxproj
+**/xcschemes
+# **/*.xcworkspace
 DerivedData/
 .build/
 build/
