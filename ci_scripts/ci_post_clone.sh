@@ -11,6 +11,3 @@ cd ..
 
 # Generate the Xcode project
 xcodegen generate
-
-# See all project
-ls
