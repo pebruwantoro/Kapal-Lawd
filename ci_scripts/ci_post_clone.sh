@@ -28,7 +28,8 @@ if [ ! -d "Kapal-Lawd.xcodeproj" ]; then
     exit 1
 fi
 
-chmod chmod 775 Kapal-Lawd.xcodeproj
+chmod 775 Kapal-Lawd.xcodeproj
+sudo chown -R tc:tc Kapal-Lawd.xcodeproj
 echo "Current Directory: $(pwd)"
 ls -la
 
