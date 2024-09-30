@@ -9,6 +9,8 @@ cd ..
 # Generate the Xcode project
 xcodegen generate
 
+echo "Current Directory: $(pwd)"
+ls -la
+
 # Resolve Swift package dependencies and create the Package.resolved file
-xcodebuild -resolvePackageDependencies -project Kapal-Lawd.xcodeproj \
-    -disableAutomaticPackageResolution NO
+xcodebuild -project Kapal-Lawd.xcodeproj -scheme Kapal-Lawd -verbose
