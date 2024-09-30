@@ -21,6 +21,8 @@ if [ ! -d "Kapal-Lawd.xcodeproj" ]; then
     exit 1
 fi
 
+chmod -R u+rwx ./Kapal-Lawd.xcodeproj
+
 # Resolve package dependencies
 xcodebuild -resolvePackageDependencies -project ./Kapal-Lawd.xcodeproj -scheme Kapal-Lawd
 
