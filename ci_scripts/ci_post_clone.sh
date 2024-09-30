@@ -18,8 +18,6 @@ xcodegen
 echo "Check file on Kapal-Lawd.xcodeproj"
 ls Kapal-Lawd.xcodeproj
 
-mkdir Kapal-Lawd.xcodeproj/project.xcworkspace
-
 echo "Check file on project.xcworkspace"
 ls Kapal-Lawd.xcodeproj/project.xcworkspace 
 
@@ -33,7 +31,7 @@ mkdir Kapal-Lawd.xcodeproj/project.xcworkspace/xcshareddata/swiftpm
 touch Kapal-Lawd.xcodeproj/project.xcworkspace/xcshareddata/swiftpm/Package.resolved
 
 echo "Creating Package.resolved..."
-cat <<EOL > project.xcworkspace/xcshareddata/swiftpm/Package.resolved
+cat <<EOL > Kapal-Lawd.xcodeproj/project.xcworkspace/xcshareddata/swiftpm/Package.resolved
 {
   "originHash" : "fc9f608b2604b47e8a4e8f6d34706a07df80b7a48044b46fc831990fd3c8aece",
   "pins" : [
