@@ -4,6 +4,7 @@ settings:
   CURRENT_PROJECT_VERSION: 1
 options:
   bundleIdPrefix: com.Kapal-Lawd
+  resolvePackagesAutomatically: true
 packages:
   SDBeaconScanner:
     url: https://github.com/SagarSDagdu/SDBeaconScanner.git

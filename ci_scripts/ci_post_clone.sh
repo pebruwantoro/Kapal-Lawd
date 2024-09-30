@@ -94,9 +94,12 @@ ls -la Kapal-Lawd.xcodeproj/project.xcworkspace/xcshareddata
 ls -la Kapal-Lawd.xcodeproj/project.xcworkspace/xcshareddata/swiftpm
 
 # Resolve package dependencies
-if ! xcodebuild -resolvePackageDependencies -project ./Kapal-Lawd.xcodeproj -scheme Kapal-Lawd -allowProvisioningUpdates; then
-    echo "Failed to resolve package dependencies."
-    exit 1
+xcodebuild -resolvePackageDependencies -project ./Kapal-Lawd.xcodeproj -scheme Kapal-Lawd -allowProvisioningUpdates
+
+# Generate the resolved file if it's not there
+if [ ! -f "./Kapal-Lawd.xcodeproj/project.xcworkspace/xcshareddata/swiftpm/Package.resolved" ]; then
+    echo "Package.resolved file is missing, generating it."
+    xcodebuild -resolvePackageDependencies -project ./Kapal-Lawd.xcodeproj -scheme Kapal-Lawd
 fi
 
 # Build the project
