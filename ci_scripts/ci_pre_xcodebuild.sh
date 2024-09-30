@@ -1,10 +1,7 @@
 #!/bin/bash
 
-# Exit immediately if a command exits with a non-zero status
-set -e
-
 # Change to the project directory
-cd "$(dirname "$0")"
+cd ..
 
 # Resolve Swift package dependencies
 echo "Resolving Swift package dependencies..."
