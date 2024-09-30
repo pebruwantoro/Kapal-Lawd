@@ -9,6 +9,8 @@ cd ..
 # Generate the Xcode project
 xcodegen generate
 
+ls -la
+
 cat ./Kapal-Lawd.xcodeproj/project.xcworkspace/xcshareddata/swiftpm/Package.resolved
 
 
