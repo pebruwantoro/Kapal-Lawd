@@ -2,8 +2,10 @@ name: Kapal-Lawd
 settings:
   MARKETING_VERSION: "1.0"
   CURRENT_PROJECT_VERSION: 1
+  DEVELOPMENT_TEAM: ${DEVELOPMENT_TEAM_ID}
 options:
   bundleIdPrefix: com.Kapal-Lawd
+  resolvePackagesAutomatically: true
 packages:
   SDBeaconScanner:
     url: https://github.com/SagarSDagdu/SDBeaconScanner.git
@@ -17,12 +19,23 @@ targets:
         properties:
           Privacy - Location Always and When In Use Usage Description: "Your app needs access to your location to provide personalized services even when the app is in the background."
           Privacy - Location When In Use Usage Description: "Your app needs access to your location to provide personalized services when the app is in use."
+          NSLocationWhenInUseUsageDescription: "Your app needs access to your location to provide personalized services even when the app is in the background."
+          NSLocationAlwaysAndWhenInUseUsageDescription: "Your app needs access to your location to provide personalized services even when the app is in the background."
+          NSBluetoothAlwaysUsageDescription: "This app requires continuous access to Bluetooth for background monitoring."
+          NSBluetoothPeripheralUsageDescription: "This app requires access to Bluetooth for connecting to peripherals."
+          UIBackgroundModes:
+            - location
+            - audio
+            - bluetooth-central
+          UILaunchScreen:
+            UIImageName: ""
     sources: [Kapal-Lawd]
     resources: [Resources]
     settings:
       PRODUCT_BUNDLE_IDENTIFIER: com.Kapal-Lawd.Kapal-Lawd
       INFOPLIST_FILE: Kapal-Lawd/Info.plist
       GENERATE_INFOPLIST_FILE: true
+      DEVELOPMENT_TEAM: ${DEVELOPMENT_TEAM_ID}
     dependencies:
         - package: SDBeaconScanner
   Kapal-LawdTests:
@@ -37,6 +50,7 @@ targets:
         BUNDLE_LOADER: "$(TEST_HOST)"
         INFOPLIST_FILE: Kapal-Lawd/Info.plist
         GENERATE_INFOPLIST_FILE: true
+        DEVELOPMENT_TEAM: ${DEVELOPMENT_TEAM_ID}
 schemes:
   Kapal-Lawd:
     build:
@@ -47,4 +61,3 @@ schemes:
       targets:
       - name: Kapal-LawdTests
       gatherCoverageData: true
-
