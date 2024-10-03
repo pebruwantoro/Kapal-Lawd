@@ -10,7 +10,7 @@ import CoreLocation
 class IBeaconDetector: NSObject, ObservableObject, CLLocationManagerDelegate {
     @Published var proximity: CLProximity = .unknown
     private var locationManager: CLLocationManager?
-    private let beaconUUID = UUID(uuidString: "8E44B286-6125-4222-817F-E3DCF3225D2F")
+    private let beaconUUID = UUID(uuidString: "2D7A9F0C-E0E8-4CC9-A71B-A21DB2D034A1")
     private let beaconIdentifier = "Beacon1"
     
     override init() {
@@ -32,8 +32,8 @@ class IBeaconDetector: NSObject, ObservableObject, CLLocationManagerDelegate {
     func startMonitoring() {
         guard let beaconUUID = beaconUUID else { return }
         
-        // Buat region untuk beacon
-        let beaconRegion = CLBeaconRegion(uuid: beaconUUID, identifier: beaconIdentifier)
+        // Buat region untuk beacon dengan UUID, major, dan minor
+        let beaconRegion = CLBeaconRegion(uuid: beaconUUID, major: 5, minor: 88, identifier: beaconIdentifier)
         
         // Mulai monitor dan ranging untuk region
         locationManager?.startMonitoring(for: beaconRegion)
@@ -42,12 +42,15 @@ class IBeaconDetector: NSObject, ObservableObject, CLLocationManagerDelegate {
         // Pastikan aplikasi terus melakukan pemindaian lokasi di background
         locationManager?.startUpdatingLocation()
     }
+
     
     func locationManager(_ manager: CLLocationManager, didRangeBeacons beacons: [CLBeacon], in region: CLBeaconRegion) {
         if let nearestBeacon = beacons.first {
             proximity = nearestBeacon.proximity
+            print("Detect : \(nearestBeacon)")
         } else {
             proximity = .unknown
+            print("No Beacons")
         }
     }
     
