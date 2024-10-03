@@ -29,6 +29,12 @@ targets:
             - bluetooth-central
           UILaunchScreen:
             UIImageName: ""
+          UISupportedInterfaceOrientations:
+            - UIInterfaceOrientationPortrait
+            - UIInterfaceOrientationPortraitUpsideDown
+            - UIInterfaceOrientationLandscapeLeft
+            - UIInterfaceOrientationLandscapeRight
+          CFBundleIconName: "AppIcon"
     sources: [Kapal-Lawd]
     resources: [Resources]
     settings:
