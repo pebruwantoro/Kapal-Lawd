@@ -6,71 +6,170 @@
 //
 
 import CoreLocation
+import Combine
 
 class IBeaconDetector: NSObject, ObservableObject, CLLocationManagerDelegate {
-    @Published var proximity: CLProximity = .unknown
+    // Published properties
+    @Published var detectedBeacons: [CLBeacon] = []
+    @Published var closestBeacon: CLBeacon?
+    @Published var estimatedDistance: Double = -1.0
+
+    // Private properties
     private var locationManager: CLLocationManager?
-    private let beaconUUID = UUID(uuidString: "8E44B286-6125-4222-817F-E3DCF3225D2F")
-    private let beaconIdentifier = "Beacon1"
-    
+    private let beaconUUIDs = [
+        UUID(uuidString: "EF63C140-2AF4-4E1E-AAB3-340055B3BB4A"),
+        UUID(uuidString: "EF63C140-2AF4-4E1E-AAB3-340055B3BB4D")
+    ]
+    private let beaconIdentifier = "MyBeacons"
+    private var audioMap: [String: String] = [
+        "EF63C140-2AF4-4E1E-AAB3-340055B3BB4A:0:0": "dreams",
+        "EF63C140-2AF4-4E1E-AAB3-340055B3BB4D:0:0": "Naruto Soundtrack - The Raising Fighting Spirit"
+    ]
+    private var rssiReadings: [String: [Int]] = [:]
+    private var consecutiveCloserReadings = 0
+    private let requiredConsecutiveReadings = 3
+    private let switchingThreshold = 0.5 // meters
+
     override init() {
         super.init()
         locationManager = CLLocationManager()
         locationManager?.delegate = self
-        
-        // Minta izin untuk "Always Authorization"
+
+        // Request "Always Authorization"
         if CLLocationManager.authorizationStatus() != .authorizedAlways {
             locationManager?.requestAlwaysAuthorization()
         }
-        
-        // Aktifkan untuk pemindaian lokasi secara berkelanjutan
+
+        // Enable continuous location scanning
         locationManager?.allowsBackgroundLocationUpdates = true
-        
+
         startMonitoring()
     }
-    
+
     func startMonitoring() {
-        guard let beaconUUID = beaconUUID else { return }
-        
-        // Buat region untuk beacon
-        let beaconRegion = CLBeaconRegion(uuid: beaconUUID, identifier: beaconIdentifier)
-        
-        // Mulai monitor dan ranging untuk region
-        locationManager?.startMonitoring(for: beaconRegion)
-        locationManager?.startRangingBeacons(in: beaconRegion)
-        
-        // Pastikan aplikasi terus melakukan pemindaian lokasi di background
+        guard !beaconUUIDs.isEmpty else { return }
+
+        for uuid in beaconUUIDs.compactMap({ $0 }) {
+            let beaconRegion = CLBeaconRegion(uuid: uuid, identifier: beaconIdentifier)
+            locationManager?.startMonitoring(for: beaconRegion)
+            locationManager?.startRangingBeacons(satisfying: beaconRegion.beaconIdentityConstraint)
+        }
+
+        // Ensure the app continues location updates in the background
         locationManager?.startUpdatingLocation()
     }
-    
-    func locationManager(_ manager: CLLocationManager, didRangeBeacons beacons: [CLBeacon], in region: CLBeaconRegion) {
-        if let nearestBeacon = beacons.first {
-            proximity = nearestBeacon.proximity
+
+    // Helper function to create a unique identifier for a beacon
+    func beaconIdentifier(for beacon: CLBeacon) -> String {
+        return "\(beacon.uuid.uuidString):\(beacon.major):\(beacon.minor)"
+    }
+
+    // Public method to get the audio file name
+    func getAudioFileName(for identifier: String) -> String? {
+        return audioMap[identifier]
+    }
+
+    // Distance estimation function
+    private func estimateDistance(rssi: Int, for beaconIdentifier: String) -> Double {
+        let txPower = -59 // Calibrated value
+        let n: Double = 2.0 // Adjust based on environment
+        if rssi == 0 {
+            return -1.0 // Cannot determine distance
+        }
+
+        // Collect RSSI readings for averaging
+        if rssiReadings[beaconIdentifier] == nil {
+            rssiReadings[beaconIdentifier] = []
+        }
+        rssiReadings[beaconIdentifier]?.append(rssi)
+        if rssiReadings[beaconIdentifier]!.count > 10 {
+            rssiReadings[beaconIdentifier]?.removeFirst()
+        }
+        let averageRSSI = rssiReadings[beaconIdentifier]!.reduce(0, +) / rssiReadings[beaconIdentifier]!.count
+
+        let ratio = Double(txPower - averageRSSI) / (10 * n)
+        let distance = pow(10, ratio)
+        return distance
+    }
+
+    // CLLocationManagerDelegate methods
+    func locationManager(_ manager: CLLocationManager, didRange beacons: [CLBeacon], satisfying beaconConstraint: CLBeaconIdentityConstraint) {
+        if beacons.isEmpty {
+            closestBeacon = nil
+            estimatedDistance = -1.0
+            return
+        }
+
+        detectedBeacons = beacons
+
+        var nearestBeacon: CLBeacon?
+        var smallestDistance: Double = Double.greatestFiniteMagnitude
+
+        for beacon in beacons {
+            let identifier = beaconIdentifier(for: beacon)
+            let distance = estimateDistance(rssi: beacon.rssi, for: identifier)
+            if distance >= 0 {
+                if distance < smallestDistance {
+                    smallestDistance = distance
+                    nearestBeacon = beacon
+                }
+            }
+        }
+
+        if let nearest = nearestBeacon {
+            let identifier = beaconIdentifier(for: nearest)
+            let distanceDifference = estimatedDistance - smallestDistance
+
+            if let currentClosest = self.closestBeacon {
+                let currentIdentifier = beaconIdentifier(for: currentClosest)
+                if identifier != currentIdentifier {
+                    if distanceDifference > switchingThreshold {
+                        consecutiveCloserReadings += 1
+                        if consecutiveCloserReadings >= requiredConsecutiveReadings {
+                            // Switch to the new beacon
+                            self.closestBeacon = nearest
+                            estimatedDistance = smallestDistance
+                            consecutiveCloserReadings = 0
+                        }
+                    } else {
+                        consecutiveCloserReadings = 0
+                    }
+                } else {
+                    // Same beacon remains closest
+                    self.closestBeacon = nearest
+                    estimatedDistance = smallestDistance
+                    consecutiveCloserReadings = 0
+                }
+            } else {
+                // No current closest beacon
+                self.closestBeacon = nearest
+                estimatedDistance = smallestDistance
+                consecutiveCloserReadings = 0
+            }
         } else {
-            proximity = .unknown
+            self.closestBeacon = nil
+            estimatedDistance = -1.0
+            consecutiveCloserReadings = 0
         }
     }
-    
+
     func locationManager(_ manager: CLLocationManager, didEnterRegion region: CLRegion) {
-        // Ketika masuk ke region beacon, mulai ranging
         if let beaconRegion = region as? CLBeaconRegion {
-            locationManager?.startRangingBeacons(in: beaconRegion)
+            locationManager?.startRangingBeacons(satisfying: beaconRegion.beaconIdentityConstraint)
         }
     }
 
     func locationManager(_ manager: CLLocationManager, didExitRegion region: CLRegion) {
-        // Hentikan ranging saat keluar dari region beacon
         if let beaconRegion = region as? CLBeaconRegion {
-            locationManager?.stopRangingBeacons(in: beaconRegion)
+            locationManager?.stopRangingBeacons(satisfying: beaconRegion.beaconIdentityConstraint)
         }
     }
-    
+
     func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
-        // Tetap kosong, cukup untuk menjaga aplikasi tetap berjalan di background
+        // Keep empty; sufficient to keep the app running in the background
     }
-    
+
     func locationManager(_ manager: CLLocationManager, didChangeAuthorization status: CLAuthorizationStatus) {
-        // Pastikan izin "Always" telah diberikan
         if status == .authorizedAlways {
             startMonitoring()
         }
