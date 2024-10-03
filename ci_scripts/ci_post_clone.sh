@@ -12,15 +12,22 @@ ls .
 cd ..
 
 # Fetch the latest Git tag
-LATEST_TAG=$(git describe --tags $(git rev-list --tags --max-count=1))
+CURRENT_PROJECT_VERSION=$(git describe --tags $(git rev-list --tags --max-count=1))
 
-# If no tag found, default tag
-if [ -z "$LATEST_TAG" ]; then
-  LATEST_TAG="alpha-1.0.0"
+# Extract the numeric part of the tag (for MARKETING_VERSION, should be numeric like 1.0.0)
+MARKETING_VERSION=$(echo $CURRENT_PROJECT_VERSION | grep -oE '[0-9]+(\.[0-9]+)*')
+
+# If no tag is found or invalid tag, default to 1.0.0
+if [ -z "$MARKETING_VERSION" ]; then
+  MARKETING_VERSION="1.0.0"
 fi
 
-# Export the tag so it can be used in the Xcodegen YAML file
-export CURRENT_PROJECT_VERSION=$LATEST_TAG
+# Export variables to be used in xcodegen
+export MARKETING_VERSION=$MARKETING_VERSION
+export CURRENT_PROJECT_VERSION=$CURRENT_PROJECT_VERSION
+
+echo "MARKETING_VERSION: $MARKETING_VERSION"
+echo "CURRENT_PROJECT_VERSION: $CURRENT_PROJECT_VERSION"
 
 # Generate the Xcode project using XcodeGen
 echo "Generating Xcode project..."
