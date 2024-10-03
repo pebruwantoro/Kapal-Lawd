@@ -8,75 +8,76 @@
 
 import SwiftUI
 import AVFoundation
+import CoreLocation
 
 struct ContentView: View {
     @StateObject var beaconScanner = IBeaconDetector()
     @State private var proximityText: String = "No Beacon Detected"
     @StateObject private var avManager = AVManager.shared
-    
+
     var body: some View {
-        VStack {
+        VStack(spacing: 20) {
             Text(proximityText)
                 .padding()
                 .font(.headline)
-                .onReceive(beaconScanner.$proximity) { proximity in
-                    print(proximity.rawValue)
-                    switch proximity {
-                        case .immediate:
-                            proximityText = "Dekat sekali"
-                            if !avManager.isPlaying {
-                                avManager.startPlayback(songTitle: "dreams")  // Ganti dengan lagu yang diinginkan
-                            }
-                        case .near:
-                            proximityText = "Dekat"
-                            if !avManager.isPlaying {
-                                avManager.startPlayback(songTitle: "dreams")
-                            }
-                        case .far:
-                            proximityText = "Jauh"
-                            avManager.stopPlayback()
-                        case .unknown:
-                            proximityText = "Tidak diketahui"
-                            avManager.stopPlayback()
-                        @unknown default:
-                            proximityText = "Tidak diketahui"
-                        avManager.stopPlayback()
-                    }
-                    
-                Text("Now Playing: \(avManager.currentSongTitle ?? "None")")
-                
-                // Audio Player Controls
-                HStack {
-                    Button("", action: {
-                        if avManager.isPlaying {
-                            avManager.pausePlayback()
-                        } else {
-                            avManager.startPlayback(songTitle: "welcome")
-                        }
-                    })
+                .onReceive(beaconScanner.$closestBeacon) { beacon in
+                    handleClosestBeaconChange(beacon)
                 }
-                .onAppear {
-                        configureAudioSession()
+
+            if beaconScanner.estimatedDistance >= 0 {
+                Text(String(format: "Estimated Distance: %.2f meters", beaconScanner.estimatedDistance))
+                    .font(.subheadline)
+            } else {
+                Text("Estimating distance...")
+                    .font(.subheadline)
+            }
+
+            Text("Now Playing: \(avManager.currentSongTitle ?? "None")")
+                .font(.subheadline)
+
+            // Audio Player Controls
+            HStack {
+                Button(action: {
+                    if avManager.isPlaying {
+                        avManager.pausePlayback()
+                    } else if let songTitle = avManager.currentSongTitle {
+                        avManager.resumePlayback()
+                    }
+                }) {
+                    Text(avManager.isPlaying ? "Pause" : "Play")
+                        .padding()
+                        .background(Color.blue)
+                        .foregroundColor(.white)
+                        .cornerRadius(8)
                 }
             }
         }
+        .padding()
     }
-    
-//  Mengonfigurasi sesi audio agar bisa diputar di latar belakang
-    private func configureAudioSession() {
-        do {
-            let session = AVAudioSession.sharedInstance()
 
-            // Gunakan kategori playback untuk memutar audio di latar belakang
-            try session.setCategory(.playback, mode: .default)
-
-            // Aktifkan sesi audio
-            try session.setActive(true)
-
-            print("Audio session berhasil diatur.")
-        } catch {
-            print("Gagal mengatur sesi audio: \(error.localizedDescription)")
+    // Handle changes in the closest beacon
+    private func handleClosestBeaconChange(_ beacon: CLBeacon?) {
+        if let beacon = beacon {
+            let identifier = beaconScanner.beaconIdentifier(for: beacon)
+            proximityText = "Closest Beacon: \(identifier)"
+            if let songTitle = beaconScanner.getAudioFileName(for: identifier) {
+                startAudioIfNeeded(songTitle: songTitle)
+            } else {
+                avManager.stopPlayback()
+            }
+        } else {
+            proximityText = "No Beacon Detected"
+            avManager.stopPlayback()
         }
-//                    .padding()
+    }
+
+    // Start audio playback if not already playing
+    private func startAudioIfNeeded(songTitle: String) {
+        if avManager.currentSongTitle != songTitle {
+            avManager.stopPlayback()
+            avManager.startPlayback(songTitle: songTitle)
+        } else if !avManager.isPlaying {
+            avManager.resumePlayback()
+        }
     }
 }
