@@ -12,6 +12,7 @@ ls .
 cd ..
 
 # Fetch the latest Git tag (should be a semantic version like 1.0.0)
+git fetch --tags
 GIT_TAG=$(git describe --tags $(git rev-list --tags --max-count=1))
 echo "GIT_TAG: $GIT_TAG"
 
@@ -22,7 +23,7 @@ VERSION=$(echo $GIT_TAG | grep -oE '[0-9]+(\.[0-9]+)*')
 if [ -z "$VERSION" ]; then
   VERSION="1.0.0"
 fi
-echo "GIT_TAG: $GIT_TAG"
+echo "VERSION: $VERSION"
 
 # If the tag contains non-numeric parts (e.g., alpha-1.1.2), use the commit count as the build number
 if [[ $GIT_TAG =~ [^0-9.] ]]; then
@@ -32,7 +33,7 @@ else
   # If the tag is purely numeric, use the tag as the CURRENT_PROJECT_VERSION
   BUILD_NUMBER=$VERSION
 fi
-echo "GIT_TAG: $BUILD_NUMBER"
+echo "BUILD_NUMBER: $BUILD_NUMBER"
 
 # Export variables to be used in xcodegen
 export MARKETING_VERSION=$VERSION
