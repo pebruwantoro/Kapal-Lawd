@@ -11,6 +11,17 @@ ls .
 # Change to the project directory
 cd ..
 
+# Fetch the latest Git tag
+LATEST_TAG=$(git describe --tags $(git rev-list --tags --max-count=1))
+
+# If no tag found, default tag
+if [ -z "$LATEST_TAG" ]; then
+  LATEST_TAG="alpha-1.0.0"
+fi
+
+# Export the tag so it can be used in the Xcodegen YAML file
+export CURRENT_PROJECT_VERSION=$LATEST_TAG
+
 # Generate the Xcode project using XcodeGen
 echo "Generating Xcode project..."
 xcodegen
