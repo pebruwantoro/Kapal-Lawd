@@ -15,6 +15,10 @@ class AVManager: ObservableObject {
     
     private var player: AVPlayer?
     private var playerItem: AVPlayerItem?
+    private var fadeTimer: Timer?
+    private var fadeVolume: Float = 0.0
+    private let fadeDuration: TimeInterval = 2.0 // Duration for fade-in and fade-out
+    
     @Published var isPlaying = false
     @Published var currentSongTitle: String?
 
@@ -23,43 +27,49 @@ class AVManager: ObservableObject {
             print("Audio file not found")
             return
         }
-        let playerItem = AVPlayerItem(url: url)
-        self.playerItem = playerItem
-        self.player = AVPlayer(playerItem: playerItem)
         
-        // Set audio session for background playback
+        // Initialize player item and player
+        playerItem = AVPlayerItem(url: url)
+        player = AVPlayer(playerItem: playerItem)
+        
+        // Set initial volume to 0 for fade-in
+        player?.volume = 0.0
+        fadeVolume = 0.0
+        
+        // Configure audio session for background playback
         try? AVAudioSession.sharedInstance().setCategory(.playback, mode: .default)
         try? AVAudioSession.sharedInstance().setActive(true)
         
         // Start playing
-        self.player?.play()
-        self.isPlaying = true
-        self.currentSongTitle = songTitle
+        player?.play()
+        isPlaying = true
+        currentSongTitle = songTitle
         
         // Update lock screen info
         updateNowPlayingInfo(songTitle: songTitle)
         
-        // Semtup remote transport controls
+        // Setup remote transport controls
         setupRemoteTransportControls()
+        
+        // Start fade-in effect
+        startFadeIn()
     }
 
     func pausePlayback() {
-        self.player?.pause()
-        self.isPlaying = false
+        player?.pause()
+        isPlaying = false
         updateNowPlayingInfo(songTitle: currentSongTitle ?? "")
     }
 
     func resumePlayback() {
-        self.player?.play()
-        self.isPlaying = true
+        player?.play()
+        isPlaying = true
         updateNowPlayingInfo(songTitle: currentSongTitle ?? "")
     }
 
     func stopPlayback() {
-        self.player?.pause()
-        self.player?.seek(to: CMTime.zero)
-        self.isPlaying = false
-        updateNowPlayingInfo(songTitle: currentSongTitle ?? "")
+        // Start fade-out effect
+        startFadeOut()
     }
 }
 
@@ -105,6 +115,54 @@ extension AVManager {
                 return .success
             }
             return .commandFailed
+        }
+    }
+}
+
+extension AVManager {
+    // MARK: - Fade-In and Fade-Out Methods
+    
+    private func startFadeIn() {
+        fadeTimer?.invalidate()
+        fadeVolume = 0.0
+        player?.volume = fadeVolume
+        
+        let fadeStep = 0.1 / Float(fadeDuration) // Adjust volume every 0.1 seconds
+        
+        fadeTimer = Timer.scheduledTimer(withTimeInterval: 0.1, repeats: true) { [weak self] timer in
+            guard let self = self else { return }
+            self.fadeVolume += fadeStep
+            if self.fadeVolume >= 1.0 {
+                self.fadeVolume = 1.0
+                self.player?.volume = self.fadeVolume
+                timer.invalidate()
+            } else {
+                self.player?.volume = self.fadeVolume
+            }
+        }
+    }
+    
+    private func startFadeOut() {
+        fadeTimer?.invalidate()
+        fadeVolume = player?.volume ?? 1.0
+        
+        let fadeStep = 0.1 / Float(fadeDuration)
+        
+        fadeTimer = Timer.scheduledTimer(withTimeInterval: 0.1, repeats: true) { [weak self] timer in
+            guard let self = self else { return }
+            self.fadeVolume -= fadeStep
+            if self.fadeVolume <= 0.0 {
+                self.fadeVolume = 0.0
+                self.player?.volume = self.fadeVolume
+                timer.invalidate()
+                self.player?.pause()
+                self.player = nil
+                self.playerItem = nil
+                self.isPlaying = false
+                self.currentSongTitle = nil
+            } else {
+                self.player?.volume = self.fadeVolume
+            }
         }
     }
 }
