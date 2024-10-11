@@ -16,15 +16,14 @@ class AVManager: ObservableObject {
     private var player: AVPlayer?
     private var playerItem: AVPlayerItem?
     private var fadeTimer: Timer?
-    private var fadeVolume: Float = 0.0
-    private let fadeDuration: TimeInterval = 2.0 // Duration for fade-in and fade-out
+    private let fadeStepInterval: TimeInterval = 0.1 // Time between volume adjustments
     
     @Published var isPlaying = false
     @Published var currentSongTitle: String?
-
+    
     func startPlayback(songTitle: String) {
         guard let url = Bundle.main.url(forResource: songTitle, withExtension: "mp3") else {
-            print("Audio file not found")
+            print("Audio file not found: \(songTitle)")
             return
         }
         
@@ -32,9 +31,8 @@ class AVManager: ObservableObject {
         playerItem = AVPlayerItem(url: url)
         player = AVPlayer(playerItem: playerItem)
         
-        // Set initial volume to 0 for fade-in
+        // Set initial volume to 0
         player?.volume = 0.0
-        fadeVolume = 0.0
         
         // Configure audio session for background playback
         try? AVAudioSession.sharedInstance().setCategory(.playback, mode: .default)
@@ -50,30 +48,50 @@ class AVManager: ObservableObject {
         
         // Setup remote transport controls
         setupRemoteTransportControls()
-        
-        // Start fade-in effect
-        startFadeIn()
     }
-
-    func pausePlayback() {
-        player?.pause()
-        isPlaying = false
-        updateNowPlayingInfo(songTitle: currentSongTitle ?? "")
-    }
-
-    func resumePlayback() {
-        player?.play()
-        isPlaying = true
-        updateNowPlayingInfo(songTitle: currentSongTitle ?? "")
-    }
-
+    
     func stopPlayback() {
-        // Start fade-out effect
-        startFadeOut()
+        // Fade out to volume 0
+        fadeToVolume(targetVolume: 0.0, duration: 1.0) { [weak self] in
+            self?.player?.pause()
+            self?.player = nil
+            self?.playerItem = nil
+            self?.isPlaying = false
+            self?.currentSongTitle = nil
+        }
     }
-}
-
-extension AVManager {
+    
+    // Method to fade to target volume
+    func fadeToVolume(targetVolume: Float, duration: TimeInterval, completion: (() -> Void)? = nil) {
+        fadeTimer?.invalidate()
+        
+        guard let player = player else {
+            completion?()
+            return
+        }
+        
+        let currentVolume = player.volume
+        let volumeDifference = targetVolume - currentVolume
+        let numberOfSteps = max(Int(duration / fadeStepInterval), 1)
+        let volumeStep = volumeDifference / Float(numberOfSteps)
+        
+        var stepsCompleted = 0
+        fadeTimer = Timer.scheduledTimer(
+            withTimeInterval: fadeStepInterval,
+            repeats: true
+        ) { [weak self] timer in
+            guard let self = self else { return }
+            stepsCompleted += 1
+            let newVolume = currentVolume + Float(stepsCompleted) * volumeStep
+            self.player?.volume = max(0.0, min(1.0, newVolume))
+            if stepsCompleted >= numberOfSteps {
+                self.player?.volume = targetVolume
+                timer.invalidate()
+                completion?()
+            }
+        }
+    }
+    
     private func updateNowPlayingInfo(songTitle: String) {
         var nowPlayingInfo = [String: Any]()
         nowPlayingInfo[MPMediaItemPropertyTitle] = songTitle
@@ -99,16 +117,6 @@ extension AVManager {
             return .commandFailed
         }
         
-        commandCenter.nextTrackCommand.addTarget { [unowned self] event in
-            print("Next track")
-            return .success
-        }
-
-        commandCenter.previousTrackCommand.addTarget { [unowned self] event in
-            print("Previous track")
-            return .success
-        }
-        
         commandCenter.pauseCommand.addTarget { [unowned self] event in
             if self.isPlaying {
                 self.pausePlayback()
@@ -117,52 +125,16 @@ extension AVManager {
             return .commandFailed
         }
     }
-}
-
-extension AVManager {
-    // MARK: - Fade-In and Fade-Out Methods
     
-    private func startFadeIn() {
-        fadeTimer?.invalidate()
-        fadeVolume = 0.0
-        player?.volume = fadeVolume
-        
-        let fadeStep = 0.1 / Float(fadeDuration) // Adjust volume every 0.1 seconds
-        
-        fadeTimer = Timer.scheduledTimer(withTimeInterval: 0.1, repeats: true) { [weak self] timer in
-            guard let self = self else { return }
-            self.fadeVolume += fadeStep
-            if self.fadeVolume >= 1.0 {
-                self.fadeVolume = 1.0
-                self.player?.volume = self.fadeVolume
-                timer.invalidate()
-            } else {
-                self.player?.volume = self.fadeVolume
-            }
-        }
+    func pausePlayback() {
+        player?.pause()
+        isPlaying = false
+        updateNowPlayingInfo(songTitle: currentSongTitle ?? "")
     }
     
-    private func startFadeOut() {
-        fadeTimer?.invalidate()
-        fadeVolume = player?.volume ?? 1.0
-        
-        let fadeStep = 0.1 / Float(fadeDuration)
-        
-        fadeTimer = Timer.scheduledTimer(withTimeInterval: 0.1, repeats: true) { [weak self] timer in
-            guard let self = self else { return }
-            self.fadeVolume -= fadeStep
-            if self.fadeVolume <= 0.0 {
-                self.fadeVolume = 0.0
-                self.player?.volume = self.fadeVolume
-                timer.invalidate()
-                self.player?.pause()
-                self.player = nil
-                self.playerItem = nil
-                self.isPlaying = false
-                self.currentSongTitle = nil
-            } else {
-                self.player?.volume = self.fadeVolume
-            }
-        }
+    func resumePlayback() {
+        player?.play()
+        isPlaying = true
+        updateNowPlayingInfo(songTitle: currentSongTitle ?? "")
     }
 }
