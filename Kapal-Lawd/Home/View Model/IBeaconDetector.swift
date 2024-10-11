@@ -25,10 +25,8 @@ class IBeaconDetector: NSObject, ObservableObject, CLLocationManagerDelegate {
         "EF63C140-2AF4-4E1E-AAB3-340055B3BB4A:0:0": "dreams",
         "EF63C140-2AF4-4E1E-AAB3-340055B3BB4D:0:0": "Naruto Soundtrack - The Raising Fighting Spirit"
     ]
-    private var rssiReadings: [String: [Int]] = [:]
-    private var consecutiveCloserReadings = 0
-    private let requiredConsecutiveReadings = 3
-    private let switchingThreshold = 0.5 // meters
+    private var emaRSSI: [String: Double] = [:]
+    private let emaAlpha: Double = 0.2 // Smoothing factor
 
     override init() {
         super.init()
@@ -47,16 +45,17 @@ class IBeaconDetector: NSObject, ObservableObject, CLLocationManagerDelegate {
     }
 
     func startMonitoring() {
+        guard let locationManager = self.locationManager else { return }
         guard !beaconUUIDs.isEmpty else { return }
 
         for uuid in beaconUUIDs.compactMap({ $0 }) {
             let beaconRegion = CLBeaconRegion(uuid: uuid, identifier: beaconIdentifier)
-            locationManager?.startMonitoring(for: beaconRegion)
-            locationManager?.startRangingBeacons(satisfying: beaconRegion.beaconIdentityConstraint)
+            locationManager.startMonitoring(for: beaconRegion)
+            locationManager.startRangingBeacons(satisfying: beaconRegion.beaconIdentityConstraint)
         }
 
         // Ensure the app continues location updates in the background
-        locationManager?.startUpdatingLocation()
+        locationManager.startUpdatingLocation()
     }
 
     // Helper function to create a unique identifier for a beacon
@@ -69,31 +68,35 @@ class IBeaconDetector: NSObject, ObservableObject, CLLocationManagerDelegate {
         return audioMap[identifier]
     }
 
-    // Distance estimation function
+    // Distance estimation function with EMA for RSSI smoothing
     private func estimateDistance(rssi: Int, for beaconIdentifier: String) -> Double {
-        let txPower = -59 // Calibrated value
-        let n: Double = 2.0 // Adjust based on environment
+        let txPower = -59 // Calibrated value; replace with your own
+        let n: Double = 2.2 // Calibrated path-loss exponent
+
         if rssi == 0 {
             return -1.0 // Cannot determine distance
         }
 
-        // Collect RSSI readings for averaging
-        if rssiReadings[beaconIdentifier] == nil {
-            rssiReadings[beaconIdentifier] = []
+        // Exponential Moving Average (EMA) for RSSI
+        if emaRSSI[beaconIdentifier] == nil {
+            emaRSSI[beaconIdentifier] = Double(rssi)
+        } else {
+            emaRSSI[beaconIdentifier] = emaAlpha * Double(rssi) + (1 - emaAlpha) * emaRSSI[beaconIdentifier]!
         }
-        rssiReadings[beaconIdentifier]?.append(rssi)
-        if rssiReadings[beaconIdentifier]!.count > 10 {
-            rssiReadings[beaconIdentifier]?.removeFirst()
-        }
-        let averageRSSI = rssiReadings[beaconIdentifier]!.reduce(0, +) / rssiReadings[beaconIdentifier]!.count
+        let averageRSSI = emaRSSI[beaconIdentifier]!
 
-        let ratio = Double(txPower - averageRSSI) / (10 * n)
+        // Calculate distance using the path-loss model
+        let ratio = (Double(txPower) - averageRSSI) / (10 * n)
         let distance = pow(10, ratio)
         return distance
     }
 
     // CLLocationManagerDelegate methods
-    func locationManager(_ manager: CLLocationManager, didRange beacons: [CLBeacon], satisfying beaconConstraint: CLBeaconIdentityConstraint) {
+    func locationManager(
+        _ manager: CLLocationManager,
+        didRange beacons: [CLBeacon],
+        satisfying beaconConstraint: CLBeaconIdentityConstraint
+    ) {
         if beacons.isEmpty {
             closestBeacon = nil
             estimatedDistance = -1.0
@@ -117,39 +120,12 @@ class IBeaconDetector: NSObject, ObservableObject, CLLocationManagerDelegate {
         }
 
         if let nearest = nearestBeacon {
-            let identifier = beaconIdentifier(for: nearest)
-            let distanceDifference = estimatedDistance - smallestDistance
-
-            if let currentClosest = self.closestBeacon {
-                let currentIdentifier = beaconIdentifier(for: currentClosest)
-                if identifier != currentIdentifier {
-                    if distanceDifference > switchingThreshold {
-                        consecutiveCloserReadings += 1
-                        if consecutiveCloserReadings >= requiredConsecutiveReadings {
-                            // Switch to the new beacon
-                            self.closestBeacon = nearest
-                            estimatedDistance = smallestDistance
-                            consecutiveCloserReadings = 0
-                        }
-                    } else {
-                        consecutiveCloserReadings = 0
-                    }
-                } else {
-                    // Same beacon remains closest
-                    self.closestBeacon = nearest
-                    estimatedDistance = smallestDistance
-                    consecutiveCloserReadings = 0
-                }
-            } else {
-                // No current closest beacon
-                self.closestBeacon = nearest
-                estimatedDistance = smallestDistance
-                consecutiveCloserReadings = 0
-            }
+            // Update estimatedDistance and closestBeacon
+            self.closestBeacon = nearest
+            estimatedDistance = smallestDistance
         } else {
             self.closestBeacon = nil
             estimatedDistance = -1.0
-            consecutiveCloserReadings = 0
         }
     }
 
