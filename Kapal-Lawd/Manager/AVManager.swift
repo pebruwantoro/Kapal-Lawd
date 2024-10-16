@@ -12,15 +12,35 @@ import MediaPlayer
 
 class AVManager: ObservableObject {
     public static var shared = AVManager()
+    let commandCenter = MPRemoteCommandCenter.shared()
     
     private var player: AVPlayer?
     private var playerItem: AVPlayerItem?
     private var fadeTimer: Timer?
     private let fadeStepInterval: TimeInterval = 0.1 // Time between volume adjustments
     
+    @Published var playlist: [Playlist] = []
+    private var _currentPlaylistIndex: Int = 0
     @Published var isPlaying = false
     @Published var currentSongTitle: String?
     
+    var cancellable: AnyCancellable?
+    
+    var currentPlaylistIndexPublisher = PassthroughSubject<Int, Never>()
+    
+    var currentPlaylistIndex: Int {
+        get {
+            return _currentPlaylistIndex
+        }
+        set {
+            _currentPlaylistIndex = newValue
+            currentPlaylistIndexPublisher.send(newValue)
+            print("Curent Playlist On Index: \(newValue)")
+        }
+    }
+    
+    private var commandHandlersSetup = false
+
     func startPlayback(songTitle: String) {
         guard let url = Bundle.main.url(forResource: songTitle, withExtension: "mp3") else {
             print("Audio file not found: \(songTitle)")
@@ -48,6 +68,11 @@ class AVManager: ObservableObject {
         
         // Setup remote transport controls
         setupRemoteTransportControls()
+        
+        NotificationCenter.default.addObserver(self,
+                                               selector: #selector(playerDidFinishPlaying(_:)),
+                                               name: .AVPlayerItemDidPlayToEndTime,
+                                               object: playerItem)
     }
     
     func stopPlayback() {
@@ -90,6 +115,54 @@ class AVManager: ObservableObject {
                 completion?()
             }
         }
+        
+        NotificationCenter.default.removeObserver(self, name: .AVPlayerItemDidPlayToEndTime, object: playerItem)
+    }
+    
+    func reset() {
+        playlist = []
+        currentPlaylistIndex = 0
+    }
+    
+    func startFirstTime() {
+        if !playlist.isEmpty {
+            startPlayback(songTitle: playlist[0].name)
+        }
+    }
+        
+    func nextPlaylist() {
+        if currentPlaylistIndex < playlist.count - 1 {
+            currentPlaylistIndex += 1
+            startPlayback(songTitle: playlist[currentPlaylistIndex].name)
+            setCancelabel()
+        }
+    }
+
+    func previousPlaylist() {
+        if currentPlaylistIndex > 0 {
+            currentPlaylistIndex -= 1
+            startPlayback(songTitle: playlist[currentPlaylistIndex].name)
+            setCancelabel()
+        }
+    }
+    
+    private func setCancelabel() {
+        cancellable = currentPlaylistIndexPublisher.sink { newIndex in
+            print("Current playlist index changed to: \(newIndex)")
+        }
+    }
+}
+
+extension AVManager {
+    private func setupRemoteTransportControls() {
+        guard !commandHandlersSetup else { return }
+                
+        commandHandlersSetup = true
+        
+        nextPlaylistCommand()
+        previousPlaylistCommand()
+        pausePlaylistCommand()
+        playPlaylistCommand()
     }
     
     private func updateNowPlayingInfo(songTitle: String) {
@@ -106,25 +179,69 @@ class AVManager: ObservableObject {
         MPNowPlayingInfoCenter.default().nowPlayingInfo = nowPlayingInfo
     }
     
-    private func setupRemoteTransportControls() {
-        let commandCenter = MPRemoteCommandCenter.shared()
-
-        commandCenter.playCommand.addTarget { [unowned self] event in
-            if !self.isPlaying {
-                self.resumePlayback()
-                return .success
-            }
-            return .commandFailed
+    private func nextPlaylistCommand() {
+        commandCenter.nextTrackCommand.isEnabled = true
+        commandCenter.nextTrackCommand.removeTarget(nil)
+        
+        commandCenter.nextTrackCommand.addTarget { [unowned self] event in
+            self.nextPlaylist()
+            
+            return .success
         }
+    }
+    
+    private func previousPlaylistCommand() {
+        commandCenter.previousTrackCommand.isEnabled = true
+        commandCenter.previousTrackCommand.removeTarget(nil)
+        
+        commandCenter.previousTrackCommand.addTarget { [unowned self] event in
+            self.previousPlaylist()
+            
+            return .success
+        }
+    }
+    
+    private func pausePlaylistCommand() {
+        commandCenter.pauseCommand.isEnabled = true
+        commandCenter.pauseCommand.removeTarget(nil)
         
         commandCenter.pauseCommand.addTarget { [unowned self] event in
             if self.isPlaying {
                 self.pausePlayback()
+                isPlaying = false
+                
                 return .success
             }
+            
             return .commandFailed
         }
     }
+    
+    private func playPlaylistCommand() {
+        commandCenter.playCommand.isEnabled = true
+        commandCenter.playCommand.removeTarget(nil)
+        
+        commandCenter.playCommand.addTarget { [unowned self] event in
+            if !self.isPlaying {
+                self.resumePlayback()
+                
+                return .success
+            }
+            
+            return .commandFailed
+        }
+    }
+    
+    @objc
+    private func playerDidFinishPlaying(_ notification: Notification) {
+        NotificationCenter.default.removeObserver(self, name: .AVPlayerItemDidPlayToEndTime, object: playerItem)
+        
+        nextPlaylist()
+    }
+}
+
+extension AVManager {
+    // MARK: - Fade-In and Fade-Out Methods
     
     func pausePlayback() {
         player?.pause()

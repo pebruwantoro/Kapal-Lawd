@@ -7,6 +7,7 @@
 
 import SwiftUI
 import AVFoundation
+import Combine
 
 struct ContentView: View {
     @StateObject var beaconScanner = IBeaconDetector()
@@ -35,103 +36,57 @@ struct ContentView: View {
         (enter: 1.6, exit: 2.1, volumeLevel: .level1, volume: 0.2)   // Level 1
     ]
 
+    @StateObject private var audioPlayerViewModel: AudioPlayerViewModel
+    @State private var previousDistance = 0.0
+    
+    init(viewModel: AudioPlayerViewModel = AudioPlayerViewModel()) {
+        _audioPlayerViewModel = StateObject(wrappedValue: viewModel)
+    }
+    
     var body: some View {
         VStack(spacing: 20) {
-            Text(proximityText)
+            Text(audioPlayerViewModel.proximityText)
                 .padding()
                 .font(.headline)
-                .onReceive(beaconScanner.$estimatedDistance) { distance in
-                    handleEstimatedDistanceChange(distance)
+                .onReceive(audioPlayerViewModel.beaconScanner.$estimatedDistance) { distance in
+                    audioPlayerViewModel.handleEstimatedDistanceChange(distance)
                 }
-
-            if beaconScanner.estimatedDistance >= 0 {
-                Text(String(format: "Estimated Distance: %.2f meters", beaconScanner.estimatedDistance))
+            
+            if audioPlayerViewModel.beaconScanner.estimatedDistance >= 0 {
+                Text(String(format: "Estimated Distance: %.2f meters", audioPlayerViewModel.beaconScanner.estimatedDistance))
                     .font(.subheadline)
             } else {
                 Text("Estimating distance...")
                     .font(.subheadline)
             }
-
-            Text("Now Playing: \(avManager.currentSongTitle ?? "None")")
-                .font(.subheadline)
-
+            
+            Text(String(format: "Now Playing: %@", audioPlayerViewModel.currentSongTitle ?? "none"))
+            
             // Audio Player Controls
             HStack {
-                Button(action: {
-                    if avManager.isPlaying {
-                        avManager.pausePlayback()
-                    } else if let songTitle = avManager.currentSongTitle {
-                        avManager.startPlayback(songTitle: songTitle)
-                    }
-                }) {
-                    Text(avManager.isPlaying ? "Pause" : "Play")
-                        .padding()
-                        .background(Color.blue)
-                        .foregroundColor(.white)
-                        .cornerRadius(8)
-                }
-
-                // Test Play Button
-                Button(action: {
-                    avManager.startPlayback(songTitle: "dreams")
-                    avManager.fadeToVolume(targetVolume: 1.0, duration: 1.0)
-                }) {
-                    Text("Test Play")
-                        .padding()
-                        .background(Color.green)
-                        .foregroundColor(.white)
-                        .cornerRadius(8)
-                }
-            }
-        }
-        .padding()
-        .onAppear {
-            configureAudioSession()
-        }
-    }
-
-    // Handle changes in the estimated distance
-    private func handleEstimatedDistanceChange(_ distance: Double) {
-        if let closestBeacon = beaconScanner.closestBeacon, distance >= 0 {
-            let identifier = beaconScanner.beaconIdentifier(for: closestBeacon)
-            proximityText = "Closest Beacon: \(identifier)"
-            print("Beacon detected: \(identifier), Estimated Distance: \(distance) meters")
-
-            if distance <= 2.0 {
-                // Reset lostBeaconCount since we are within 2 meters
-                lostBeaconCount = 0
-                if let songTitle = beaconScanner.getAudioFileName(for: identifier) {
-                    print("Song mapped to beacon: \(songTitle)")
-                    adjustAudioForDistance(distance: distance, songTitle: songTitle)
+                Button("Previous", action: {
+                    audioPlayerViewModel.previousPlaylist()
+                    audioPlayerViewModel.startPlayback(song: audioPlayerViewModel.fetchCurrentSong())
+                })
+                
+                if audioPlayerViewModel.isPlaying {
+                    Button("Pause", action: {
+                        audioPlayerViewModel.pausePlayback()
+                    })
                 } else {
-                    print("No song mapped for beacon: \(identifier)")
-                    avManager.stopPlayback()
-                    lastTargetVolume = nil
-                    currentVolumeLevel = .none
+                    Button("Play", action: {
+                        audioPlayerViewModel.resumePlayback()
+                    })
                 }
-            } else {
-                // Distance is greater than 2 meters
-                lostBeaconCount += 1
-                print("Distance greater than 2 meters. Lost count: \(lostBeaconCount)")
-                if lostBeaconCount >= maxLostBeaconCount {
-                    proximityText = "Beacon is too far"
-                    print("Beacon too far after \(maxLostBeaconCount) attempts")
-                    avManager.stopPlayback()
-                    lastTargetVolume = nil
-                    currentVolumeLevel = .none
-                }
-                // Else, keep current playback state
+                
+                Button("Next", action: {
+                    audioPlayerViewModel.nextPlaylist()
+                    audioPlayerViewModel.startPlayback(song: audioPlayerViewModel.fetchCurrentSong())
+                })
             }
-        } else {
-            // Beacon not detected or distance invalid
-            lostBeaconCount += 1
-            print("Beacon not detected or invalid distance. Lost count: \(lostBeaconCount)")
-            if lostBeaconCount >= maxLostBeaconCount {
-                proximityText = "No Beacon Detected"
-                print("No closest beacon found after \(maxLostBeaconCount) attempts")
-                avManager.stopPlayback()
-                lastTargetVolume = nil
-                currentVolumeLevel = .none
+            .padding()
+            .onAppear {
+                audioPlayerViewModel.configureAudioSession()
             }
             // Else, keep current playback state
         }

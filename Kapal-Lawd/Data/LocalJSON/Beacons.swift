@@ -8,10 +8,5 @@
 import Foundation
 
 struct Beacons: Codable {
-    let uuid: String
-    
-    
-    enum CodingKeys: String, CodingKey {
-        case uuid = "UUID"
-    }
+    let uuid: String    
 }

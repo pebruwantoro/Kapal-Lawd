@@ -16,7 +16,7 @@ struct Collections: Codable {
     let shortContents: String
 
     enum CodingKeys: String, CodingKey {
-        case uuid = "UUID"
+        case uuid
         case roomId = "rooms_id"
         case name
         case beaconId = "beacon_id"

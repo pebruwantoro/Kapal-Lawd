@@ -1,0 +1,17 @@
+[
+    {
+        "uuid": "ae2f36cb-55bd-4c50-91f7-1cff2da00c4e",
+        "collection_id": "1be649c9-c897-4f62-bc97-895eef69d46b",
+        "name": "Playlist1",
+    },
+    {
+        "uuid": "180da7b1-a5e6-44d7-ad84-9698a1c03655",
+        "collection_id": "1be649c9-c897-4f62-bc97-895eef69d46b",
+        "name": "Playlist2",
+    },
+    {
+        "uuid": "795158c7-3e24-43d6-af11-f594ad48402e",
+        "collection_id": "1be649c9-c897-4f62-bc97-895eef69d46b",
+        "name": "Playlist3",
+    }
+]
