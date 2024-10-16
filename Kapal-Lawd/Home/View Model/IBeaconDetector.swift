@@ -12,7 +12,7 @@ class IBeaconDetector: NSObject, ObservableObject, CLLocationManagerDelegate {
     // Published properties
     @Published var detectedBeacons: [CLBeacon] = []
     @Published var closestBeacon: CLBeacon?
-    @Published var estimatedDistance: Double = -1.0
+    @Published var estimatedDistance: Double = -1.0 // Distance in meters
 
     // Private properties
     private var locationManager: CLLocationManager?
@@ -68,29 +68,6 @@ class IBeaconDetector: NSObject, ObservableObject, CLLocationManagerDelegate {
         return audioMap[identifier]
     }
 
-    // Distance estimation function with EMA for RSSI smoothing
-    private func estimateDistance(rssi: Int, for beaconIdentifier: String) -> Double {
-        let txPower = -59 // Calibrated value; replace with your own
-        let n: Double = 2.2 // Calibrated path-loss exponent
-
-        if rssi == 0 {
-            return -1.0 // Cannot determine distance
-        }
-
-        // Exponential Moving Average (EMA) for RSSI
-        if emaRSSI[beaconIdentifier] == nil {
-            emaRSSI[beaconIdentifier] = Double(rssi)
-        } else {
-            emaRSSI[beaconIdentifier] = emaAlpha * Double(rssi) + (1 - emaAlpha) * emaRSSI[beaconIdentifier]!
-        }
-        let averageRSSI = emaRSSI[beaconIdentifier]!
-
-        // Calculate distance using the path-loss model
-        let ratio = (Double(txPower) - averageRSSI) / (10 * n)
-        let distance = pow(10, ratio)
-        return distance
-    }
-
     // CLLocationManagerDelegate methods
     func locationManager(
         _ manager: CLLocationManager,
@@ -105,28 +82,46 @@ class IBeaconDetector: NSObject, ObservableObject, CLLocationManagerDelegate {
 
         detectedBeacons = beacons
 
-        var nearestBeacon: CLBeacon?
-        var smallestDistance: Double = Double.greatestFiniteMagnitude
-
-        for beacon in beacons {
-            let identifier = beaconIdentifier(for: beacon)
-            let distance = estimateDistance(rssi: beacon.rssi, for: identifier)
-            if distance >= 0 {
-                if distance < smallestDistance {
-                    smallestDistance = distance
-                    nearestBeacon = beacon
-                }
-            }
-        }
-
-        if let nearest = nearestBeacon {
-            // Update estimatedDistance and closestBeacon
-            self.closestBeacon = nearest
-            estimatedDistance = smallestDistance
+        // Find the beacon with the strongest signal (highest RSSI)
+        if let nearestBeacon = beacons.max(by: { $0.rssi < $1.rssi }) {
+            let identifier = beaconIdentifier(for: nearestBeacon)
+            let smoothedRSSI = smoothRSSI(rssi: nearestBeacon.rssi, for: identifier)
+            let distance = estimateDistance(rssi: smoothedRSSI)
+            self.closestBeacon = nearestBeacon
+            self.estimatedDistance = distance
         } else {
             self.closestBeacon = nil
-            estimatedDistance = -1.0
+            self.estimatedDistance = -1.0
         }
+    }
+
+    // Smooth the RSSI values using EMA
+    private func smoothRSSI(rssi: Int, for beaconIdentifier: String) -> Double {
+        if rssi == 0 {
+            return -100.0 // Invalid RSSI, return a low value
+        }
+
+        // Exponential Moving Average (EMA) for RSSI
+        if emaRSSI[beaconIdentifier] == nil {
+            emaRSSI[beaconIdentifier] = Double(rssi)
+        } else {
+            emaRSSI[beaconIdentifier] = emaAlpha * Double(rssi) + (1 - emaAlpha) * emaRSSI[beaconIdentifier]!
+        }
+        return emaRSSI[beaconIdentifier]!
+    }
+
+    // Estimate distance from RSSI
+    private func estimateDistance(rssi: Double) -> Double {
+        let txPower = -59.0 // Replace with your calibrated Measured Power
+        let n = 2.0 // Replace with your calibrated path-loss exponent
+
+        if rssi == 0 {
+            return -1.0 // Cannot determine distance
+        }
+
+        let ratio = (txPower - rssi) / (10 * n)
+        let distance = pow(10, ratio)
+        return distance
     }
 
     func locationManager(_ manager: CLLocationManager, didEnterRegion region: CLRegion) {
