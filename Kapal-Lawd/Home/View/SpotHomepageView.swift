@@ -1,0 +1,61 @@
+//
+//  SpotHomepageView.swift
+//  Kapal-Lawd
+//
+//  Created by Elsavira T on 15/10/24.
+//
+
+import SwiftUI
+
+struct SpotHomepageView: View {
+    @State private var isExploring = false
+    
+    var body: some View {
+        NavigationStack {
+            if isExploring {
+                FindAuditagView(isExploring: $isExploring)
+            } else {
+                Spacer()
+                VStack (spacing: 16) {
+                    VStack {
+                        Image("audiumlogo")
+                    }
+                    .frame(width: 313, alignment: .leading)
+                    
+                    VStack {
+                        Text("Audium")
+                            .bold()
+                            .font(.title)
+                            .frame(width: 317, alignment: .leading)
+                        Text("Begin your audio-guided museum experience")
+                            .font(.subheadline)
+                            .frame(width: 317, alignment: .leading)
+                    }
+                    
+                    VStack {
+                        Button(action: {
+                            isExploring = true
+                        }, label: {
+                            Text("Start Exploration")
+                                .foregroundColor(.white)
+                                .font(.body)
+                                .frame(maxWidth: .infinity, maxHeight: 50)
+                                .background(.black)
+                                .cornerRadius(86)
+                        })
+                    }
+                    .padding(.horizontal, 24)
+                }
+                .frame(maxWidth: .infinity, maxHeight: 230)
+                .background(.white)
+                .cornerRadius(36)
+                .shadow(radius: 5)
+                .padding(.horizontal, 16)
+            }
+        }
+    }
+}
+
+#Preview {
+    SpotHomepageView()
+}
