@@ -17,11 +17,23 @@ struct ContentView: View {
     @State private var lostBeaconCount: Int = 0
     private let maxLostBeaconCount = 5 // Threshold for consecutive losses
 
-    enum VolumeLevel {
-        case none
-        case low // 50% volume
-        case high // 100% volume
+    enum VolumeLevel: Int {
+        case none = 0
+        case level1 = 1 // 20% volume
+        case level2 = 2 // 40% volume
+        case level3 = 3 // 60% volume
+        case level4 = 4 // 80% volume
+        case level5 = 5 // 100% volume
     }
+
+    // Distance thresholds with hysteresis
+    private let thresholds: [(enter: Double, exit: Double, volumeLevel: VolumeLevel, volume: Float)] = [
+        (enter: 0.0, exit: 0.5, volumeLevel: .level5, volume: 1.0),  // Level 5
+        (enter: 0.4, exit: 0.9, volumeLevel: .level4, volume: 0.8),  // Level 4
+        (enter: 0.8, exit: 1.3, volumeLevel: .level3, volume: 0.6),  // Level 3
+        (enter: 1.2, exit: 1.7, volumeLevel: .level2, volume: 0.4),  // Level 2
+        (enter: 1.6, exit: 2.1, volumeLevel: .level1, volume: 0.2)   // Level 1
+    ]
 
     var body: some View {
         VStack(spacing: 20) {
@@ -127,39 +139,40 @@ struct ContentView: View {
 
     // Adjust audio playback based on distance
     private func adjustAudioForDistance(distance: Double, songTitle: String) {
-        let targetVolume: Float
-        var newVolumeLevel: VolumeLevel = currentVolumeLevel
+        var targetVolume: Float = 0.0
+        var newVolumeLevel: VolumeLevel = .none
 
-        switch currentVolumeLevel {
-        case .none:
-            if distance <= 2.0 {
-                newVolumeLevel = distance <= 1.0 ? .high : .low
-                targetVolume = newVolumeLevel == .high ? 1.0 : 0.5
+        // Determine the new volume level based on distance and hysteresis
+        for threshold in thresholds {
+            if currentVolumeLevel == threshold.volumeLevel {
+                // Currently in this volume level, check exit condition
+                if distance > threshold.exit {
+                    continue
+                } else {
+                    newVolumeLevel = threshold.volumeLevel
+                    targetVolume = threshold.volume
+                    break
+                }
             } else {
-                targetVolume = 0.0
-            }
-        case .low:
-            if distance <= 1.0 {
-                newVolumeLevel = .high
-                targetVolume = 1.0
-            } else if distance > 2.1 {
-                newVolumeLevel = .none
-                targetVolume = 0.0
-            } else {
-                newVolumeLevel = .low
-                targetVolume = 0.5
-            }
-        case .high:
-            if distance > 1.1 {
-                newVolumeLevel = .low
-                targetVolume = 0.5
-            } else {
-                newVolumeLevel = .high
-                targetVolume = 1.0
+                // Not in this volume level, check enter condition
+                if distance <= threshold.enter {
+                    newVolumeLevel = threshold.volumeLevel
+                    targetVolume = threshold.volume
+                    break
+                }
             }
         }
 
-        print("Distance: \(distance), Target Volume: \(targetVolume), Current Volume Level: \(currentVolumeLevel)")
+        if newVolumeLevel == .none {
+            targetVolume = 0.0
+        }
+
+        if newVolumeLevel == currentVolumeLevel {
+            // No change in volume level
+            return
+        }
+
+        print("Distance: \(distance), Target Volume: \(targetVolume), Current Volume Level: \(currentVolumeLevel), New Volume Level: \(newVolumeLevel)")
 
         if targetVolume == 0.0 {
             if avManager.isPlaying {
@@ -206,4 +219,3 @@ struct ContentView: View {
         }
     }
 }
-
