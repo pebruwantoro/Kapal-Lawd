@@ -42,6 +42,7 @@ struct FindAuditagView: View {
                 Text("Scanning AudiTag...")
                     .bold()
                     .font(.title3)
+                    .foregroundColor(Color("AppText"))
                     .padding(.bottom, 12)
                 
                 Text("Please come closer to the collection")
