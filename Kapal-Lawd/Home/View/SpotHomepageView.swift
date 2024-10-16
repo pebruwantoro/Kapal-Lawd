@@ -26,9 +26,11 @@ struct SpotHomepageView: View {
                         Text("Audium")
                             .bold()
                             .font(.title)
+                            .foregroundColor(Color("AppText"))
                             .frame(width: 317, alignment: .leading)
                         Text("Begin your audio-guided museum experience")
                             .font(.subheadline)
+                            .foregroundColor(Color("AppText"))
                             .frame(width: 317, alignment: .leading)
                     }
                     
