@@ -95,7 +95,12 @@ struct PlaylistView: View {
                                 Text("2:30")
                             }
                             Spacer()
-                            Image("playbutton")
+                            Button(action:  {
+
+                            }, label: {
+                            Image(systemName: "play")
+                                .foregroundColor(Color("AppLabel"))
+                            })
                             
                         }.frame(maxWidth: .infinity, maxHeight: 60)
                         
@@ -106,7 +111,12 @@ struct PlaylistView: View {
                                 Text("2:30")
                             }
                             Spacer()
-                            Image("playbutton")
+                            Button(action:  {
+
+                            }, label: {
+                            Image(systemName: "play")
+                                .foregroundColor(Color("AppLabel"))
+                            })
                             
                         }.frame(maxWidth: .infinity, maxHeight: 60)
                         
@@ -117,7 +127,12 @@ struct PlaylistView: View {
                                 Text("2:30")
                             }
                             Spacer()
-                            Image("playbutton")
+                            Button(action:  {
+
+                            }, label: {
+                            Image(systemName: "play")
+                                .foregroundColor(Color("AppLabel"))
+                            })
                             
                         }.frame(maxWidth: .infinity, maxHeight: 60)
                     }.padding(.bottom, 16)
