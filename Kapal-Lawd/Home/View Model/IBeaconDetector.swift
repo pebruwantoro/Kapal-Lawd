@@ -16,40 +16,39 @@ class IBeaconDetector: NSObject, ObservableObject, CLLocationManagerDelegate {
 
     // Private properties
     private var locationManager: CLLocationManager?
-    private let beaconUUIDs = [
-        UUID(uuidString: "EF63C140-2AF4-4E1E-AAB3-340055B3BB4A"),
-        UUID(uuidString: "EF63C140-2AF4-4E1E-AAB3-340055B3BB4D")
-    ]
+    
+    var beacons : [Beacons] = []
+    
     private let beaconIdentifier = "MyBeacons"
-    private var audioMap: [String: String] = [
-        "EF63C140-2AF4-4E1E-AAB3-340055B3BB4A:0:0": "dreams",
-        "EF63C140-2AF4-4E1E-AAB3-340055B3BB4D:0:0": "Naruto Soundtrack - The Raising Fighting Spirit"
-    ]
+
     private var emaRSSI: [String: Double] = [:]
     private let emaAlpha: Double = 0.2 // Smoothing factor
+    
+    private var beaconLocalRepo = JSONBeaconsRepository()
+    
+     override init() {
+        // Get List Beacons
+        let result = beaconLocalRepo.fetchListBeacons()
+        self.beacons = result.0
 
-    override init() {
         super.init()
         locationManager = CLLocationManager()
         locationManager?.delegate = self
-
-        // Request "Always Authorization"
-        if CLLocationManager.authorizationStatus() != .authorizedAlways {
-            locationManager?.requestAlwaysAuthorization()
-        }
+        locationManager?.requestAlwaysAuthorization()
 
         // Enable continuous location scanning
         locationManager?.allowsBackgroundLocationUpdates = true
-
+        
+        
         startMonitoring()
     }
-
+    
     func startMonitoring() {
         guard let locationManager = self.locationManager else { return }
-        guard !beaconUUIDs.isEmpty else { return }
-
-        for uuid in beaconUUIDs.compactMap({ $0 }) {
-            let beaconRegion = CLBeaconRegion(uuid: uuid, identifier: beaconIdentifier)
+        guard !beacons.isEmpty else { return }
+        print("beacons",beacons)
+        for beacon in beacons {
+            let beaconRegion = CLBeaconRegion(uuid: UUID(uuidString: beacon.uuid)!, identifier: beaconIdentifier)
             locationManager.startMonitoring(for: beaconRegion)
             locationManager.startRangingBeacons(satisfying: beaconRegion.beaconIdentityConstraint)
         }
@@ -60,12 +59,8 @@ class IBeaconDetector: NSObject, ObservableObject, CLLocationManagerDelegate {
 
     // Helper function to create a unique identifier for a beacon
     func beaconIdentifier(for beacon: CLBeacon) -> String {
-        return "\(beacon.uuid.uuidString):\(beacon.major):\(beacon.minor)"
-    }
-
-    // Public method to get the audio file name
-    func getAudioFileName(for identifier: String) -> String? {
-        return audioMap[identifier]
+//        return "\(beacon.uuid.uuidString):\(beacon.major):\(beacon.minor)"
+        return "\(beacon.uuid.uuidString)"
     }
 
     // CLLocationManagerDelegate methods
@@ -74,14 +69,14 @@ class IBeaconDetector: NSObject, ObservableObject, CLLocationManagerDelegate {
         didRange beacons: [CLBeacon],
         satisfying beaconConstraint: CLBeaconIdentityConstraint
     ) {
-        if beacons.isEmpty {
+        if self.beacons.isEmpty {
             closestBeacon = nil
             estimatedDistance = -1.0
             return
         }
 
         detectedBeacons = beacons
-
+        print("detected",detectedBeacons)
         // Find the beacon with the strongest signal (highest RSSI)
         if let nearestBeacon = beacons.max(by: { $0.rssi < $1.rssi }) {
             let identifier = beaconIdentifier(for: nearestBeacon)

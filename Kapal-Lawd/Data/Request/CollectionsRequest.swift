@@ -8,7 +8,5 @@
 import Foundation
 
 internal struct CollectionsRequest {
-    var uuid: String
-    var roomId: String
     var beaconId: String
 }
