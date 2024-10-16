@@ -48,8 +48,10 @@ struct ContentView: View {
             Text(audioPlayerViewModel.proximityText)
                 .padding()
                 .font(.headline)
-                .onReceive(audioPlayerViewModel.beaconScanner.$estimatedDistance) { distance in
-                    audioPlayerViewModel.handleEstimatedDistanceChange(distance)
+                
+                .onReceive(audioPlayerViewModel.$isFindBeacon) { isFindBeacon in
+                    print("find my beacon: ", isFindBeacon)
+                    audioPlayerViewModel.fetchResources()
                 }
             
             if audioPlayerViewModel.beaconScanner.estimatedDistance >= 0 {
@@ -60,33 +62,32 @@ struct ContentView: View {
                     .font(.subheadline)
             }
             
-            Text(String(format: "Now Playing: %@", audioPlayerViewModel.currentSongTitle ?? "none"))
-            
-            // Audio Player Controls
-            HStack {
-                Button("Previous", action: {
-                    audioPlayerViewModel.previousPlaylist()
-                    audioPlayerViewModel.startPlayback(song: audioPlayerViewModel.fetchCurrentSong())
-                })
+            if audioPlayerViewModel.isFindBeacon {
+                Text(String(format: "Now Playing: %@", audioPlayerViewModel.currentSongTitle ?? "none"))
                 
-                if audioPlayerViewModel.isPlaying {
-                    Button("Pause", action: {
-                        audioPlayerViewModel.pausePlayback()
+                // Audio Player Controls
+                HStack {
+                    Button("Previous", action: {
+                        audioPlayerViewModel.previousPlaylist()
+                        audioPlayerViewModel.adjustAudioForDistance(distance: audioPlayerViewModel.beaconScanner.estimatedDistance)
                     })
-                } else {
-                    Button("Play", action: {
-                        audioPlayerViewModel.resumePlayback()
+                    
+                    if audioPlayerViewModel.isPlaying {
+                        Button("Pause", action: {
+                            audioPlayerViewModel.pausePlayback()
+                        })
+                    } else {
+                        Button("Play", action: {
+                            audioPlayerViewModel.resumePlayback()
+                        })
+                    }
+                    
+                    Button("Next", action: {
+                        audioPlayerViewModel.nextPlaylist()
+                        audioPlayerViewModel.adjustAudioForDistance(distance: audioPlayerViewModel.beaconScanner.estimatedDistance)
                     })
                 }
-                
-                Button("Next", action: {
-                    audioPlayerViewModel.nextPlaylist()
-                    audioPlayerViewModel.startPlayback(song: audioPlayerViewModel.fetchCurrentSong())
-                })
-            }
-            .padding()
-            .onAppear {
-                audioPlayerViewModel.configureAudioSession()
+                .padding()
             }
             // Else, keep current playback state
         }
@@ -171,6 +172,12 @@ struct ContentView: View {
             print("Audio session configured successfully.")
         } catch {
             print("Failed to configure audio session: \(error.localizedDescription)")
+        }.onAppear {
+            audioPlayerViewModel.configureAudioSession()
+        }.onReceive(audioPlayerViewModel.beaconScanner.$estimatedDistance) { distance in
+            print("distance: ", distance)
+//                    audioPlayerViewModel.handleEstimatedDistanceChange(audioPlayerViewModel.beaconScanner.estimatedDistance)
+            audioPlayerViewModel.getClosestBeacon(distance)
         }
     }
 }

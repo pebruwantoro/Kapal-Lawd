@@ -23,10 +23,11 @@ class AVManager: ObservableObject {
     private var _currentPlaylistIndex: Int = 0
     @Published var isPlaying = false
     @Published var currentSongTitle: String?
-    
+    private var commandHandlersSetup = false
     var cancellable: AnyCancellable?
     
     var currentPlaylistIndexPublisher = PassthroughSubject<Int, Never>()
+    
     
     var currentPlaylistIndex: Int {
         get {
@@ -38,8 +39,6 @@ class AVManager: ObservableObject {
             print("Curent Playlist On Index: \(newValue)")
         }
     }
-    
-    private var commandHandlersSetup = false
 
     func startPlayback(songTitle: String) {
         guard let url = Bundle.main.url(forResource: songTitle, withExtension: "mp3") else {
@@ -52,7 +51,7 @@ class AVManager: ObservableObject {
         player = AVPlayer(playerItem: playerItem)
         
         // Set initial volume to 0
-        player?.volume = 0.0
+//        player?.volume = 0.0
         
         // Configure audio session for background playback
         try? AVAudioSession.sharedInstance().setCategory(.playback, mode: .default)
@@ -165,13 +164,28 @@ extension AVManager {
         playPlaylistCommand()
     }
     
+    private func getAppIcon() -> UIImage? {
+        if let iconsDictionary = Bundle.main.infoDictionary?["CFBundleIcons"] as? [String: Any],
+           let primaryIconDictionary = iconsDictionary["CFBundlePrimaryIcon"] as? [String: Any],
+           let iconFiles = primaryIconDictionary["CFBundleIconFiles"] as? [String],
+           let lastIcon = iconFiles.last {
+            return UIImage(named: lastIcon)
+        }
+        return nil
+    }
+    
     private func updateNowPlayingInfo(songTitle: String) {
         var nowPlayingInfo = [String: Any]()
         nowPlayingInfo[MPMediaItemPropertyTitle] = songTitle
+        let artwork = MPMediaItemArtwork(boundsSize: getAppIcon()!.size) { size in
+            return self.getAppIcon()!
+        }
+        
 
         if let playerItem = self.playerItem {
             let duration = CMTimeGetSeconds(playerItem.asset.duration)
             nowPlayingInfo[MPMediaItemPropertyPlaybackDuration] = duration
+            nowPlayingInfo[MPMediaItemPropertyArtwork] = artwork
             nowPlayingInfo[MPNowPlayingInfoPropertyElapsedPlaybackTime] = CMTimeGetSeconds(playerItem.currentTime())
             nowPlayingInfo[MPNowPlayingInfoPropertyPlaybackRate] = self.isPlaying ? 1.0 : 0.0
         }
