@@ -26,11 +26,22 @@ class AudioPlayerViewModel: ObservableObject {
     private let maxLostBeaconCount = 5 // Threshold for consecutive losses
     @Published var isFindBeacon = false
 
-    enum VolumeLevel {
-        case none
-        case low // 50% volume
-        case high // 100% volume
+    enum VolumeLevel: Int {
+        case none = 0
+        case level1 = 1 // 20% volume
+        case level2 = 2 // 40% volume
+        case level3 = 3 // 60% volume
+        case level4 = 4 // 80% volume
+        case level5 = 5 // 100% volume
     }
+    
+    private let thresholds: [(enter: Double, exit: Double, volumeLevel: VolumeLevel, volume: Float)] = [
+        (enter: 0.0, exit: 0.5, volumeLevel: .level5, volume: 1.0),  // Level 5
+        (enter: 0.4, exit: 0.9, volumeLevel: .level4, volume: 0.8),  // Level 4
+        (enter: 0.8, exit: 1.3, volumeLevel: .level3, volume: 0.6),  // Level 3
+        (enter: 1.2, exit: 1.7, volumeLevel: .level2, volume: 0.4),  // Level 2
+        (enter: 1.6, exit: 2.1, volumeLevel: .level1, volume: 0.2)   // Level 1
+    ]
     
     func fetchCollectionByBeaconId(id: String) -> [Collections] {
         print("beacon id", id)
@@ -59,10 +70,8 @@ class AudioPlayerViewModel: ObservableObject {
             try session.setCategory(.playback, mode: .default)
 
             try session.setActive(true)
-
-            print("Audio session berhasil diatur.")
         } catch {
-            print("Gagal mengatur sesi audio: \(error.localizedDescription)")
+            print("Error: \(error.localizedDescription)")
         }
     }
 }
@@ -102,39 +111,41 @@ extension AudioPlayerViewModel {
     }
     
     func adjustAudioForDistance(distance: Double) {
-        let targetVolume: Float
-        var newVolumeLevel: VolumeLevel = currentVolumeLevel
+        var targetVolume: Float = 0.0
+        var newVolumeLevel: VolumeLevel = .none
+        let songTitle = fetchCurrentSong()
 
-        switch currentVolumeLevel {
-        case .none:
-            if distance <= 2.0 {
-                newVolumeLevel = distance <= 1.0 ? .high : .low
-                targetVolume = newVolumeLevel == .high ? 1.0 : 0.5
+        // Determine the new volume level based on distance and hysteresis
+        for threshold in thresholds {
+            if currentVolumeLevel == threshold.volumeLevel {
+                // Currently in this volume level, check exit condition
+                if distance > threshold.exit {
+                    continue
+                } else {
+                    newVolumeLevel = threshold.volumeLevel
+                    targetVolume = threshold.volume
+                    break
+                }
             } else {
-                targetVolume = 0.0
-            }
-        case .low:
-            if distance <= 1.0 {
-                newVolumeLevel = .high
-                targetVolume = 1.0
-            } else if distance > 2.1 {
-                newVolumeLevel = .none
-                targetVolume = 0.0
-            } else {
-                newVolumeLevel = .low
-                targetVolume = 0.5
-            }
-        case .high:
-            if distance > 1.1 {
-                newVolumeLevel = .low
-                targetVolume = 0.5
-            } else {
-                newVolumeLevel = .high
-                targetVolume = 1.0
+                // Not in this volume level, check enter condition
+                if distance <= threshold.enter {
+                    newVolumeLevel = threshold.volumeLevel
+                    targetVolume = threshold.volume
+                    break
+                }
             }
         }
 
-        print("Distance: \(distance), Target Volume: \(targetVolume), Current Volume Level: \(currentVolumeLevel)")
+        if newVolumeLevel == .none {
+            targetVolume = 0.0
+        }
+
+        if newVolumeLevel == currentVolumeLevel {
+            // No change in volume level
+            return
+        }
+
+        print("Distance: \(distance), Target Volume: \(targetVolume), Current Volume Level: \(currentVolumeLevel), New Volume Level: \(newVolumeLevel)")
 
         if targetVolume == 0.0 {
             if audioVideoManager.isPlaying {
@@ -147,37 +158,32 @@ extension AudioPlayerViewModel {
             return
         }
 
-        if audioVideoManager.currentSongTitle != "" || audioVideoManager.currentSongTitle != "none" && !audioVideoManager.isPlaying {
+        if audioVideoManager.currentSongTitle != songTitle || !audioVideoManager.isPlaying {
+            // Start new playback
+            self.stopPlayback()
+            self.currentSongTitle = songTitle
+            self.startPlayback(song: songTitle)
             audioVideoManager.fadeToVolume(targetVolume: targetVolume, duration: 1.0)
             lastTargetVolume = targetVolume
             currentVolumeLevel = newVolumeLevel
-            startPlayback(song: fetchCurrentSong())
         } else {
             if lastTargetVolume != targetVolume {
                 audioVideoManager.fadeToVolume(targetVolume: targetVolume, duration: 1.0)
                 lastTargetVolume = targetVolume
                 currentVolumeLevel = newVolumeLevel
-                audioVideoManager.isPlaying = false
             }
         }
-
     }
-    
-    func updateDistance(_ distance: Double) {
         
-    }
-    
     func fetchResources() {
-        if self.isFindBeacon {
-            let collections = fetchCollectionByBeaconId(id: beaconScanner.beaconIdentifier(for: beaconScanner.closestBeacon!))
-            if !collections.isEmpty {
-                for collection in collections {
-                    
-                    let playlist = fetchPlaylistByCollectionId(id: collection.uuid)
-                    if !playlist.isEmpty {
-                        adjustAudioForDistance(distance: beaconScanner.estimatedDistance)
-                        audioVideoManager.playlist = playlist
-                    }
+        let collections = fetchCollectionByBeaconId(id: beaconScanner.beaconIdentifier(for: beaconScanner.closestBeacon!))
+        if !collections.isEmpty {
+            for collection in collections {
+                
+                let playlist = fetchPlaylistByCollectionId(id: collection.uuid)
+                if !playlist.isEmpty {
+                    adjustAudioForDistance(distance: beaconScanner.estimatedDistance)
+                    audioVideoManager.playlist = playlist
                 }
             }
         }
@@ -185,7 +191,8 @@ extension AudioPlayerViewModel {
     
     func getClosestBeacon(_ distance: Double) {
         if !self.isFindBeacon {
-            if let closestBeacon = beaconScanner.closestBeacon, distance >= 0 {
+            
+            if let closestBeacon = beaconScanner.closestBeacon {
                 let identifier = beaconScanner.beaconIdentifier(for: closestBeacon)
                 self.proximityText = "Closest Beacon: \(identifier)"
                 self.isFindBeacon = true
@@ -204,41 +211,33 @@ extension AudioPlayerViewModel {
     }
     
     func handleEstimatedDistanceChange(_ distance: Double) {
-        if let closestBeacon = beaconScanner.closestBeacon, distance >= 0 {
+        if let closestBeacon = beaconScanner.closestBeacon {
             let identifier = beaconScanner.beaconIdentifier(for: closestBeacon)
             proximityText = "Closest Beacon: \(identifier)"
             print("Beacon detected: \(identifier), Estimated Distance: \(distance) meters")
 
-            print("ini playlist", audioVideoManager.playlist)
-            self.isFindBeacon = true
-            
-            if self.isFindBeacon {
-                let collections = fetchCollectionByBeaconId(id: identifier)
-                if !collections.isEmpty {
-                    for collection in collections {
-                        
-                        let playlist = fetchPlaylistByCollectionId(id: collection.uuid)
-                        if !playlist.isEmpty {
-                            adjustAudioForDistance(distance: distance)
-                            audioVideoManager.playlist = playlist
-                        }
-                    }
-                }
-            }
-            
-            if distance <= 2.0{
+            if distance <= 2.0 {
                 // Reset lostBeaconCount since we are within 2 meters
                 lostBeaconCount = 0
-//                self.isFirst = false
+                adjustAudioForDistance(distance: distance)
+//                self.fetchResources()
+//                if let songTitle = beaconScanner.getAudioFileName(for: identifier) {
+//                    print("Song mapped to beacon: \(songTitle)")
+//                    adjustAudioForDistance(distance: distance, songTitle: songTitle)
+//                } else {
+//                    print("No song mapped for beacon: \(identifier)")
+//                    avManager.stopPlayback()
+//                    lastTargetVolume = nil
+//                    currentVolumeLevel = .none
+//                }
             } else {
                 // Distance is greater than 2 meters
                 lostBeaconCount += 1
-                self.isFindBeacon = false
                 print("Distance greater than 2 meters. Lost count: \(lostBeaconCount)")
                 if lostBeaconCount >= maxLostBeaconCount {
                     proximityText = "Beacon is too far"
                     print("Beacon too far after \(maxLostBeaconCount) attempts")
-                    audioVideoManager.stopPlayback()
+                    self.stopPlayback()
                     lastTargetVolume = nil
                     currentVolumeLevel = .none
                 }
@@ -246,17 +245,15 @@ extension AudioPlayerViewModel {
             }
         } else {
             // Beacon not detected or distance invalid
-            self.isFindBeacon = false
             lostBeaconCount += 1
             print("Beacon not detected or invalid distance. Lost count: \(lostBeaconCount)")
             if lostBeaconCount >= maxLostBeaconCount {
                 proximityText = "No Beacon Detected"
                 print("No closest beacon found after \(maxLostBeaconCount) attempts")
-                audioVideoManager.stopPlayback()
+                self.stopPlayback()
                 lastTargetVolume = nil
                 currentVolumeLevel = .none
             }
-            // Else, keep current playback state
         }
     }
 }

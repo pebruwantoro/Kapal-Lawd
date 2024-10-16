@@ -34,11 +34,7 @@ class IBeaconDetector: NSObject, ObservableObject, CLLocationManagerDelegate {
         super.init()
         locationManager = CLLocationManager()
         locationManager?.delegate = self
-
-        // Request "Always Authorization"
-        if CLLocationManager.authorizationStatus() != .authorizedAlways {
-            locationManager?.requestAlwaysAuthorization()
-        }
+        locationManager?.requestAlwaysAuthorization()
 
         // Enable continuous location scanning
         locationManager?.allowsBackgroundLocationUpdates = true
@@ -50,7 +46,7 @@ class IBeaconDetector: NSObject, ObservableObject, CLLocationManagerDelegate {
     func startMonitoring() {
         guard let locationManager = self.locationManager else { return }
         guard !beacons.isEmpty else { return }
-
+        print("beacons",beacons)
         for beacon in beacons {
             let beaconRegion = CLBeaconRegion(uuid: UUID(uuidString: beacon.uuid)!, identifier: beaconIdentifier)
             locationManager.startMonitoring(for: beaconRegion)
@@ -73,14 +69,14 @@ class IBeaconDetector: NSObject, ObservableObject, CLLocationManagerDelegate {
         didRange beacons: [CLBeacon],
         satisfying beaconConstraint: CLBeaconIdentityConstraint
     ) {
-        if beacons.isEmpty {
+        if self.beacons.isEmpty {
             closestBeacon = nil
             estimatedDistance = -1.0
             return
         }
 
         detectedBeacons = beacons
-
+        print("detected",detectedBeacons)
         // Find the beacon with the strongest signal (highest RSSI)
         if let nearestBeacon = beacons.max(by: { $0.rssi < $1.rssi }) {
             let identifier = beaconIdentifier(for: nearestBeacon)

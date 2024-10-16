@@ -18,7 +18,6 @@ class AVManager: ObservableObject {
     private var playerItem: AVPlayerItem?
     private var fadeTimer: Timer?
     private let fadeStepInterval: TimeInterval = 0.1 // Time between volume adjustments
-    
     @Published var playlist: [Playlist] = []
     private var _currentPlaylistIndex: Int = 0
     @Published var isPlaying = false
@@ -27,7 +26,6 @@ class AVManager: ObservableObject {
     var cancellable: AnyCancellable?
     
     var currentPlaylistIndexPublisher = PassthroughSubject<Int, Never>()
-    
     
     var currentPlaylistIndex: Int {
         get {
