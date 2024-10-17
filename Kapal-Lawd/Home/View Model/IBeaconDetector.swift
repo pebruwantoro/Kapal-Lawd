@@ -46,7 +46,7 @@ class IBeaconDetector: NSObject, ObservableObject, CLLocationManagerDelegate {
     func startMonitoring() {
         guard let locationManager = self.locationManager else { return }
         guard !beacons.isEmpty else { return }
-        print("beacons",beacons)
+        
         for beacon in beacons {
             let beaconRegion = CLBeaconRegion(uuid: UUID(uuidString: beacon.uuid)!, identifier: beaconIdentifier)
             locationManager.startMonitoring(for: beaconRegion)

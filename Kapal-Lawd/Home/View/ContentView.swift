@@ -37,10 +37,10 @@ struct ContentView: View {
                     print("distance:", distance)
                     audioPlayerViewModel.handleEstimatedDistanceChange(distance)
                 }
-//                .onReceive(audioPlayerViewModel.$isFindBeacon) { isFindBeacon in
-//                    print("find my beacon: ", isFindBeacon)
+                .onReceive(audioPlayerViewModel.$isFindBeacon) { isFindBeacon in
+                    print("find my beacon: ", isFindBeacon)
 //                    audioPlayerViewModel.fetchResources()
-//                }
+                }
             
             if audioPlayerViewModel.beaconScanner.estimatedDistance >= 0 {
                 Text(String(format: "Estimated Distance: %.2f meters", audioPlayerViewModel.beaconScanner.estimatedDistance))
@@ -60,7 +60,7 @@ struct ContentView: View {
                         audioPlayerViewModel.adjustAudioForDistance(distance: audioPlayerViewModel.beaconScanner.estimatedDistance)
                     })
                     
-                    if audioPlayerViewModel.isPlaying {
+                    if audioPlayerViewModel.audioVideoManager.isPlaying {
                         Button("Pause", action: {
                             audioPlayerViewModel.pausePlayback()
                         })

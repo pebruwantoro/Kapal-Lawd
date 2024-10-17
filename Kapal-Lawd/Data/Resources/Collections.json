@@ -5,7 +5,9 @@
     "name": "Ancient Egypt",
     "beacon_id": "9D38C8B0-77F8-4E23-8DBA-1546C4D035A4",
     "long_contents": "This collection features artifacts from Ancient Egypt, including mummies, sculptures, and papyrus scrolls.",
-    "short_contents": "Explore the wonders of Ancient Egypt."
+    "short_contents": "Explore the wonders of Ancient Egypt.",
+    "authored_by": "Sabach",
+    "authored_at": "2024-10-10"
   },
   {
     "uuid": "4cb46a79-5f62-470f-b31c-98bd5169b22c",
@@ -13,7 +15,9 @@
     "name": "Modern Art",
     "beacon_id": "3d023d21-83d9-4c48-94fb-48718e22aa14",
     "long_contents": "A diverse collection showcasing modern art from the 20th century to contemporary works.",
-    "short_contents": "Experience the evolution of modern art."
+    "short_contents": "Experience the evolution of modern art.",
+    "authored_by": "Sabach",
+    "authored_at": "2024-10-10"
   }
 ]
 
