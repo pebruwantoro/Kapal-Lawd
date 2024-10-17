@@ -11,7 +11,6 @@ import SwiftUI
 class AudioPlayerViewModel: ObservableObject {
     private var player: AVPlayer?
     private var playerItem: AVPlayerItem?
-    @Published var isPlaying = false
     @Published var currentSongTitle: String?
     private var collectionRepo = JSONCollectionsRepository()
     private var playlistRepo = JSONPlaylistRepository()
@@ -22,7 +21,7 @@ class AudioPlayerViewModel: ObservableObject {
     @Published var proximityText: String = "No Beacon Detected"
     @State private var lastTargetVolume: Float? = nil
     @State private var currentVolumeLevel: VolumeLevel = .none
-    @State private var lostBeaconCount: Int = 0
+    private var lostBeaconCount: Int = 0
     private let maxLostBeaconCount = 5 // Threshold for consecutive losses
     @Published var isFindBeacon = false
 
@@ -77,10 +76,6 @@ class AudioPlayerViewModel: ObservableObject {
 }
 
 extension AudioPlayerViewModel {
-    func isAudioPlaying() -> Bool {
-        return audioVideoManager.isPlaying
-    }
-    
     func fetchCurrentSong() -> String {
         currentSongTitle = audioVideoManager.currentSongTitle
         return currentSongTitle ?? "none"
@@ -174,85 +169,35 @@ extension AudioPlayerViewModel {
             }
         }
     }
-        
-    func fetchResources() {
-        let collections = fetchCollectionByBeaconId(id: beaconScanner.beaconIdentifier(for: beaconScanner.closestBeacon!))
-        if !collections.isEmpty {
-            for collection in collections {
-                
-                let playlist = fetchPlaylistByCollectionId(id: collection.uuid)
-                if !playlist.isEmpty {
-                    adjustAudioForDistance(distance: beaconScanner.estimatedDistance)
-                    audioVideoManager.playlist = playlist
-                }
-            }
-        }
-    }
-    
-    func getClosestBeacon(_ distance: Double) {
-        if !self.isFindBeacon {
-            
-            if let closestBeacon = beaconScanner.closestBeacon {
-                let identifier = beaconScanner.beaconIdentifier(for: closestBeacon)
-                self.proximityText = "Closest Beacon: \(identifier)"
-                self.isFindBeacon = true
-            }
-        } else {
-            if distance > 0.5 {
-                self.isFindBeacon = false
-                beaconScanner.closestBeacon = nil
-                audioVideoManager.playlist = []
-                self.stopPlayback()
-                self.lastTargetVolume = nil
-                self.currentVolumeLevel = .none
-                audioVideoManager.isPlaying = false
-            }
-        }
-    }
     
     func handleEstimatedDistanceChange(_ distance: Double) {
         if let closestBeacon = beaconScanner.closestBeacon {
             let identifier = beaconScanner.beaconIdentifier(for: closestBeacon)
-            proximityText = "Closest Beacon: \(identifier)"
+           
+            proximityText = "Closest Beacon Found"
             print("Beacon detected: \(identifier), Estimated Distance: \(distance) meters")
 
             if distance <= 2.0 {
                 // Reset lostBeaconCount since we are within 2 meters
-                lostBeaconCount = 0
-                adjustAudioForDistance(distance: distance)
-//                self.fetchResources()
-//                if let songTitle = beaconScanner.getAudioFileName(for: identifier) {
-//                    print("Song mapped to beacon: \(songTitle)")
-//                    adjustAudioForDistance(distance: distance, songTitle: songTitle)
-//                } else {
-//                    print("No song mapped for beacon: \(identifier)")
-//                    avManager.stopPlayback()
-//                    lastTargetVolume = nil
-//                    currentVolumeLevel = .none
-//                }
+                self.isFindBeacon = true
+                self.lostBeaconCount = 0
             } else {
                 // Distance is greater than 2 meters
-                lostBeaconCount += 1
-                print("Distance greater than 2 meters. Lost count: \(lostBeaconCount)")
-                if lostBeaconCount >= maxLostBeaconCount {
+                self.lostBeaconCount += 1
+                print("Distance greater than 2 meters. Lost count: \(self.lostBeaconCount)")
+                if self.lostBeaconCount >= self.maxLostBeaconCount {
                     proximityText = "Beacon is too far"
+                    self.isFindBeacon = false
                     print("Beacon too far after \(maxLostBeaconCount) attempts")
-                    self.stopPlayback()
-                    lastTargetVolume = nil
-                    currentVolumeLevel = .none
                 }
-                // Else, keep current playback state
             }
         } else {
-            // Beacon not detected or distance invalid
-            lostBeaconCount += 1
-            print("Beacon not detected or invalid distance. Lost count: \(lostBeaconCount)")
-            if lostBeaconCount >= maxLostBeaconCount {
+            self.lostBeaconCount += 1
+            print("Beacon not detected or invalid distance. Lost count: \(self.lostBeaconCount)")
+            if self.lostBeaconCount >= self.maxLostBeaconCount {
+                self.isFindBeacon = false
                 proximityText = "No Beacon Detected"
                 print("No closest beacon found after \(maxLostBeaconCount) attempts")
-                self.stopPlayback()
-                lastTargetVolume = nil
-                currentVolumeLevel = .none
             }
         }
     }

@@ -9,11 +9,13 @@ import SwiftUI
 
 struct SpotHomepageView: View {
     @State private var isExploring = false
+    @State private var isFinding = false
+    @State private var beaconId: String?
     
     var body: some View {
         NavigationStack {
             if isExploring {
-                FindAuditagView(isExploring: $isExploring)
+                FindAuditagView(isExploring: $isExploring, isFinding: $isFinding)
             } else {
                 Spacer()
                 VStack (spacing: 16) {
@@ -44,6 +46,7 @@ struct SpotHomepageView: View {
                                 .frame(maxWidth: .infinity, maxHeight: 50)
                                 .background(.black)
                                 .cornerRadius(86)
+                            
                         })
                     }
                     .padding(.horizontal, 24)

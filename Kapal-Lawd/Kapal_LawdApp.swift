@@ -12,6 +12,7 @@ struct Kapal_LawdApp: App {
     var body: some Scene {
         WindowGroup {
            SpotHomepageView()
+//            ContentView()
         }
     }
 }
