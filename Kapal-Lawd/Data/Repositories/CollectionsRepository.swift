@@ -9,7 +9,7 @@ import Foundation
 
 internal protocol CollectionsRepository {
     func fetchListCollections() -> ([Collections], ErrorHandler?)
-    func fetchListCollectionsByRoomIdAndBeaconId(req: CollectionsRequest) -> ([Collections], ErrorHandler?)
+    func fetchListCollectionsByBeaconId(req: CollectionsRequest) -> ([Collections], ErrorHandler?)
 }
 
 internal final class JSONCollectionsRepository: CollectionsRepository {
@@ -27,7 +27,7 @@ internal final class JSONCollectionsRepository: CollectionsRepository {
         }
     }
     
-    func fetchListCollectionsByRoomIdAndBeaconId(req: CollectionsRequest) -> ([Collections], ErrorHandler?) {
+    func fetchListCollectionsByBeaconId(req: CollectionsRequest) -> ([Collections], ErrorHandler?) {
         let (collections, errorHandler) = fetchListCollections()
         
         if let error = errorHandler {
@@ -35,12 +35,9 @@ internal final class JSONCollectionsRepository: CollectionsRepository {
         }
         
         let result = collections.filter {
-            $0.roomId == req.roomId &&
-            $0.beaconId == req.roomId
+            $0.beaconId == req.beaconId
         }
         
         return (result ,nil)
     }
-    
-    
 }

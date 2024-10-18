@@ -35,6 +35,7 @@ targets:
             - UIInterfaceOrientationLandscapeLeft
             - UIInterfaceOrientationLandscapeRight
           CFBundleIconName: "AppIcon"
+          CFBundleDisplayName: "Audium"
     sources: [Kapal-Lawd]
     resources: [Resources]
     settings:

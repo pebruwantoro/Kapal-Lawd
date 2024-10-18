@@ -14,13 +14,17 @@ struct Collections: Codable {
     let beaconId: String
     let longContents: String
     let shortContents: String
+    let authoredBy: String
+    let authoredAt: String
 
     enum CodingKeys: String, CodingKey {
-        case uuid = "UUID"
+        case uuid
         case roomId = "rooms_id"
         case name
         case beaconId = "beacon_id"
         case longContents = "long_contents"
         case shortContents = "short_contents"
+        case authoredBy = "authored_by"
+        case authoredAt = "authored_at"
     }
 }
