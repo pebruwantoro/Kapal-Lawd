@@ -76,7 +76,7 @@ class IBeaconDetector: NSObject, ObservableObject, CLLocationManagerDelegate {
         }
 
         detectedBeacons = beacons
-        print("detected",detectedBeacons)
+        
         // Find the beacon with the strongest signal (highest RSSI)
         if let nearestBeacon = beacons.max(by: { $0.rssi < $1.rssi }) {
             let identifier = beaconIdentifier(for: nearestBeacon)

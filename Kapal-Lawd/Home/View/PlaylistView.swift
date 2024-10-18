@@ -14,6 +14,20 @@ struct PlaylistView: View {
     @Binding var collections: [Collections]
     @State var isMusicPlaying: Bool = false
     
+    
+    enum title: String {
+        case defaultSong = "No Song"
+    }
+    
+    enum duration: Double {
+        case defaultDuration = 0.0
+    }
+    
+//    @State var songTitle: String = title.defaultSong.rawValue
+//    @State var songDuration: Double = duration.defaultDuration.rawValue
+//    @State var songDurationString: String = "00:00"
+    @State var list: [Playlist] = []
+    
     var body: some View {
         NavigationStack {
             VStack {
@@ -69,8 +83,6 @@ struct PlaylistView: View {
                     .padding(.top, 12)
                     .padding(.bottom, 12)
                     
-                    
-                    
                     VStack (spacing: 16) {
                         VStack (alignment: .leading) {
                             Text("TRACKLIST")
@@ -80,7 +92,7 @@ struct PlaylistView: View {
                         .frame(maxWidth: .infinity, maxHeight: 25, alignment: .topLeading)
                         
                         let playlists = audioPlayerViewModel.fetchPlaylistByCollectionId(id: collections[0].uuid)
-                        
+
                         if !playlists.isEmpty {
                             List(playlists, id: \.uuid) { playlist in
                                 HStack {
@@ -92,35 +104,30 @@ struct PlaylistView: View {
                                     
                                     Spacer()
                                     
-                                    Button(action:  {
-                                        if audioPlayerViewModel.audioVideoManager.isPlaying {
-                                            self.isMusicPlaying = false
-                                            audioPlayerViewModel.stopPlayback()
-                                        } else {
-                                            self.isMusicPlaying = true
-                                            audioPlayerViewModel.startPlayback(song: playlist.name)
-                                        }
-                                    }, label: {
-                                        if self.isMusicPlaying {
+                                    Button(action: {}, label: {
+                                        if audioPlayerViewModel.audioVideoManager.isPlaying && playlist.name == audioPlayerViewModel.audioVideoManager.currentSongTitle {
                                             Image("sound")
                                                 .foregroundColor(Color("AppLabel"))
                                         } else {
                                             Image(systemName: "play")
-                                                .foregroundColor(Color("AppLabel"))                                            }
+                                                .foregroundColor(Color("AppLabel"))
+                                        }
                                     })
                                     
+                                    
                                 }.frame(maxWidth: .infinity, maxHeight: 60)
-                            }.padding(.bottom, 16)
+                            }
+                            .padding(.bottom, 16)
+                            .onAppear{
+                                audioPlayerViewModel.audioVideoManager.playlist = playlists
+                                self.list = playlists
+                            }
                         }
                     }.padding(.bottom, 16)
                     
-                    VStack {
-                        
+                    if !self.list.isEmpty {
+                        PlayerView(list: $list)
                     }
-                    .frame(maxWidth: .infinity, maxHeight: 174)
-                    .background(Color.white)
-                    .cornerRadius(36)
-                    .shadow(radius: 5)
                 }
             }
             .padding(.horizontal, 16)
@@ -138,15 +145,25 @@ extension PlaylistView {
             outputFormatter.dateFormat = "dd MMMM yyyy"
             
             let formattedDateString = outputFormatter.string(from: newDate)
-            print("format masa depan",formattedDateString)
+            
             return formattedDateString
         }
         
         return ""
-    }}
+    }
+}
 
 
 
 #Preview {
-    PlaylistView(isExploring: .constant(false), collections: .constant([]))
+    PlaylistView(isExploring: .constant(false), collections: .constant([Collections(
+        uuid: "String",
+        roomId: "String",
+        name: "String",
+        beaconId: "String",
+        longContents: "String",
+        shortContents: "String",
+        authoredBy: "String",
+        authoredAt: "2024-10-10"
+    )]))
 }

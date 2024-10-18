@@ -48,9 +48,6 @@ class AVManager: ObservableObject {
         playerItem = AVPlayerItem(url: url)
         player = AVPlayer(playerItem: playerItem)
         
-        // Set initial volume to 0
-//        player?.volume = 0.0
-        
         // Configure audio session for background playback
         try? AVAudioSession.sharedInstance().setCategory(.playback, mode: .default)
         try? AVAudioSession.sharedInstance().setActive(true)
@@ -75,6 +72,7 @@ class AVManager: ObservableObject {
     func stopPlayback() {
         // Fade out to volume 0
         fadeToVolume(targetVolume: 0.0, duration: 1.0) { [weak self] in
+            self?.player?.pause()
             self?.player?.pause()
             self?.player = nil
             self?.playerItem = nil
