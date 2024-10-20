@@ -104,19 +104,19 @@ struct PlaylistView: View {
                                     
                                     Spacer()
                                     
-                                    Button(action: {}, label: {
+                                    Button(action: {
+                                    }) {
                                         if audioPlayerViewModel.audioVideoManager.isPlaying && playlist.name == audioPlayerViewModel.audioVideoManager.currentSongTitle {
                                             Image("sound")
-                                                .foregroundColor(Color("AppLabel"))
                                         } else {
                                             Image(systemName: "play")
                                                 .foregroundColor(Color("AppLabel"))
                                         }
-                                    })
-                                    
+                                    }
                                     
                                 }.frame(maxWidth: .infinity, maxHeight: 60)
                             }
+                            .listStyle(.plain)
                             .padding(.bottom, 16)
                             .onAppear{
                                 audioPlayerViewModel.audioVideoManager.playlist = playlists

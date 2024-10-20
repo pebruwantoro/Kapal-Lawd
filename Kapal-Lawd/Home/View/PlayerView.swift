@@ -47,7 +47,7 @@ struct PlayerView: View {
                             }
                         }, label:  {
                             Image(systemName: "backward")
-                                .foregroundColor(.black)
+                                .foregroundColor(Color("AppPlayer"))
                         })
                         .frame(width: 50, height: 50)
                         
@@ -55,12 +55,13 @@ struct PlayerView: View {
                             
                         }, label:  {
                             Image(systemName: "15.arrow.trianglehead.counterclockwise")
-                                .foregroundColor(.black)
+                                .foregroundColor(Color("AppPlayer"))
                         })
                         .frame(width: 50, height: 50)
                         
                         ZStack {
                             Circle()
+                                .foregroundColor(Color("AppPlayer"))
                             
                             Button(action:  {
                                 self.isPlaying.toggle()
@@ -86,7 +87,7 @@ struct PlayerView: View {
                             
                         }, label:  {
                             Image(systemName: "15.arrow.trianglehead.clockwise")
-                                .foregroundColor(.black)
+                                .foregroundColor(Color("AppPlayer"))
                         })
                         .frame(width: 50, height: 50)
                         
@@ -97,7 +98,7 @@ struct PlayerView: View {
                             }
                         }, label:  {
                             Image(systemName: "forward")
-                                .foregroundColor(.black)
+                                .foregroundColor(Color("AppPlayer"))
                         })
                         .frame(width: 50, height: 50)
                     }
