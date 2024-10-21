@@ -16,5 +16,17 @@
         "collection_id": "1be649c9-c897-4f62-bc97-895eef69d46b",
         "name": "Playlist3",
         "duration": "04:01"
+    },
+    {
+        "uuid": "180da7b1-a5e6-44d7-ad84-9698a1c03655",
+        "collection_id": "4cb46a79-5f62-470f-b31c-98bd5169b22c",
+        "name": "Playlist1",
+        "duration": "03:51"
+    },
+    {
+        "uuid": "795158c7-3e24-43d6-af11-f594ad48402e",
+        "collection_id": "4cb46a79-5f62-470f-b31c-98bd5169b22c",
+        "name": "Playlist3",
+        "duration": "04:01"
     }
 ]
