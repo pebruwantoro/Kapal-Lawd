@@ -24,7 +24,8 @@ class AudioPlayerViewModel: ObservableObject {
     private var lostBeaconCount: Int = 0
     private let maxLostBeaconCount = 5 // Threshold for consecutive losses
     @Published var isFindBeacon = false
-
+    @Published var isBeaconFar = false
+    
     enum VolumeLevel: Int {
         case none = 0
         case level1 = 1 // 20% volume
@@ -177,9 +178,10 @@ extension AudioPlayerViewModel {
             proximityText = "Closest Beacon Found"
             print("Beacon detected: \(identifier), Estimated Distance: \(distance) meters")
 
-            if distance <= 2.0 {
+            if distance <= 1.0 {
                 // Reset lostBeaconCount since we are within 2 meters
                 self.isFindBeacon = true
+                self.isBeaconFar = false
                 self.lostBeaconCount = 0
             } else {
                 // Distance is greater than 2 meters
@@ -188,6 +190,7 @@ extension AudioPlayerViewModel {
                 if self.lostBeaconCount >= self.maxLostBeaconCount {
                     proximityText = "Beacon is too far"
                     self.isFindBeacon = false
+                    self.isBeaconFar = true
                     print("Beacon too far after \(maxLostBeaconCount) attempts")
                 }
             }
@@ -196,6 +199,7 @@ extension AudioPlayerViewModel {
             print("Beacon not detected or invalid distance. Lost count: \(self.lostBeaconCount)")
             if self.lostBeaconCount >= self.maxLostBeaconCount {
                 self.isFindBeacon = false
+                self.isBeaconFar = true
                 proximityText = "No Beacon Detected"
                 print("No closest beacon found after \(maxLostBeaconCount) attempts")
             }
