@@ -63,6 +63,7 @@ struct PlayerView: View {
                             Circle()
                                 .foregroundColor(Color("AppPlayer"))
                             
+                            // TODO : Fix tampilan agar buttonnya sesuai slicing di figma
                             Button(action:  {
                                 self.isPlaying.toggle()
                                 

@@ -13,6 +13,7 @@ struct PlaylistView: View {
     @ObservedObject private var audioPlayerViewModel = AudioPlayerViewModel()
     @Binding var collections: [Collections]
     @State var isMusicPlaying: Bool = false
+    @State var showAlert = false
     
     
     enum title: String {
@@ -33,8 +34,10 @@ struct PlaylistView: View {
             VStack {
                 HStack {
                     Button(action:  {
-                        isExploring = true
-                    }, label: {
+                        showAlert = true
+                        
+                    }
+                           , label: {
                         Image(systemName: "xmark")
                             .foregroundColor(.gray)
                             .font(.subheadline)
@@ -43,13 +46,32 @@ struct PlaylistView: View {
                             .cornerRadius(86)
                     })
                     
+                    .alert(isPresented: $showAlert) {
+                        Alert(
+                            title: Text("End Exploration Session"),
+                            message: Text("By stopping the session, your device will not perform AudiTag scanning"),
+                            primaryButton: .default(Text("Continue Exploration")) {
+                                print("End clicked")
+                            },
+                            secondaryButton: .destructive(Text("End Session")) {
+                                isExploring = false
+                            }
+                        )
+                    }
+                    
                     Text("AudiTag Collections")
                         .frame(maxWidth: 283)
                         .font(.headline)
-                    
                 }
                 .frame(maxWidth: .infinity, maxHeight: 50)
                 .padding(.trailing, 50)
+                
+                // TODO : Kalau beacon jauh -> dismiss ke FindAuditagView(Clear all)
+                // TODO : locked screen jadi potrait
+                // TODO : Intinya FindAuditagView dan PlaylistView saling berhubungan
+                // TODO : Fix Darkmode dan Lightmode
+                // TODO : AV Ambience Sound Background, AV Micro-Interaction
+                // TODO : Button play di play list ketika dipencet akan memutar lagu sesuai dengan play list
                 
                 if !collections.isEmpty {
                     HStack (spacing: 16) {
@@ -108,7 +130,9 @@ struct PlaylistView: View {
                                     }) {
                                         if audioPlayerViewModel.audioVideoManager.isPlaying && playlist.name == audioPlayerViewModel.audioVideoManager.currentSongTitle {
                                             Image("sound")
-                                        } else {
+                                        } 
+                                        //Putar tombol play di setiap lagu
+                                        else {
                                             Image(systemName: "play")
                                                 .foregroundColor(Color("AppLabel"))
                                         }
