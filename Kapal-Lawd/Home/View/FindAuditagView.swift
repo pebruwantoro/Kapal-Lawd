@@ -14,26 +14,22 @@ struct FindAuditagView: View {
     @StateObject private var audioPlayerViewModel = AudioPlayerViewModel()
     @State var collections: [Collections] = []
     let pulseScan = Animation.easeOut(duration: 2).repeatForever(autoreverses: true)
-
+    
     var body: some View {
         Group {
             Spacer()
             
             if audioPlayerViewModel.isFindBeacon {
-                VStack {
-                    PlaylistView(isExploring: self.$isExploring, collections: $collections)
-                }
+                // Show the PlaylistView when a beacon is found
+                PlaylistView(isExploring: self.$isExploring, collections: $collections)
             } else {
+                // Show the scanning view when no beacon is found
                 VStack(spacing: 16) {
                     Text(audioPlayerViewModel.proximityText)
                         .bold()
                         .font(.title3)
                         .foregroundColor(Color("AppText"))
                         .padding(.bottom, 12)
-                        .onReceive(audioPlayerViewModel.beaconScanner.$estimatedDistance) { distance in
-                            print("distance:", distance)
-                            audioPlayerViewModel.handleEstimatedDistanceChange(distance)
-                        }
                     
                     ZStack {
                         Circle()
@@ -42,7 +38,6 @@ struct FindAuditagView: View {
                             .scaleEffect(isScanning ? 0.7 : 2.4)
                             .animation(pulseScan.delay(0.6), value: isScanning)
                             .animation(.easeInOut(duration: 1), value: isScanning)
-
                         
                         Image("scanning")
                             .padding(.top, 45)
@@ -93,23 +88,14 @@ struct FindAuditagView: View {
                 .opacity(cardOpacity)
             }
         }
-        .onReceive(audioPlayerViewModel.$isFindBeacon, perform: { value in
-           
+        .onReceive(audioPlayerViewModel.$isFindBeacon) { value in
             if value {
                 collections = audioPlayerViewModel.fetchCollectionByBeaconId(id: audioPlayerViewModel.beaconScanner.closestBeacon?.uuid.uuidString ?? "")
                 print(collections)
-                audioPlayerViewModel.startPlayback(song: "Bluetooth")
-                audioPlayerViewModel.bgSound(song: audioPlayerViewModel.backgroundSound)
+            } else {
+                collections = []
             }
-        })
-        
-//        .onReceive(audioPlayerViewModel.$backgroundSound) { backgroundSound in
-//            //repeat dan volumenya turunin
-////            if backgroundSound != "" {
-//                audioPlayerViewModel.bgSound(song: backgroundSound)
-////            }
-//        }
-        
+        }
     }
 }
 

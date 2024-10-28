@@ -15,10 +15,10 @@ class AudioPlayerViewModel: ObservableObject {
     @Published var currentSongTitle: String?
     private var collectionRepo = JSONCollectionsRepository()
     private var playlistRepo = JSONPlaylistRepository()
-
+    
     @Published var audioVideoManager = AVManager.shared
     @Published var bgSoundManager = BGSoundManager.shared
-        
+    
     @Published var beaconScanner = IBeaconDetector()
     @Published var proximityText: String = "No Beacon Detected"
     private var lastTargetVolume: Float? = nil
@@ -27,9 +27,10 @@ class AudioPlayerViewModel: ObservableObject {
     private let maxLostBeaconCount = 5 // Threshold for consecutive losses
     @Published var isFindBeacon = false
     @Published var isBeaconFar = false
-
+    
     private var cancellables = Set<AnyCancellable>()
     @Published var backgroundSound: String = ""
+    @Published var collections: [Collections] = []
     
     enum VolumeLevel: Int {
         case none = 0
@@ -88,9 +89,9 @@ class AudioPlayerViewModel: ObservableObject {
     internal func configureAudioSession() {
         do {
             let session = AVAudioSession.sharedInstance()
-
+            
             try session.setCategory(.playback, mode: .default)
-
+            
             try session.setActive(true)
         } catch {
             print("Error: \(error.localizedDescription)")
@@ -142,7 +143,7 @@ extension AudioPlayerViewModel {
         var targetVolume: Float = 0.0
         var newVolumeLevel: VolumeLevel = .none
         let songTitle = fetchCurrentSong()
-
+        
         // Determine the new volume level based on RSSI and hysteresis
         for threshold in thresholds {
             if currentVolumeLevel == threshold.volumeLevel {
@@ -163,18 +164,18 @@ extension AudioPlayerViewModel {
                 }
             }
         }
-
+        
         if newVolumeLevel == .none {
             targetVolume = 0.0
         }
-
+        
         if newVolumeLevel == currentVolumeLevel {
             // No change in volume level
             return
         }
-
+        
         print("RSSI: \(rssi), Target Volume: \(targetVolume), Current Volume Level: \(currentVolumeLevel), New Volume Level: \(newVolumeLevel)")
-
+        
         if targetVolume == 0.0 {
             if audioVideoManager.isPlaying {
                 audioVideoManager.fadeToVolume(targetVolume: 0.0, duration: 1.0) {
@@ -185,7 +186,7 @@ extension AudioPlayerViewModel {
             lastTargetVolume = nil
             return
         }
-
+        
         if audioVideoManager.currentSongTitle != songTitle || !audioVideoManager.isPlaying {
             // Start new playback
             self.stopPlayback()
@@ -206,15 +207,24 @@ extension AudioPlayerViewModel {
     func handleRSSIChange(_ rssi: Double) {
         if let closestBeacon = beaconScanner.closestBeacon, rssi > -100.0 {
             let identifier = beaconScanner.beaconIdentifier(for: closestBeacon)
-           
+            
             proximityText = "Closest Beacon Found"
             print("Beacon detected: \(identifier), Average RSSI: \(rssi) dBm")
-
-            if rssi >= thresholds.last!.enter { // Adjust this threshold as needed
+            
+            if rssi >= thresholds.last!.enter {
                 // Reset lostBeaconCount since we are within range
                 self.isFindBeacon = true
                 self.isBeaconFar = false
                 self.lostBeaconCount = 0
+                
+                // Start playback if not already playing
+                if !audioVideoManager.isPlaying {
+                    // Fetch collections and background sound
+                    self.collections = fetchCollectionByBeaconId(id: closestBeacon.uuid.uuidString)
+                    startPlayback(song: "Bluetooth")
+                    bgSound(song: backgroundSound)
+                }
+                
                 adjustAudioForRSSI(rssi: rssi)
             } else {
                 // RSSI is lower than threshold
@@ -227,14 +237,13 @@ extension AudioPlayerViewModel {
                     stopPlayback()
                     stopBackground()
                     print("Beacon too far after \(maxLostBeaconCount) attempts")
-                    // Stop playback
-                    stopPlayback()
+                    // Reset variables
                     lastTargetVolume = nil
                     currentVolumeLevel = .none
                 }
-                // Else, keep current playback state
             }
         } else {
+            // No beacon detected
             self.lostBeaconCount += 1
             print("Beacon not detected or invalid RSSI. Lost count: \(self.lostBeaconCount)")
             if self.lostBeaconCount >= self.maxLostBeaconCount {
@@ -244,12 +253,9 @@ extension AudioPlayerViewModel {
                 stopPlayback()
                 stopBackground()
                 print("No closest beacon found after \(maxLostBeaconCount) attempts")
-                // Stop playback
-                stopPlayback()
+                // Reset variables
                 lastTargetVolume = nil
                 currentVolumeLevel = .none
             }
-            // Else, keep current playback state
         }
-    }
-}
+    }}
