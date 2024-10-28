@@ -8,5 +8,11 @@
 import Foundation
 
 struct Beacons: Codable {
-    let uuid: String    
+    let uuid: String   
+    let backgroundSound: String
+    
+    enum CodingKeys: String, CodingKey {
+        case uuid
+        case backgroundSound = "background_sound"
+    }
 }

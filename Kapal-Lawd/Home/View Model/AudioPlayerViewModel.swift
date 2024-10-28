@@ -17,6 +17,7 @@ class AudioPlayerViewModel: ObservableObject {
     private var playlistRepo = JSONPlaylistRepository()
 
     @Published var audioVideoManager = AVManager.shared
+    @Published var bgSoundManager = BGSoundManager.shared
         
     @Published var beaconScanner = IBeaconDetector()
     @Published var proximityText: String = "No Beacon Detected"
@@ -28,6 +29,7 @@ class AudioPlayerViewModel: ObservableObject {
     @Published var isBeaconFar = false
 
     private var cancellables = Set<AnyCancellable>()
+    @Published var backgroundSound: String = ""
     
     enum VolumeLevel: Int {
         case none = 0
@@ -59,6 +61,11 @@ class AudioPlayerViewModel: ObservableObject {
     }
     
     func fetchCollectionByBeaconId(id: String) -> [Collections] {
+        for beacon in beaconScanner.beacons {
+            if beacon.uuid == beaconScanner.closestBeacon?.uuid.uuidString {
+                self.backgroundSound = beacon.backgroundSound
+            }
+        }
         print("beacon id", id)
         let result = collectionRepo.fetchListCollectionsByBeaconId(req: CollectionsRequest(beaconId: id))
         let errorHandler = result.1
@@ -106,7 +113,17 @@ extension AudioPlayerViewModel {
     }
     
     func startPlayback(song: String) {
+        //TODO : Manager ganti Manager BGSound
         audioVideoManager.startPlayback(songTitle: song)
+    }
+    
+    func bgSound(song: String) {
+        //TODO : Manager ganti Manager BGSound
+        bgSoundManager.startPlayback(songTitle: song)
+    }
+    
+    func stopBackground(){
+        bgSoundManager.stopPlayback()
     }
     
     func stopPlayback() {
@@ -207,6 +224,8 @@ extension AudioPlayerViewModel {
                     proximityText = "Beacon is too far"
                     self.isFindBeacon = false
                     self.isBeaconFar = true
+                    stopPlayback()
+                    stopBackground()
                     print("Beacon too far after \(maxLostBeaconCount) attempts")
                     // Stop playback
                     stopPlayback()
@@ -222,6 +241,8 @@ extension AudioPlayerViewModel {
                 self.isFindBeacon = false
                 self.isBeaconFar = true
                 proximityText = "No Beacon Detected"
+                stopPlayback()
+                stopBackground()
                 print("No closest beacon found after \(maxLostBeaconCount) attempts")
                 // Stop playback
                 stopPlayback()

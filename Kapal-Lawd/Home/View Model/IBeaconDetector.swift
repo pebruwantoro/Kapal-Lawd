@@ -126,4 +126,13 @@ class IBeaconDetector: NSObject, ObservableObject, CLLocationManagerDelegate {
             startMonitoring()
         }
     }
+    
+    func fetchBeacondById(id: String) -> Beacons {
+        let result = beaconLocalRepo.fetchListBeaconsByUUID(req: BeaconsRequest(uuid: id))
+        let errorHandler = result.1
+        if let errorHandler = errorHandler {
+            print("error: \(errorHandler)")
+        }
+        return result.0[0]
+    }
 }
