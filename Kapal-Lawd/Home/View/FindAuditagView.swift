@@ -72,6 +72,8 @@ struct FindAuditagView: View {
                     VStack {
                         Button(action: {
                             isExploring = false
+                            audioPlayerViewModel.stopPlayback()
+                            audioPlayerViewModel.stopBackground()
                         }, label: {
                             Text("Stop Scanning")
                                 .foregroundColor(.gray)
@@ -96,8 +98,18 @@ struct FindAuditagView: View {
             if value {
                 collections = audioPlayerViewModel.fetchCollectionByBeaconId(id: audioPlayerViewModel.beaconScanner.closestBeacon?.uuid.uuidString ?? "")
                 print(collections)
+                audioPlayerViewModel.startPlayback(song: "Bluetooth")
+                audioPlayerViewModel.bgSound(song: audioPlayerViewModel.backgroundSound)
             }
         })
+        
+//        .onReceive(audioPlayerViewModel.$backgroundSound) { backgroundSound in
+//            //repeat dan volumenya turunin
+////            if backgroundSound != "" {
+//                audioPlayerViewModel.bgSound(song: backgroundSound)
+////            }
+//        }
+        
     }
 }
 

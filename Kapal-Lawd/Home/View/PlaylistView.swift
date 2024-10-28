@@ -11,6 +11,8 @@ struct PlaylistView: View {
     
     @Binding var isExploring: Bool
 //    @ObservedObject private var audioPlayerViewModel = AudioPlayerViewModel()
+    @State private var isPlay = false
+    @State private var isFirst = false
     @StateObject private var audioPlayerViewModel = AudioPlayerViewModel()
     @Binding var collections: [Collections]
     @State var isMusicPlaying: Bool = false
@@ -62,6 +64,8 @@ struct PlaylistView: View {
                                     },
                                     secondaryButton: .destructive(Text("End Session")) {
                                         isExploring = false
+                                        audioPlayerViewModel.stopPlayback()
+                                        audioPlayerViewModel.stopBackground()
                                     }
                                 )
                             }
@@ -73,12 +77,11 @@ struct PlaylistView: View {
                         .frame(maxWidth: .infinity, maxHeight: 50)
                         .padding(.trailing, 50)
                         
-                        // TODO : Kalau beacon jauh -> dismiss ke FindAuditagView(Clear all)
+                        // TODO : Audio Disable ketika balik ke UI sebelumnya (Done)
                         // TODO : locked screen jadi potrait
-                        // TODO : Intinya FindAuditagView dan PlaylistView saling berhubungan
                         // TODO : Fix Darkmode dan Lightmode
-                        // TODO : AV Ambience Sound Background, AV Micro-Interaction
-                        // TODO : Button play di play list ketika dipencet akan memutar lagu sesuai dengan play list
+                        // TODO : AV Ambience Sound Background, AV Micro-Interaction (Done)
+                        // TODO : Button play di play list ketika dipencet akan memutar lagu sesuai dengan play list (Done)->Tinggal Pause Audionya
                         
                         if !collections.isEmpty {
                             HStack (spacing: 16) {
@@ -134,11 +137,17 @@ struct PlaylistView: View {
                                             Spacer()
                                             
                                             Button(action: {
-                                            }) {
+                                                audioPlayerViewModel.startPlayback(song: playlist.name)
+                                            })
+                                            {
+                                                //Tambahin if untuk ngetrigger player view
+                                                //Ubah tampilan dan fungsi di state sebgai pause
+                                                
                                                 if audioPlayerViewModel.audioVideoManager.isPlaying && playlist.name == audioPlayerViewModel.audioVideoManager.currentSongTitle {
                                                     Image("sound")
                                                 }
-                                                //Putar tombol play di setiap lagu
+                                                //Putar tombol play di setiap lagu (Done)
+                                                //Pause setiap lagu
                                                 else {
                                                     Image(systemName: "play")
                                                         .foregroundColor(Color("AppLabel"))
