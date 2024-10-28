@@ -174,9 +174,9 @@ struct PlaylistView: View {
                 }
             }
         }
-        .onReceive(audioPlayerViewModel.beaconScanner.$estimatedDistance) { distance in
-            print("distance:", distance)
-            audioPlayerViewModel.handleEstimatedDistanceChange(distance)
+        .onReceive(audioPlayerViewModel.beaconScanner.$averageRSSI) { rssi in
+            print("averageRSSI:", rssi)
+            audioPlayerViewModel.handleRSSIChange(rssi)
         }
     }
 }
