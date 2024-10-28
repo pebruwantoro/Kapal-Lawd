@@ -10,11 +10,10 @@ import SwiftUI
 struct PlayerView: View {
     
     @State private var trackBar = 0.0
-    @State private var isPlaying = false
+    @State private var isPlaying = true
     @Binding var list: [Playlist]
     @State private var currentSecond: String = "00:00"
     @ObservedObject private var audioPlayerViewModel = AudioPlayerViewModel()
-    @State private var isFirstPlay: Bool = true
     
     let timer = Timer.publish(every: 0.1, on: .main, in: .common).autoconnect()
     
@@ -28,12 +27,17 @@ struct PlayerView: View {
                         .font(.body)
                         .foregroundColor(.gray)
                     
-                    ProgressView("", value: trackBar, total: 300)
+                    ProgressView("", value: trackBar, total: convertToSeconds(from: list[audioPlayerViewModel.audioVideoManager.currentPlaylistIndex].duration)!)
                         .accentColor(Color("AppButton"))
                         .scaleEffect(x: 1, y: 1.5, anchor: .bottom)
                     
                     HStack {
                         Text(currentSecond).font(.subheadline)
+                            .onReceive(audioPlayerViewModel.audioVideoManager.$currentTimeInSeconds) { time in
+                            self.currentSecond = convertSecondsToTimeString(seconds: time)
+                            self.trackBar = time
+                        }
+                        
                         Spacer()
                         Text(list[audioPlayerViewModel.audioVideoManager.currentPlaylistIndex].duration).font(.subheadline)
                     }
@@ -63,25 +67,22 @@ struct PlayerView: View {
                             Circle()
                                 .foregroundColor(Color("AppPlayer"))
                             
-                            // TODO : Fix tampilan agar buttonnya sesuai slicing di figma
                             Button(action:  {
                                 self.isPlaying.toggle()
                                 
-                                if self.isPlaying {
-                                    if self.isFirstPlay {
-                                        audioPlayerViewModel.startPlayback(song: list[audioPlayerViewModel.audioVideoManager.currentPlaylistIndex].name)
-                                        self.isFirstPlay = false
-                                    } else {
-                                        audioPlayerViewModel.resumePlayback()
-                                    }
-                                    
+                                if !self.isPlaying {
+                                    audioPlayerViewModel.resumePlayback()
                                 } else {
                                     audioPlayerViewModel.pausePlayback()
                                 }
                             }, label:  {
-                                Image(systemName: isPlaying ? "pause.fill" : "play.fill")
+                                Image(systemName: self.isPlaying ? "pause.fill" : "play.fill")
                                     .foregroundColor(.white)
                             })
+                        }.onReceive(audioPlayerViewModel.audioVideoManager.$isPlaying) { value in
+                            print("value", value)
+                            print("isPlaying", isPlaying)
+                            self.isPlaying = value
                         }
                         
                         Button(action:  {
@@ -110,12 +111,6 @@ struct PlayerView: View {
             }
         }
         .padding(.horizontal, 24)
-        .onReceive(timer) { _ in
-            if isPlaying && trackBar < convertToSeconds(from: list[audioPlayerViewModel.audioVideoManager.currentPlaylistIndex].duration)! {
-                trackBar += 0.1
-                self.currentSecond = convertSecondsToTimeString(seconds: trackBar)
-            }
-        }
         .frame(maxWidth: .infinity, maxHeight: 174)
         .background(Color.white)
         .cornerRadius(36)

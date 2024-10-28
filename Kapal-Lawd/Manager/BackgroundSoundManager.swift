@@ -10,33 +10,13 @@ import AVKit
 import Combine
 import MediaPlayer
 
-class BGSoundManager: ObservableObject {
-    public static var shared = BGSoundManager()
-    let commandCenter = MPRemoteCommandCenter.shared()
-    
+class BackgroundSoundManager: ObservableObject {
+    public static var shared = BackgroundSoundManager()
     private var player: AVPlayer?
     private var playerItem: AVPlayerItem?
     private var fadeTimer: Timer?
     private let fadeStepInterval: TimeInterval = 0.1
-    @Published var playlist: [Playlist] = []
-    private var _currentPlaylistIndex: Int = 0
-    @Published var isPlaying = false
-    @Published var currentSongTitle: String?
-    private var commandHandlersSetup = false
-
-    var currentPlaylistIndexPublisher = PassthroughSubject<Int, Never>()
     
-    var currentPlaylistIndex: Int {
-        get {
-            return _currentPlaylistIndex
-        }
-        set {
-            _currentPlaylistIndex = newValue
-            currentPlaylistIndexPublisher.send(newValue)
-            print("Curent Playlist On Index: \(newValue)")
-        }
-    }
-
     func startPlayback(songTitle: String) {
         guard let url = Bundle.main.url(forResource: songTitle, withExtension: "mp3") else {
             print("Audio file not found: \(songTitle)")
@@ -53,8 +33,6 @@ class BGSoundManager: ObservableObject {
         
         // Start playing
         player?.play()
-        isPlaying = true
-        currentSongTitle = songTitle
         
     }
     
@@ -65,8 +43,6 @@ class BGSoundManager: ObservableObject {
             self?.player?.pause()
             self?.player = nil
             self?.playerItem = nil
-            self?.isPlaying = false
-            self?.currentSongTitle = nil
         }
     }
     
@@ -99,7 +75,5 @@ class BGSoundManager: ObservableObject {
                 completion?()
             }
         }
-        
-        NotificationCenter.default.removeObserver(self, name: .AVPlayerItemDidPlayToEndTime, object: playerItem)
     }
 }
