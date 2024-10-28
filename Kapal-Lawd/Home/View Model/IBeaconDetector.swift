@@ -12,12 +12,12 @@ class IBeaconDetector: NSObject, ObservableObject, CLLocationManagerDelegate {
     // Published properties
     @Published var detectedBeacons: [CLBeacon] = []
     @Published var closestBeacon: CLBeacon?
-    @Published var estimatedDistance: Double = -1.0 // Distance in meters
+    @Published var averageRSSI: Double = -100.0 // Smoothed RSSI value
 
     // Private properties
     private var locationManager: CLLocationManager?
     
-    var beacons : [Beacons] = []
+    var beacons: [Beacons] = []
     
     private let beaconIdentifier = "MyBeacons"
 
@@ -26,7 +26,7 @@ class IBeaconDetector: NSObject, ObservableObject, CLLocationManagerDelegate {
     
     private var beaconLocalRepo = JSONBeaconsRepository()
     
-     override init() {
+    override init() {
         // Get List Beacons
         let result = beaconLocalRepo.fetchListBeacons()
         self.beacons = result.0
@@ -39,7 +39,6 @@ class IBeaconDetector: NSObject, ObservableObject, CLLocationManagerDelegate {
         // Enable continuous location scanning
         locationManager?.allowsBackgroundLocationUpdates = true
         
-        
         startMonitoring()
     }
     
@@ -48,9 +47,11 @@ class IBeaconDetector: NSObject, ObservableObject, CLLocationManagerDelegate {
         guard !beacons.isEmpty else { return }
         
         for beacon in beacons {
-            let beaconRegion = CLBeaconRegion(uuid: UUID(uuidString: beacon.uuid)!, identifier: beaconIdentifier)
-            locationManager.startMonitoring(for: beaconRegion)
-            locationManager.startRangingBeacons(satisfying: beaconRegion.beaconIdentityConstraint)
+            if let uuid = UUID(uuidString: beacon.uuid) {
+                let beaconRegion = CLBeaconRegion(uuid: uuid, identifier: beaconIdentifier)
+                locationManager.startMonitoring(for: beaconRegion)
+                locationManager.startRangingBeacons(satisfying: beaconRegion.beaconIdentityConstraint)
+            }
         }
 
         // Ensure the app continues location updates in the background
@@ -59,7 +60,7 @@ class IBeaconDetector: NSObject, ObservableObject, CLLocationManagerDelegate {
 
     // Helper function to create a unique identifier for a beacon
     func beaconIdentifier(for beacon: CLBeacon) -> String {
-//        return "\(beacon.uuid.uuidString):\(beacon.major):\(beacon.minor)"
+        // Modify as needed to include major and minor if necessary
         return "\(beacon.uuid.uuidString)"
     }
 
@@ -71,7 +72,7 @@ class IBeaconDetector: NSObject, ObservableObject, CLLocationManagerDelegate {
     ) {
         if self.beacons.isEmpty {
             closestBeacon = nil
-            estimatedDistance = -1.0
+            averageRSSI = -100.0
             return
         }
 
@@ -81,12 +82,11 @@ class IBeaconDetector: NSObject, ObservableObject, CLLocationManagerDelegate {
         if let nearestBeacon = beacons.max(by: { $0.rssi < $1.rssi }) {
             let identifier = beaconIdentifier(for: nearestBeacon)
             let smoothedRSSI = smoothRSSI(rssi: nearestBeacon.rssi, for: identifier)
-            let distance = estimateDistance(rssi: smoothedRSSI)
             self.closestBeacon = nearestBeacon
-            self.estimatedDistance = distance
+            self.averageRSSI = smoothedRSSI
         } else {
             self.closestBeacon = nil
-            self.estimatedDistance = -1.0
+            self.averageRSSI = -100.0
         }
     }
 
@@ -103,20 +103,6 @@ class IBeaconDetector: NSObject, ObservableObject, CLLocationManagerDelegate {
             emaRSSI[beaconIdentifier] = emaAlpha * Double(rssi) + (1 - emaAlpha) * emaRSSI[beaconIdentifier]!
         }
         return emaRSSI[beaconIdentifier]!
-    }
-
-    // Estimate distance from RSSI
-    private func estimateDistance(rssi: Double) -> Double {
-        let txPower = -59.0 // Replace with your calibrated Measured Power
-        let n = 2.0 // Replace with your calibrated path-loss exponent
-
-        if rssi == 0 {
-            return -1.0 // Cannot determine distance
-        }
-
-        let ratio = (txPower - rssi) / (10 * n)
-        let distance = pow(10, ratio)
-        return distance
     }
 
     func locationManager(_ manager: CLLocationManager, didEnterRegion region: CLRegion) {
