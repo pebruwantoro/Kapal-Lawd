@@ -8,9 +8,8 @@
 import SwiftUI
 
 struct PlayerView: View {
-    
-    @State private var trackBar = 0.0
-    @State private var isPlaying = true
+    @Binding var trackBar: Double
+    @Binding var isPlaying: Bool
     @Binding var list: [Playlist]
     @State private var currentSecond: String = "00:00"
     @ObservedObject private var audioPlayerViewModel = AudioPlayerViewModel()
@@ -69,20 +68,20 @@ struct PlayerView: View {
                             
                             Button(action:  {
                                 self.isPlaying.toggle()
-                                
+                                print("isPlaying button press", isPlaying)
                                 if !self.isPlaying {
+                                    print("masuk resume")
                                     audioPlayerViewModel.resumePlayback()
+                                    self.isPlaying = true
                                 } else {
+                                    print("masuk pause")
                                     audioPlayerViewModel.pausePlayback()
+                                    self.isPlaying = false
                                 }
                             }, label:  {
                                 Image(systemName: self.isPlaying ? "pause.fill" : "play.fill")
                                     .foregroundColor(.white)
                             })
-                        }.onReceive(audioPlayerViewModel.audioVideoManager.$isPlaying) { value in
-                            print("value", value)
-                            print("isPlaying", isPlaying)
-                            self.isPlaying = value
                         }
                         
                         Button(action:  {
@@ -148,7 +147,7 @@ extension PlayerView {
 }
 
 #Preview {
-    PlayerView(list: .constant([Playlist(
+    PlayerView(trackBar: .constant(0.0), isPlaying: .constant(true), list: .constant([Playlist(
         uuid: "123e4567-e89b-12d3-a456-426614174000",
         collectionId: "collection-001",
         name: "My Playlist",

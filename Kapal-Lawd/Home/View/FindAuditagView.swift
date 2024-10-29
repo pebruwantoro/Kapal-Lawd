@@ -14,13 +14,14 @@ struct FindAuditagView: View {
     @StateObject private var audioPlayerViewModel = AudioPlayerViewModel()
     @State var collections: [Collections] = []
     let pulseScan = Animation.easeOut(duration: 2).repeatForever(autoreverses: true)
+    @Binding var trackBar: Double
     
     var body: some View {
         Group {
             Spacer()
             
             if audioPlayerViewModel.isFindBeacon {
-                PlaylistView(isExploring: self.$isExploring, collections: $collections)
+                PlaylistView(isExploring: self.$isExploring, collections: $collections, trackBar: $trackBar)
                     .onAppear{
                         audioPlayerViewModel.interactionSound(song: "Bluetooth")
                         audioPlayerViewModel.startBackgroundSound(song: audioPlayerViewModel.backgroundSound)
@@ -95,5 +96,5 @@ struct FindAuditagView: View {
 }
 
 #Preview {
-    FindAuditagView(isExploring: .constant(false))
+    FindAuditagView(isExploring: .constant(false), trackBar: .constant(0.0))
 }

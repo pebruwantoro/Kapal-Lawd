@@ -33,47 +33,14 @@ class BackgroundSoundManager: ObservableObject {
         
         // Start playing
         player?.play()
+        player?.volume = 0.3
         
     }
     
     func stopPlayback() {
-        // Fade out to volume 0
-        fadeToVolume(targetVolume: 0.0, duration: 1.0) { [weak self] in
-            self?.player?.pause()
-            self?.player?.pause()
-            self?.player = nil
-            self?.playerItem = nil
-        }
-    }
-    
-    // Method to fade to target volume
-    func fadeToVolume(targetVolume: Float, duration: TimeInterval, completion: (() -> Void)? = nil) {
-        fadeTimer?.invalidate()
-        
-        guard let player = player else {
-            completion?()
-            return
-        }
-        
-        let currentVolume = player.volume
-        let volumeDifference = targetVolume - currentVolume
-        let numberOfSteps = max(Int(duration / fadeStepInterval), 1)
-        let volumeStep = volumeDifference / Float(numberOfSteps)
-        
-        var stepsCompleted = 0
-        fadeTimer = Timer.scheduledTimer(
-            withTimeInterval: fadeStepInterval,
-            repeats: true
-        ) { [weak self] timer in
-            guard let self = self else { return }
-            stepsCompleted += 1
-            let newVolume = currentVolume + Float(stepsCompleted) * volumeStep
-            self.player?.volume = max(0.0, min(1.0, newVolume))
-            if stepsCompleted >= numberOfSteps {
-                self.player?.volume = targetVolume
-                timer.invalidate()
-                completion?()
-            }
-        }
+        player?.pause()
+        player?.pause()
+        player = nil
+        playerItem = nil
     }
 }

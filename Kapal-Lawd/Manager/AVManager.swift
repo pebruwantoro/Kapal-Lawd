@@ -39,12 +39,10 @@ class AVManager: ObservableObject {
             print("Curent Playlist On Index: \(newValue)")
         }
     }
-    
-    deinit {
-        removeTimeObserver()
-    }
 
     func startPlayback(songTitle: String) {
+        removeTimeObserver()
+        
         guard let url = Bundle.main.url(forResource: songTitle, withExtension: "mp3") else {
             print("Audio file not found: \(songTitle)")
             return
@@ -54,19 +52,15 @@ class AVManager: ObservableObject {
         playerItem = AVPlayerItem(url: url)
         player = AVPlayer(playerItem: playerItem)
         
-        // Configure audio session for background playback
         try? AVAudioSession.sharedInstance().setCategory(.playback, mode: .default)
         try? AVAudioSession.sharedInstance().setActive(true)
-        
-        // Start playing
+
         player?.play()
         isPlaying = true
         currentSongTitle = songTitle
         
-        // Update lock screen info
         updateNowPlayingInfo(songTitle: songTitle)
         
-        // Setup remote transport controls
         setupRemoteTransportControls()
         
         startObservingCurrentTime()
@@ -216,13 +210,8 @@ extension AVManager {
         commandCenter.pauseCommand.removeTarget(nil)
         
         commandCenter.pauseCommand.addTarget { [unowned self] event in
-            if !self.isPlaying {
-                self.pausePlayback()
-                
-                return .success
-            }
-            
-            return .commandFailed
+            self.pausePlayback()
+            return .success
         }
     }
     
@@ -231,12 +220,8 @@ extension AVManager {
         commandCenter.playCommand.removeTarget(nil)
         
         commandCenter.playCommand.addTarget { [unowned self] event in
-            if self.isPlaying {
-                self.resumePlayback()
-                return .success
-            }
-            
-            return .commandFailed
+            self.resumePlayback()
+            return .success
         }
     }
     
@@ -254,13 +239,11 @@ extension AVManager {
         timeObserverToken = player.addPeriodicTimeObserver(forInterval: CMTime(seconds: 1, preferredTimescale: 1), queue: .main) { [weak self] time in
             guard let self = self else { return }
             self.currentTimeInSeconds = CMTimeGetSeconds(time)
-            print("Current playback time: \(self.currentTimeInSeconds) seconds")
         }
     }
     
     private func removeTimeObserver() {
         if let timeObserverToken = timeObserverToken {
-            print("ke remove harusnya")
             player?.removeTimeObserver(timeObserverToken)
             self.timeObserverToken = nil
         }

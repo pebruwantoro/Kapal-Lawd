@@ -13,6 +13,7 @@ struct PlaylistView: View {
     @StateObject private var audioPlayerViewModel = AudioPlayerViewModel()
     @Binding var collections: [Collections]
     @State var showAlert = false
+    @Binding var trackBar: Double
     
     enum title: String {
         case defaultSong = "No Song"
@@ -28,7 +29,7 @@ struct PlaylistView: View {
             NavigationStack {
                 if audioPlayerViewModel.isBeaconFar{
                     VStack {
-                        FindAuditagView(isExploring: self.$isExploring)
+                        FindAuditagView(isExploring: self.$isExploring, trackBar: $trackBar)
                     }
                 }
                 else{
@@ -147,7 +148,7 @@ struct PlaylistView: View {
                             }.padding(.bottom, 16)
                             
                             if !self.list.isEmpty {
-                                PlayerView(list: $list)
+                                PlayerView(trackBar: $trackBar, isPlaying: $audioPlayerViewModel.audioVideoManager.isPlaying, list: $list)
                             }
                         }
                     }
@@ -191,5 +192,5 @@ extension PlaylistView {
         shortContents: "String",
         authoredBy: "String",
         authoredAt: "2024-10-10"
-    )]))
+    )]), trackBar: .constant(0.0))
 }

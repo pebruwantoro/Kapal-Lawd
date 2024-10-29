@@ -10,11 +10,12 @@ import SwiftUI
 struct SpotHomepageView: View {
     @State private var isExploring = false
     @State private var beaconId: String?
+    @State private var trackBar = 0.0
     
     var body: some View {
         NavigationStack {
             if isExploring {
-                FindAuditagView(isExploring: $isExploring)
+                FindAuditagView(isExploring: $isExploring, trackBar: $trackBar)
             } else {
                 Spacer()
                 VStack (spacing: 16) {
