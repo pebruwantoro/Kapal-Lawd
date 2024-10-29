@@ -75,6 +75,7 @@ class AVManager: ObservableObject {
     func stopPlayback() {
         // Fade out to volume 0
         fadeToVolume(targetVolume: 0.0, duration: 1.0) { [weak self] in
+            self?.updateNowPlayingInfo(songTitle: self?.currentSongTitle ?? "")
             self?.player?.pause()
             self?.player?.pause()
             self?.player = nil

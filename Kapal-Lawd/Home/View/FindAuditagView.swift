@@ -15,6 +15,8 @@ struct FindAuditagView: View {
     @State var collections: [Collections] = []
     let pulseScan = Animation.easeOut(duration: 2).repeatForever(autoreverses: true)
     @Binding var trackBar: Double
+    
+    @Environment(\.scenePhase) private var scenePhase
 
     var body: some View {
         Group {
@@ -24,6 +26,19 @@ struct FindAuditagView: View {
                 PlaylistView(isExploring: self.$isExploring, collections: self.$collections, trackBar: self.$trackBar)
                     .onAppear{
                         audioPlayerViewModel.interactionSound(song: "AudiumTagConnect")
+                    }
+                    .onChange(of: scenePhase) { newPhase, _ in
+                        switch newPhase {
+                        case .active:
+                            audioPlayerViewModel.interactionSound(song: "AudiumTagConnect")
+                        case .background:
+                            audioPlayerViewModel.interactionSound(song: "AudiumTagConnect")
+                        case .inactive:
+                            print("screen inactive")
+                        @unknown default:
+                            break
+                        }
+                        
                     }
                     .environmentObject(audioPlayerViewModel)
             } else {

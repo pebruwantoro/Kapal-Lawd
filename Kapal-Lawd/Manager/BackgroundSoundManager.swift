@@ -16,6 +16,7 @@ class BackgroundSoundManager: ObservableObject {
     private var playerItem: AVPlayerItem?
     private var fadeTimer: Timer?
     private let fadeStepInterval: TimeInterval = 0.1
+    @Published var isBackgroundPlaying = false
     
     init() {
         setupReplayObserver()
@@ -54,7 +55,7 @@ class BackgroundSoundManager: ObservableObject {
         
         self.player?.play()
         self.player?.volume = 0.5
-        
+        self.isBackgroundPlaying = true
     }
     
     func stopPlayback() {
@@ -62,5 +63,6 @@ class BackgroundSoundManager: ObservableObject {
         self.player?.pause()
         self.player = nil
         self.playerItem = nil
+        self.isBackgroundPlaying = false
     }
 }
