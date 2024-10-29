@@ -9,9 +9,13 @@ import SwiftUI
 
 @main
 struct Kapal_LawdApp: App {
+    private let refreshTaskID = "com.Kapal-Lawd.refresh"
     var body: some Scene {
         WindowGroup {
            SpotHomepageView()
+                .onAppear{
+                    
+                }
         }
     }
 }

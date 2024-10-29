@@ -242,7 +242,7 @@ extension AVManager {
         }
     }
     
-    private func removeTimeObserver() {
+    func removeTimeObserver() {
         if let timeObserverToken = timeObserverToken {
             player?.removeTimeObserver(timeObserverToken)
             self.timeObserverToken = nil

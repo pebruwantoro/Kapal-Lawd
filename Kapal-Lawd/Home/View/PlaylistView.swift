@@ -125,6 +125,7 @@ struct PlaylistView: View {
                                             
                                             Button(action: {
                                                 audioPlayerViewModel.startPlayback(song: playlist.name)
+//                                                self.songDuration = convertToSeconds(from: playlist.duration)!
                                             })
                                             {
                                                 if audioPlayerViewModel.audioVideoManager.isPlaying && playlist.name == audioPlayerViewModel.audioVideoManager.currentSongTitle {
@@ -192,5 +193,6 @@ extension PlaylistView {
         shortContents: "String",
         authoredBy: "String",
         authoredAt: "2024-10-10"
-    )]), trackBar: .constant(0.0))
+    )]), trackBar: .constant(0.0)
+    )
 }

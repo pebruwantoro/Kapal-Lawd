@@ -18,6 +18,16 @@
     "short_contents": "Experience the evolution of modern art.",
     "authored_by": "Sabach",
     "authored_at": "2024-10-10"
+  },
+  {
+    "uuid": "bd322d14-698c-4434-aa7b-2112b75ec5f9",
+    "rooms_id": "room-003",
+    "name": "Modern Art",
+    "beacon_id": "2d7a9f0c-e0e8-4cc9-a71b-a21db2d034a1",
+    "long_contents": "A diverse collection showcasing modern art from the 20th century to contemporary works.",
+    "short_contents": "Experience the evolution of modern art.",
+    "authored_by": "Sabach",
+    "authored_at": "2024-10-10"
   }
 ]
 

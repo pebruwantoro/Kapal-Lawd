@@ -15,6 +15,7 @@ struct FindAuditagView: View {
     @State var collections: [Collections] = []
     let pulseScan = Animation.easeOut(duration: 2).repeatForever(autoreverses: true)
     @Binding var trackBar: Double
+    @EnvironmentObject var backgroundTaskManager: BackgroundTaskManager
     
     var body: some View {
         Group {
@@ -22,9 +23,11 @@ struct FindAuditagView: View {
             
             if audioPlayerViewModel.isFindBeacon {
                 PlaylistView(isExploring: self.$isExploring, collections: $collections, trackBar: $trackBar)
-                    .onAppear{
+                    .onReceive(audioPlayerViewModel.$isFindBeacon){ _ in
                         audioPlayerViewModel.interactionSound(song: "Bluetooth")
-                        audioPlayerViewModel.startBackgroundSound(song: audioPlayerViewModel.backgroundSound)
+                        delay(0.5) {
+                            audioPlayerViewModel.startBackgroundSound(song: audioPlayerViewModel.backgroundSound)
+                        }
                     }
             } else {
                 VStack(spacing: 16) {
@@ -84,6 +87,9 @@ struct FindAuditagView: View {
                 .padding(.horizontal, 16)
                 .opacity(cardOpacity)
             }
+        }
+        .onAppear{
+            audioPlayerViewModel.audioVideoManager.removeTimeObserver()
         }
         .onReceive(audioPlayerViewModel.$isFindBeacon) { value in
             if value {

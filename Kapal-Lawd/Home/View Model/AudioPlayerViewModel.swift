@@ -10,8 +10,6 @@ import SwiftUI
 import Combine
 
 class AudioPlayerViewModel: ObservableObject {
-    private var player: AVPlayer?
-    private var playerItem: AVPlayerItem?
     @Published var currentSongTitle: String?
     private var collectionRepo = JSONCollectionsRepository()
     private var playlistRepo = JSONPlaylistRepository()
@@ -256,4 +254,5 @@ extension AudioPlayerViewModel {
                 currentVolumeLevel = .none
             }
         }
-    }}
+    }
+}
