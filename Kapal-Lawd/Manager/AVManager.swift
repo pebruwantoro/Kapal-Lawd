@@ -49,15 +49,15 @@ class AVManager: ObservableObject {
         }
         
         // Initialize player item and player
-        playerItem = AVPlayerItem(url: url)
-        player = AVPlayer(playerItem: playerItem)
+        self.playerItem = AVPlayerItem(url: url)
+        self.player = AVPlayer(playerItem: playerItem)
         
         try? AVAudioSession.sharedInstance().setCategory(.playback, mode: .default)
         try? AVAudioSession.sharedInstance().setActive(true)
 
-        player?.play()
-        isPlaying = true
-        currentSongTitle = songTitle
+        self.player?.play()
+        self.isPlaying = true
+        self.currentSongTitle = songTitle
         
         updateNowPlayingInfo(songTitle: songTitle)
         
@@ -69,6 +69,7 @@ class AVManager: ObservableObject {
                                                selector: #selector(playerDidFinishPlaying(_:)),
                                                name: .AVPlayerItemDidPlayToEndTime,
                                                object: playerItem)
+        configureAudioSession()
     }
     
     func stopPlayback() {
@@ -120,7 +121,7 @@ class AVManager: ObservableObject {
     func nextPlaylist() {
         if currentPlaylistIndex < playlist.count - 1 {
             removeTimeObserver()
-            currentPlaylistIndex += 1
+            self.currentPlaylistIndex += 1
             startPlayback(songTitle: playlist[currentPlaylistIndex].name)
             setCancelabel()
         }
@@ -129,7 +130,7 @@ class AVManager: ObservableObject {
     func previousPlaylist() {
         if currentPlaylistIndex > 0 {
             removeTimeObserver()
-            currentPlaylistIndex -= 1
+            self.currentPlaylistIndex -= 1
             startPlayback(songTitle: playlist[currentPlaylistIndex].name)
             setCancelabel()
         }
@@ -246,6 +247,18 @@ extension AVManager {
         if let timeObserverToken = timeObserverToken {
             player?.removeTimeObserver(timeObserverToken)
             self.timeObserverToken = nil
+        }
+    }
+    
+    func configureAudioSession() {
+        do {
+            let session = AVAudioSession.sharedInstance()
+            
+            try session.setCategory(.playback, mode: .default)
+            
+            try session.setActive(true)
+        } catch {
+            print("Error: \(error.localizedDescription)")
         }
     }
 }

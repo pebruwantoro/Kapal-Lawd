@@ -22,21 +22,21 @@ class MicroInteractionManager: ObservableObject {
         }
         
         // Initialize player item and player
-        playerItem = AVPlayerItem(url: url)
-        player = AVPlayer(playerItem: playerItem)
+        self.playerItem = AVPlayerItem(url: url)
+        self.player = AVPlayer(playerItem: playerItem)
         
         // Configure audio session for background playback
         try? AVAudioSession.sharedInstance().setCategory(.playback, mode: .default)
         try? AVAudioSession.sharedInstance().setActive(true)
         
         // Start playing
-        player?.play()
+        self.player?.play()
         
     }
     
     func stopPlayback() {
-        player?.pause()
-        player = nil
-        playerItem = nil
+        self.player?.pause()
+        self.player = nil
+        self.playerItem = nil
     }
 }

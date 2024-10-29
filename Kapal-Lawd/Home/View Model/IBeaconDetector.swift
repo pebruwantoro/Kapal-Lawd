@@ -44,9 +44,9 @@ class IBeaconDetector: NSObject, ObservableObject, CLLocationManagerDelegate {
     
     func startMonitoring() {
         guard let locationManager = self.locationManager else { return }
-        guard !beacons.isEmpty else { return }
+        guard !self.beacons.isEmpty else { return }
         
-        for beacon in beacons {
+        for beacon in self.beacons {
             if let uuid = UUID(uuidString: beacon.uuid) {
                 let beaconRegion = CLBeaconRegion(uuid: uuid, identifier: beaconIdentifier)
                 locationManager.startMonitoring(for: beaconRegion)
@@ -61,7 +61,7 @@ class IBeaconDetector: NSObject, ObservableObject, CLLocationManagerDelegate {
     // Helper function to create a unique identifier for a beacon
     func beaconIdentifier(for beacon: CLBeacon) -> String {
         // Modify as needed to include major and minor if necessary
-        return "\(beacon.uuid.uuidString)"
+        return "\(beacon.uuid.uuidString.lowercased())"
     }
 
     // CLLocationManagerDelegate methods

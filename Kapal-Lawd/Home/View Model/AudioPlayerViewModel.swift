@@ -50,7 +50,6 @@ class AudioPlayerViewModel: ObservableObject {
     ]
     
     init() {
-        configureAudioSession()
         // Observe the averageRSSI from beaconScanner
         beaconScanner.$averageRSSI
             .receive(on: DispatchQueue.main)
@@ -83,18 +82,6 @@ class AudioPlayerViewModel: ObservableObject {
         }
         
         return result.0
-    }
-    
-    internal func configureAudioSession() {
-        do {
-            let session = AVAudioSession.sharedInstance()
-            
-            try session.setCategory(.playback, mode: .default)
-            
-            try session.setActive(true)
-        } catch {
-            print("Error: \(error.localizedDescription)")
-        }
     }
 }
 

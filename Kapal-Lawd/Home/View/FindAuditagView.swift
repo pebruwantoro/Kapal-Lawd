@@ -15,20 +15,18 @@ struct FindAuditagView: View {
     @State var collections: [Collections] = []
     let pulseScan = Animation.easeOut(duration: 2).repeatForever(autoreverses: true)
     @Binding var trackBar: Double
-    @EnvironmentObject var backgroundTaskManager: BackgroundTaskManager
+
     
     var body: some View {
         Group {
             Spacer()
             
             if audioPlayerViewModel.isFindBeacon {
-                PlaylistView(isExploring: self.$isExploring, collections: $collections, trackBar: $trackBar)
-                    .onReceive(audioPlayerViewModel.$isFindBeacon){ _ in
-                        audioPlayerViewModel.interactionSound(song: "Bluetooth")
-                        delay(0.5) {
-                            audioPlayerViewModel.startBackgroundSound(song: audioPlayerViewModel.backgroundSound)
-                        }
+                PlaylistView(isExploring: self.$isExploring, collections: self.$collections, trackBar: self.$trackBar)
+                    .onAppear{
+                        audioPlayerViewModel.interactionSound(song: "AudiumTagConnect")
                     }
+                    .environmentObject(audioPlayerViewModel)
             } else {
                 VStack(spacing: 16) {
                     ZStack {
@@ -44,7 +42,7 @@ struct FindAuditagView: View {
                             .padding(.bottom, 45)
                     }
                     .onAppear {
-                        isScanning = true
+                        self.isScanning = true
                         withAnimation(.easeOut(duration: 0.8)) {
                             cardOpacity = 1.0
                         }
@@ -66,7 +64,7 @@ struct FindAuditagView: View {
                     
                     VStack {
                         Button(action: {
-                            isExploring = false
+                            self.isExploring = false
                             audioPlayerViewModel.stopPlayback()
                             audioPlayerViewModel.stopBackground()
                         }, label: {

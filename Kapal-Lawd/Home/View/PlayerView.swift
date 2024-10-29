@@ -12,9 +12,8 @@ struct PlayerView: View {
     @Binding var isPlaying: Bool
     @Binding var list: [Playlist]
     @State private var currentSecond: String = "00:00"
-    @ObservedObject private var audioPlayerViewModel = AudioPlayerViewModel()
+    @EnvironmentObject var audioPlayerViewModel: AudioPlayerViewModel
     @State private var currentSong: String = ""
-//    @Binding var songDuration: Double
     
     let timer = Timer.publish(every: 0.1, on: .main, in: .common).autoconnect()
     
@@ -23,43 +22,29 @@ struct PlayerView: View {
         ZStack {
             VStack {
                 VStack {
-                    Text(currentSong)
+                    Text(self.currentSong)
                         .frame(maxWidth: .infinity, alignment: .leading)
                         .font(.body)
                         .foregroundColor(.gray)
-                        .onReceive(audioPlayerViewModel.audioVideoManager.$currentSongTitle) { song in
-                            if let audio = song {
-                                self.currentSong = audio
-                            }
-                        }
                     
-                    ProgressView("", value: trackBar, total: convertToSeconds(from: list[audioPlayerViewModel.audioVideoManager.currentPlaylistIndex].duration)!)
+                    ProgressView("", value: self.trackBar, total: convertToSeconds(from: list[audioPlayerViewModel.audioVideoManager.currentPlaylistIndex].duration)!)
                         .accentColor(Color("AppButton"))
                         .scaleEffect(x: 1, y: 1.5, anchor: .bottom)
-//                        .onReceive(audioPlayerViewModel.audioVideoManager.$currentSongDuration){ value in
-//                            if let duration = value {
-//                                self.songDuration = convertToSeconds(from: duration)!
-//                            }
-//                        }
                     
                     HStack {
-                        Text(currentSecond).font(.subheadline)
-                            .onReceive(audioPlayerViewModel.audioVideoManager.$currentTimeInSeconds) { time in
-                            self.currentSecond = convertSecondsToTimeString(seconds: time)
-                            self.trackBar = time
-                        }
+                        Text(self.currentSecond)
+                            .font(.subheadline)
                         
                         Spacer()
-                        Text(list[audioPlayerViewModel.audioVideoManager.currentPlaylistIndex].duration).font(.subheadline)
+                        Text(list[audioPlayerViewModel.audioVideoManager.currentPlaylistIndex].duration)
+                            .font(.subheadline)
                     }
                     .foregroundColor(.gray)
                     
                     HStack (spacing: 16) {
                         Button(action:  {
                             audioPlayerViewModel.previousPlaylist()
-                            if audioPlayerViewModel.audioVideoManager.currentPlaylistIndex > 0 {
-                                self.trackBar = 0.0
-                            }
+                            self.trackBar = 0.0
                         }, label:  {
                             Image(systemName: "backward")
                                 .foregroundColor(Color("AppPlayer"))
@@ -102,9 +87,7 @@ struct PlayerView: View {
                         
                         Button(action:  {
                             audioPlayerViewModel.nextPlaylist()
-                            if audioPlayerViewModel.audioVideoManager.currentPlaylistIndex < list.count - 1 {
-                                self.trackBar = 0.0
-                            }
+                            self.trackBar = 0.0
                         }, label:  {
                             Image(systemName: "forward")
                                 .foregroundColor(Color("AppPlayer"))
@@ -123,6 +106,15 @@ struct PlayerView: View {
         .cornerRadius(36)
         .shadow(radius: 5)
         .padding(.horizontal, 16)
+        .onReceive(audioPlayerViewModel.audioVideoManager.$currentSongTitle) { song in
+            if let audio = song {
+                self.currentSong = audio
+            }
+        }
+        .onReceive(audioPlayerViewModel.audioVideoManager.$currentTimeInSeconds) { time in
+            self.currentSecond = convertSecondsToTimeString(seconds: time)
+            self.trackBar = time
+        }
     }
 }
 

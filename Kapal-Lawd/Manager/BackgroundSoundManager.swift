@@ -24,23 +24,23 @@ class BackgroundSoundManager: ObservableObject {
         }
         
         // Initialize player item and player
-        playerItem = AVPlayerItem(url: url)
-        player = AVPlayer(playerItem: playerItem)
+        self.playerItem = AVPlayerItem(url: url)
+        self.player = AVPlayer(playerItem: playerItem)
         
         // Configure audio session for background playback
         try? AVAudioSession.sharedInstance().setCategory(.playback, mode: .default)
         try? AVAudioSession.sharedInstance().setActive(true)
         
         // Start playing
-        player?.play()
-        player?.volume = 0.3
+        self.player?.play()
+        self.player?.volume = 0.5
         
     }
     
     func stopPlayback() {
-        player?.pause()
-        player?.pause()
-        player = nil
-        playerItem = nil
+        self.player?.pause()
+        self.player?.pause()
+        self.player = nil
+        self.playerItem = nil
     }
 }

@@ -4,6 +4,7 @@
 //
 //  Created by Doni Pebruwantoro on 29/10/24.
 //
+import Foundation
 
 func convertSecondsToTimeString(seconds: Double) -> String {
     let totalMinutes = Int(seconds) / 60
@@ -25,4 +26,20 @@ func convertToSeconds(from timeString: String) -> Double? {
     
     let totalSeconds = (minutes * 60) + seconds
     return totalSeconds
+}
+
+func formattedDate(_ dateString: String) -> String {
+    let inputFormatter = DateFormatter()
+    inputFormatter.dateFormat = "yyyy-MM-dd"
+    
+    if let newDate = inputFormatter.date(from: dateString) {
+        let outputFormatter = DateFormatter()
+        outputFormatter.dateFormat = "dd MMMM yyyy"
+        
+        let formattedDateString = outputFormatter.string(from: newDate)
+        
+        return formattedDateString
+    }
+    
+    return ""
 }
