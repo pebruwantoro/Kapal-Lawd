@@ -17,7 +17,8 @@ class AudioPlayerViewModel: ObservableObject {
     private var playlistRepo = JSONPlaylistRepository()
     
     @Published var audioVideoManager = AVManager.shared
-    @Published var bgSoundManager = BGSoundManager.shared
+    @Published var backgroundSoundManager = BackgroundSoundManager.shared
+    @Published var microInteractionManager = MicroInteractionManager.shared
     
     @Published var beaconScanner = IBeaconDetector()
     @Published var proximityText: String = "No Beacon Detected"
@@ -26,7 +27,7 @@ class AudioPlayerViewModel: ObservableObject {
     private var lostBeaconCount: Int = 0
     private let maxLostBeaconCount = 5 // Threshold for consecutive losses
     @Published var isFindBeacon = false
-    @Published var isBeaconFar = false
+    @Published var isBeaconFar = true
     
     private var cancellables = Set<AnyCancellable>()
     @Published var backgroundSound: String = ""
@@ -63,11 +64,11 @@ class AudioPlayerViewModel: ObservableObject {
     
     func fetchCollectionByBeaconId(id: String) -> [Collections] {
         for beacon in beaconScanner.beacons {
-            if beacon.uuid == beaconScanner.closestBeacon?.uuid.uuidString {
+            if beacon.uuid.lowercased() == beaconScanner.closestBeacon?.uuid.uuidString.lowercased() {
                 self.backgroundSound = beacon.backgroundSound
             }
         }
-        print("beacon id", id)
+        
         let result = collectionRepo.fetchListCollectionsByBeaconId(req: CollectionsRequest(beaconId: id))
         let errorHandler = result.1
         if let errorHandler = errorHandler {
@@ -114,17 +115,23 @@ extension AudioPlayerViewModel {
     }
     
     func startPlayback(song: String) {
-        //TODO : Manager ganti Manager BGSound
         audioVideoManager.startPlayback(songTitle: song)
     }
     
-    func bgSound(song: String) {
-        //TODO : Manager ganti Manager BGSound
-        bgSoundManager.startPlayback(songTitle: song)
+    func startBackgroundSound(song: String) {
+        backgroundSoundManager.startPlayback(songTitle: song)
     }
     
     func stopBackground(){
-        bgSoundManager.stopPlayback()
+        backgroundSoundManager.stopPlayback()
+    }
+    
+    func interactionSound(song: String) {
+        microInteractionManager.startPlayback(songTitle: song)
+    }
+    
+    func stopInteractionSoundd(){
+        microInteractionManager.stopPlayback()
     }
     
     func stopPlayback() {
@@ -216,15 +223,6 @@ extension AudioPlayerViewModel {
                 self.isFindBeacon = true
                 self.isBeaconFar = false
                 self.lostBeaconCount = 0
-                
-                // Start playback if not already playing
-                if !audioVideoManager.isPlaying {
-                    // Fetch collections and background sound
-                    self.collections = fetchCollectionByBeaconId(id: closestBeacon.uuid.uuidString)
-                    startPlayback(song: "Bluetooth")
-                    bgSound(song: backgroundSound)
-                }
-                
                 adjustAudioForRSSI(rssi: rssi)
             } else {
                 // RSSI is lower than threshold

@@ -24,6 +24,8 @@ class AVManager: ObservableObject {
     @Published var currentSongTitle: String?
     private var commandHandlersSetup = false
     var cancellable: AnyCancellable?
+    @Published var currentTimeInSeconds: Double = 0.0
+    private var timeObserverToken: Any?
     
     var currentPlaylistIndexPublisher = PassthroughSubject<Int, Never>()
     
@@ -39,6 +41,8 @@ class AVManager: ObservableObject {
     }
 
     func startPlayback(songTitle: String) {
+        removeTimeObserver()
+        
         guard let url = Bundle.main.url(forResource: songTitle, withExtension: "mp3") else {
             print("Audio file not found: \(songTitle)")
             return
@@ -48,20 +52,18 @@ class AVManager: ObservableObject {
         playerItem = AVPlayerItem(url: url)
         player = AVPlayer(playerItem: playerItem)
         
-        // Configure audio session for background playback
         try? AVAudioSession.sharedInstance().setCategory(.playback, mode: .default)
         try? AVAudioSession.sharedInstance().setActive(true)
-        
-        // Start playing
+
         player?.play()
         isPlaying = true
         currentSongTitle = songTitle
         
-        // Update lock screen info
         updateNowPlayingInfo(songTitle: songTitle)
         
-        // Setup remote transport controls
         setupRemoteTransportControls()
+        
+        startObservingCurrentTime()
         
         NotificationCenter.default.addObserver(self,
                                                selector: #selector(playerDidFinishPlaying(_:)),
@@ -78,6 +80,7 @@ class AVManager: ObservableObject {
             self?.playerItem = nil
             self?.isPlaying = false
             self?.currentSongTitle = nil
+            self?.removeTimeObserver()
         }
     }
     
@@ -114,19 +117,9 @@ class AVManager: ObservableObject {
         NotificationCenter.default.removeObserver(self, name: .AVPlayerItemDidPlayToEndTime, object: playerItem)
     }
     
-    func reset() {
-        playlist = []
-        currentPlaylistIndex = 0
-    }
-    
-    func startFirstTime() {
-        if !playlist.isEmpty {
-            startPlayback(songTitle: playlist[0].name)
-        }
-    }
-        
     func nextPlaylist() {
         if currentPlaylistIndex < playlist.count - 1 {
+            removeTimeObserver()
             currentPlaylistIndex += 1
             startPlayback(songTitle: playlist[currentPlaylistIndex].name)
             setCancelabel()
@@ -135,6 +128,7 @@ class AVManager: ObservableObject {
 
     func previousPlaylist() {
         if currentPlaylistIndex > 0 {
+            removeTimeObserver()
             currentPlaylistIndex -= 1
             startPlayback(songTitle: playlist[currentPlaylistIndex].name)
             setCancelabel()
@@ -216,14 +210,8 @@ extension AVManager {
         commandCenter.pauseCommand.removeTarget(nil)
         
         commandCenter.pauseCommand.addTarget { [unowned self] event in
-            if self.isPlaying {
-                self.pausePlayback()
-                isPlaying = false
-                
-                return .success
-            }
-            
-            return .commandFailed
+            self.pausePlayback()
+            return .success
         }
     }
     
@@ -232,13 +220,8 @@ extension AVManager {
         commandCenter.playCommand.removeTarget(nil)
         
         commandCenter.playCommand.addTarget { [unowned self] event in
-            if !self.isPlaying {
-                self.resumePlayback()
-                
-                return .success
-            }
-            
-            return .commandFailed
+            self.resumePlayback()
+            return .success
         }
     }
     
@@ -248,6 +231,23 @@ extension AVManager {
         
         nextPlaylist()
     }
+    
+    private func startObservingCurrentTime() {
+        guard let player = player else { return }
+        
+        // Set up periodic time observer
+        timeObserverToken = player.addPeriodicTimeObserver(forInterval: CMTime(seconds: 1, preferredTimescale: 1), queue: .main) { [weak self] time in
+            guard let self = self else { return }
+            self.currentTimeInSeconds = CMTimeGetSeconds(time)
+        }
+    }
+    
+    private func removeTimeObserver() {
+        if let timeObserverToken = timeObserverToken {
+            player?.removeTimeObserver(timeObserverToken)
+            self.timeObserverToken = nil
+        }
+    }
 }
 
 extension AVManager {
@@ -255,13 +255,13 @@ extension AVManager {
     
     func pausePlayback() {
         player?.pause()
-        isPlaying = false
+        self.isPlaying = false
         updateNowPlayingInfo(songTitle: currentSongTitle ?? "")
     }
     
     func resumePlayback() {
         player?.play()
-        isPlaying = true
+        self.isPlaying = true
         updateNowPlayingInfo(songTitle: currentSongTitle ?? "")
     }
 }

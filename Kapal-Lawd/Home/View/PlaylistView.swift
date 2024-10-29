@@ -10,13 +10,10 @@ import SwiftUI
 struct PlaylistView: View {
     
     @Binding var isExploring: Bool
-//    @ObservedObject private var audioPlayerViewModel = AudioPlayerViewModel()
-    @State private var isPlay = false
-    @State private var isFirst = false
     @StateObject private var audioPlayerViewModel = AudioPlayerViewModel()
     @Binding var collections: [Collections]
-    @State var isMusicPlaying: Bool = false
     @State var showAlert = false
+    @Binding var trackBar: Double
     
     enum title: String {
         case defaultSong = "No Song"
@@ -25,10 +22,6 @@ struct PlaylistView: View {
     enum duration: Double {
         case defaultDuration = 0.0
     }
-    
-//    @State var songTitle: String = title.defaultSong.rawValue
-//    @State var songDuration: Double = duration.defaultDuration.rawValue
-//    @State var songDurationString: String = "00:00"
     @State var list: [Playlist] = []
     
     var body: some View {
@@ -36,7 +29,7 @@ struct PlaylistView: View {
             NavigationStack {
                 if audioPlayerViewModel.isBeaconFar{
                     VStack {
-                        FindAuditagView(isExploring: self.$isExploring)
+                        FindAuditagView(isExploring: self.$isExploring, trackBar: $trackBar)
                     }
                 }
                 else{
@@ -76,12 +69,6 @@ struct PlaylistView: View {
                         }
                         .frame(maxWidth: .infinity, maxHeight: 50)
                         .padding(.trailing, 50)
-                        
-                        // TODO : Audio Disable ketika balik ke UI sebelumnya (Done)
-                        // TODO : locked screen jadi potrait
-                        // TODO : Fix Darkmode dan Lightmode
-                        // TODO : AV Ambience Sound Background, AV Micro-Interaction (Done)
-                        // TODO : Button play di play list ketika dipencet akan memutar lagu sesuai dengan play list (Done)->Tinggal Pause Audionya
                         
                         if !collections.isEmpty {
                             HStack (spacing: 16) {
@@ -140,15 +127,9 @@ struct PlaylistView: View {
                                                 audioPlayerViewModel.startPlayback(song: playlist.name)
                                             })
                                             {
-                                                //Tambahin if untuk ngetrigger player view
-                                                //Ubah tampilan dan fungsi di state sebgai pause
-                                                
                                                 if audioPlayerViewModel.audioVideoManager.isPlaying && playlist.name == audioPlayerViewModel.audioVideoManager.currentSongTitle {
                                                     Image("sound")
-                                                }
-                                                //Putar tombol play di setiap lagu (Done)
-                                                //Pause setiap lagu
-                                                else {
+                                                } else {
                                                     Image(systemName: "play")
                                                         .foregroundColor(Color("AppLabel"))
                                                 }
@@ -159,6 +140,7 @@ struct PlaylistView: View {
                                     .listStyle(.plain)
                                     .padding(.bottom, 16)
                                     .onAppear{
+                                        audioPlayerViewModel.startPlayback(song: playlists[audioPlayerViewModel.audioVideoManager.currentPlaylistIndex].name)
                                         audioPlayerViewModel.audioVideoManager.playlist = playlists
                                         self.list = playlists
                                     }
@@ -166,7 +148,7 @@ struct PlaylistView: View {
                             }.padding(.bottom, 16)
                             
                             if !self.list.isEmpty {
-                                PlayerView(list: $list)
+                                PlayerView(trackBar: $trackBar, isPlaying: $audioPlayerViewModel.audioVideoManager.isPlaying, list: $list)
                             }
                         }
                     }
@@ -175,7 +157,6 @@ struct PlaylistView: View {
             }
         }
         .onReceive(audioPlayerViewModel.beaconScanner.$averageRSSI) { rssi in
-            print("averageRSSI:", rssi)
             audioPlayerViewModel.handleRSSIChange(rssi)
         }
     }
@@ -211,5 +192,5 @@ extension PlaylistView {
         shortContents: "String",
         authoredBy: "String",
         authoredAt: "2024-10-10"
-    )]))
+    )]), trackBar: .constant(0.0))
 }

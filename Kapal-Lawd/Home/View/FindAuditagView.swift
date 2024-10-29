@@ -14,23 +14,20 @@ struct FindAuditagView: View {
     @StateObject private var audioPlayerViewModel = AudioPlayerViewModel()
     @State var collections: [Collections] = []
     let pulseScan = Animation.easeOut(duration: 2).repeatForever(autoreverses: true)
+    @Binding var trackBar: Double
     
     var body: some View {
         Group {
             Spacer()
             
             if audioPlayerViewModel.isFindBeacon {
-                // Show the PlaylistView when a beacon is found
-                PlaylistView(isExploring: self.$isExploring, collections: $collections)
+                PlaylistView(isExploring: self.$isExploring, collections: $collections, trackBar: $trackBar)
+                    .onAppear{
+                        audioPlayerViewModel.interactionSound(song: "Bluetooth")
+                        audioPlayerViewModel.startBackgroundSound(song: audioPlayerViewModel.backgroundSound)
+                    }
             } else {
-                // Show the scanning view when no beacon is found
                 VStack(spacing: 16) {
-                    Text(audioPlayerViewModel.proximityText)
-                        .bold()
-                        .font(.title3)
-                        .foregroundColor(Color("AppText"))
-                        .padding(.bottom, 12)
-                    
                     ZStack {
                         Circle()
                             .fill(Color(red: 0.89, green: 0, blue: 0.52).opacity(0.2))
@@ -90,8 +87,7 @@ struct FindAuditagView: View {
         }
         .onReceive(audioPlayerViewModel.$isFindBeacon) { value in
             if value {
-                collections = audioPlayerViewModel.fetchCollectionByBeaconId(id: audioPlayerViewModel.beaconScanner.closestBeacon?.uuid.uuidString ?? "")
-                print(collections)
+                collections = audioPlayerViewModel.fetchCollectionByBeaconId(id: audioPlayerViewModel.beaconScanner.closestBeacon?.uuid.uuidString.lowercased() ?? "")
             } else {
                 collections = []
             }
@@ -100,5 +96,5 @@ struct FindAuditagView: View {
 }
 
 #Preview {
-    FindAuditagView(isExploring: .constant(false))
+    FindAuditagView(isExploring: .constant(false), trackBar: .constant(0.0))
 }
