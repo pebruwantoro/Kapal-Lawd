@@ -16,6 +16,30 @@ class BackgroundSoundManager: ObservableObject {
     private var playerItem: AVPlayerItem?
     private var fadeTimer: Timer?
     private let fadeStepInterval: TimeInterval = 0.1
+    @Published var isBackgroundPlaying = false
+    
+    init() {
+        setupReplayObserver()
+    }
+
+    private func setupReplayObserver() {
+        NotificationCenter.default.addObserver(
+            self,
+            selector: #selector(replayAudio),
+            name: .AVPlayerItemDidPlayToEndTime,
+            object: player?.currentItem
+        )
+    }
+    
+    @objc
+    private func replayAudio() {
+        player?.seek(to: .zero)
+        player?.play()
+    }
+    
+    deinit {
+        NotificationCenter.default.removeObserver(self)
+    }
     
     func startPlayback(songTitle: String) {
         guard let url = Bundle.main.url(forResource: songTitle, withExtension: "mp3") else {
@@ -23,24 +47,22 @@ class BackgroundSoundManager: ObservableObject {
             return
         }
         
-        // Initialize player item and player
-        playerItem = AVPlayerItem(url: url)
-        player = AVPlayer(playerItem: playerItem)
+        self.playerItem = AVPlayerItem(url: url)
+        self.player = AVPlayer(playerItem: playerItem)
         
-        // Configure audio session for background playback
         try? AVAudioSession.sharedInstance().setCategory(.playback, mode: .default)
         try? AVAudioSession.sharedInstance().setActive(true)
         
-        // Start playing
-        player?.play()
-        player?.volume = 0.3
-        
+        self.player?.play()
+        self.player?.volume = 0.5
+        self.isBackgroundPlaying = true
     }
     
     func stopPlayback() {
-        player?.pause()
-        player?.pause()
-        player = nil
-        playerItem = nil
+        self.player?.pause()
+        self.player?.pause()
+        self.player = nil
+        self.playerItem = nil
+        self.isBackgroundPlaying = false
     }
 }

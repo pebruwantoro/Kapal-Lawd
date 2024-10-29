@@ -10,8 +10,6 @@ import SwiftUI
 import Combine
 
 class AudioPlayerViewModel: ObservableObject {
-    private var player: AVPlayer?
-    private var playerItem: AVPlayerItem?
     @Published var currentSongTitle: String?
     private var collectionRepo = JSONCollectionsRepository()
     private var playlistRepo = JSONPlaylistRepository()
@@ -25,7 +23,7 @@ class AudioPlayerViewModel: ObservableObject {
     private var lastTargetVolume: Float? = nil
     private var currentVolumeLevel: VolumeLevel = .none
     private var lostBeaconCount: Int = 0
-    private let maxLostBeaconCount = 5 // Threshold for consecutive losses
+    private let maxLostBeaconCount = 15 // Threshold for consecutive losses
     @Published var isFindBeacon = false
     @Published var isBeaconFar = true
     
@@ -52,7 +50,6 @@ class AudioPlayerViewModel: ObservableObject {
     ]
     
     init() {
-        configureAudioSession()
         // Observe the averageRSSI from beaconScanner
         beaconScanner.$averageRSSI
             .receive(on: DispatchQueue.main)
@@ -85,18 +82,6 @@ class AudioPlayerViewModel: ObservableObject {
         }
         
         return result.0
-    }
-    
-    internal func configureAudioSession() {
-        do {
-            let session = AVAudioSession.sharedInstance()
-            
-            try session.setCategory(.playback, mode: .default)
-            
-            try session.setActive(true)
-        } catch {
-            print("Error: \(error.localizedDescription)")
-        }
     }
 }
 
@@ -256,4 +241,5 @@ extension AudioPlayerViewModel {
                 currentVolumeLevel = .none
             }
         }
-    }}
+    }
+}

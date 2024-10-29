@@ -16,16 +16,31 @@ struct FindAuditagView: View {
     let pulseScan = Animation.easeOut(duration: 2).repeatForever(autoreverses: true)
     @Binding var trackBar: Double
     
+    @Environment(\.scenePhase) private var scenePhase
+
     var body: some View {
         Group {
             Spacer()
             
             if audioPlayerViewModel.isFindBeacon {
-                PlaylistView(isExploring: self.$isExploring, collections: $collections, trackBar: $trackBar)
+                PlaylistView(isExploring: self.$isExploring, collections: self.$collections, trackBar: self.$trackBar)
                     .onAppear{
-                        audioPlayerViewModel.interactionSound(song: "Bluetooth")
-                        audioPlayerViewModel.startBackgroundSound(song: audioPlayerViewModel.backgroundSound)
+//                        audioPlayerViewModel.interactionSound(song: "AudiumTagConnect")
                     }
+                    .onChange(of: scenePhase) { newPhase, _ in
+                        switch newPhase {
+                        case .active:
+                            audioPlayerViewModel.interactionSound(song: "AudiumTagConnect")
+                        case .background:
+                            audioPlayerViewModel.interactionSound(song: "AudiumTagConnect")
+                        case .inactive:
+                            print("screen inactive")
+                        @unknown default:
+                            break
+                        }
+                        
+                    }
+                    .environmentObject(audioPlayerViewModel)
             } else {
                 VStack(spacing: 16) {
                     ZStack {
@@ -41,7 +56,7 @@ struct FindAuditagView: View {
                             .padding(.bottom, 45)
                     }
                     .onAppear {
-                        isScanning = true
+                        self.isScanning = true
                         withAnimation(.easeOut(duration: 0.8)) {
                             cardOpacity = 1.0
                         }
@@ -63,7 +78,7 @@ struct FindAuditagView: View {
                     
                     VStack {
                         Button(action: {
-                            isExploring = false
+                            self.isExploring = false
                             audioPlayerViewModel.stopPlayback()
                             audioPlayerViewModel.stopBackground()
                         }, label: {
@@ -85,9 +100,15 @@ struct FindAuditagView: View {
                 .opacity(cardOpacity)
             }
         }
+        .onAppear{
+            audioPlayerViewModel.audioVideoManager.removeTimeObserver()
+        }
         .onReceive(audioPlayerViewModel.$isFindBeacon) { value in
             if value {
                 collections = audioPlayerViewModel.fetchCollectionByBeaconId(id: audioPlayerViewModel.beaconScanner.closestBeacon?.uuid.uuidString.lowercased() ?? "")
+                if !audioPlayerViewModel.microInteractionManager.isInteractionPlaying {
+                    audioPlayerViewModel.interactionSound(song: "AudiumTagConnect")
+                }
             } else {
                 collections = []
             }

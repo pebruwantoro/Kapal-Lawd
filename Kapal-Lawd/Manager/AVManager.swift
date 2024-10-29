@@ -49,15 +49,15 @@ class AVManager: ObservableObject {
         }
         
         // Initialize player item and player
-        playerItem = AVPlayerItem(url: url)
-        player = AVPlayer(playerItem: playerItem)
+        self.playerItem = AVPlayerItem(url: url)
+        self.player = AVPlayer(playerItem: playerItem)
         
         try? AVAudioSession.sharedInstance().setCategory(.playback, mode: .default)
         try? AVAudioSession.sharedInstance().setActive(true)
 
-        player?.play()
-        isPlaying = true
-        currentSongTitle = songTitle
+        self.player?.play()
+        self.isPlaying = true
+        self.currentSongTitle = songTitle
         
         updateNowPlayingInfo(songTitle: songTitle)
         
@@ -69,11 +69,13 @@ class AVManager: ObservableObject {
                                                selector: #selector(playerDidFinishPlaying(_:)),
                                                name: .AVPlayerItemDidPlayToEndTime,
                                                object: playerItem)
+        configureAudioSession()
     }
     
     func stopPlayback() {
         // Fade out to volume 0
         fadeToVolume(targetVolume: 0.0, duration: 1.0) { [weak self] in
+            self?.resetNowPlayingInfo()
             self?.player?.pause()
             self?.player?.pause()
             self?.player = nil
@@ -120,7 +122,7 @@ class AVManager: ObservableObject {
     func nextPlaylist() {
         if currentPlaylistIndex < playlist.count - 1 {
             removeTimeObserver()
-            currentPlaylistIndex += 1
+            self.currentPlaylistIndex += 1
             startPlayback(songTitle: playlist[currentPlaylistIndex].name)
             setCancelabel()
         }
@@ -129,7 +131,7 @@ class AVManager: ObservableObject {
     func previousPlaylist() {
         if currentPlaylistIndex > 0 {
             removeTimeObserver()
-            currentPlaylistIndex -= 1
+            self.currentPlaylistIndex -= 1
             startPlayback(songTitle: playlist[currentPlaylistIndex].name)
             setCancelabel()
         }
@@ -181,6 +183,10 @@ extension AVManager {
         }
 
         MPNowPlayingInfoCenter.default().nowPlayingInfo = nowPlayingInfo
+    }
+    
+    private func resetNowPlayingInfo() {
+        MPNowPlayingInfoCenter.default().nowPlayingInfo = nil
     }
     
     private func nextPlaylistCommand() {
@@ -242,10 +248,22 @@ extension AVManager {
         }
     }
     
-    private func removeTimeObserver() {
+    func removeTimeObserver() {
         if let timeObserverToken = timeObserverToken {
             player?.removeTimeObserver(timeObserverToken)
             self.timeObserverToken = nil
+        }
+    }
+    
+    func configureAudioSession() {
+        do {
+            let session = AVAudioSession.sharedInstance()
+            
+            try session.setCategory(.playback, mode: .default)
+            
+            try session.setActive(true)
+        } catch {
+            print("Error: \(error.localizedDescription)")
         }
     }
 }

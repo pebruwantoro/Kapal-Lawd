@@ -15,7 +15,7 @@ struct SpotHomepageView: View {
     var body: some View {
         NavigationStack {
             if isExploring {
-                FindAuditagView(isExploring: $isExploring, trackBar: $trackBar)
+                FindAuditagView(isExploring: self.$isExploring, trackBar: self.$trackBar)
             } else {
                 Spacer()
                 VStack (spacing: 16) {
