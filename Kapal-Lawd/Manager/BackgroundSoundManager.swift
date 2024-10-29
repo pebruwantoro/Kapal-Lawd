@@ -17,21 +17,41 @@ class BackgroundSoundManager: ObservableObject {
     private var fadeTimer: Timer?
     private let fadeStepInterval: TimeInterval = 0.1
     
+    init() {
+        setupReplayObserver()
+    }
+
+    private func setupReplayObserver() {
+        NotificationCenter.default.addObserver(
+            self,
+            selector: #selector(replayAudio),
+            name: .AVPlayerItemDidPlayToEndTime,
+            object: player?.currentItem
+        )
+    }
+    
+    @objc
+    private func replayAudio() {
+        player?.seek(to: .zero)
+        player?.play()
+    }
+    
+    deinit {
+        NotificationCenter.default.removeObserver(self)
+    }
+    
     func startPlayback(songTitle: String) {
         guard let url = Bundle.main.url(forResource: songTitle, withExtension: "mp3") else {
             print("Audio file not found: \(songTitle)")
             return
         }
         
-        // Initialize player item and player
         self.playerItem = AVPlayerItem(url: url)
         self.player = AVPlayer(playerItem: playerItem)
         
-        // Configure audio session for background playback
         try? AVAudioSession.sharedInstance().setCategory(.playback, mode: .default)
         try? AVAudioSession.sharedInstance().setActive(true)
         
-        // Start playing
         self.player?.play()
         self.player?.volume = 0.5
         

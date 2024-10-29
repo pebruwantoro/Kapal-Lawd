@@ -14,6 +14,7 @@ struct PlaylistView: View {
     @State var showAlert = false
     @Binding var trackBar: Double
     @State var list: [Playlist] = []
+    @State private var isFirstPlay = true
 
     var body: some View {
         Group {
@@ -137,6 +138,10 @@ struct PlaylistView: View {
                             if !self.list.isEmpty {
                                 PlayerView(trackBar: $trackBar, isPlaying: $audioPlayerViewModel.audioVideoManager.isPlaying, list: $list)
                                     .environmentObject(audioPlayerViewModel)
+                                    .onAppear {
+//                                        audioPlayerViewModel.startPlayback(song: self.list[0].name)
+                                        audioPlayerViewModel.startPlayback(song: audioPlayerViewModel.audioVideoManager.playlist[audioPlayerViewModel.audioVideoManager.currentPlaylistIndex].name)
+                                    }
                             }
                         }
                     }
@@ -148,7 +153,10 @@ struct PlaylistView: View {
             audioPlayerViewModel.handleRSSIChange(rssi)
         }
         .onReceive(audioPlayerViewModel.$backgroundSound) { song in
-            audioPlayerViewModel.startBackgroundSound(song: song)
+            if isFirstPlay {
+                audioPlayerViewModel.startBackgroundSound(song: song)
+                isFirstPlay = false
+            }
         }
     }
 }

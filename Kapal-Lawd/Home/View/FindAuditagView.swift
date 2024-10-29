@@ -16,7 +16,6 @@ struct FindAuditagView: View {
     let pulseScan = Animation.easeOut(duration: 2).repeatForever(autoreverses: true)
     @Binding var trackBar: Double
 
-    
     var body: some View {
         Group {
             Spacer()
