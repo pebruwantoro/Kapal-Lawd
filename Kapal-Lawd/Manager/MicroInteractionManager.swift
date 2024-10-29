@@ -14,6 +14,7 @@ class MicroInteractionManager: ObservableObject {
     public static var shared = MicroInteractionManager()
     private var player: AVPlayer?
     private var playerItem: AVPlayerItem?
+    @Published var isInteractionPlaying = false
     
     func startPlayback(songTitle: String) {
         guard let url = Bundle.main.url(forResource: songTitle, withExtension: "mp3") else {
@@ -28,11 +29,13 @@ class MicroInteractionManager: ObservableObject {
         try? AVAudioSession.sharedInstance().setActive(true)
         
         self.player?.play()
+        self.isInteractionPlaying = true
     }
     
     func stopPlayback() {
         self.player?.pause()
         self.player = nil
         self.playerItem = nil
+        self.isInteractionPlaying = false
     }
 }

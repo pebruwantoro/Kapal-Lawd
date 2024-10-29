@@ -25,7 +25,7 @@ struct FindAuditagView: View {
             if audioPlayerViewModel.isFindBeacon {
                 PlaylistView(isExploring: self.$isExploring, collections: self.$collections, trackBar: self.$trackBar)
                     .onAppear{
-                        audioPlayerViewModel.interactionSound(song: "AudiumTagConnect")
+//                        audioPlayerViewModel.interactionSound(song: "AudiumTagConnect")
                     }
                     .onChange(of: scenePhase) { newPhase, _ in
                         switch newPhase {
@@ -106,6 +106,9 @@ struct FindAuditagView: View {
         .onReceive(audioPlayerViewModel.$isFindBeacon) { value in
             if value {
                 collections = audioPlayerViewModel.fetchCollectionByBeaconId(id: audioPlayerViewModel.beaconScanner.closestBeacon?.uuid.uuidString.lowercased() ?? "")
+                if !audioPlayerViewModel.microInteractionManager.isInteractionPlaying {
+                    audioPlayerViewModel.interactionSound(song: "AudiumTagConnect")
+                }
             } else {
                 collections = []
             }

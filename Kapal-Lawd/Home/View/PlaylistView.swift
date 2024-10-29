@@ -48,6 +48,7 @@ struct PlaylistView: View {
                                     secondaryButton: .destructive(Text("End Session")) {
                                         isExploring = false
                                         audioPlayerViewModel.stopPlayback()
+                                        audioPlayerViewModel.stopInteractionSoundd()
                                         audioPlayerViewModel.stopBackground()
                                     }
                                 )
