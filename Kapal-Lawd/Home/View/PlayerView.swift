@@ -83,9 +83,9 @@ struct PlayerView: View {
                                     .foregroundColor(.white)
                             })
                         }
+                        .frame(width: 50, height: 50)
                         
                         Button(action:  {
-                            
                         }, label:  {
                             Image(systemName: "15.arrow.trianglehead.clockwise")
                                 .foregroundColor(Color("AppPlayer"))

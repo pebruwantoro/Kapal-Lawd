@@ -223,15 +223,6 @@ extension AudioPlayerViewModel {
                 self.isFindBeacon = true
                 self.isBeaconFar = false
                 self.lostBeaconCount = 0
-                
-                // Start playback if not already playing
-                if !audioVideoManager.isPlaying {
-                    // Fetch collections and background sound
-//                    self.collections = fetchCollectionByBeaconId(id: closestBeacon.uuid.uuidString.lowercased())
-//                    interactionSound(song: "Bluetooth")
-//                    backgroundSound(song: backgroundSound)
-                }
-                
                 adjustAudioForRSSI(rssi: rssi)
             } else {
                 // RSSI is lower than threshold
