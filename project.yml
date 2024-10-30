@@ -10,6 +10,9 @@ packages:
   SDBeaconScanner:
     url: https://github.com/SagarSDagdu/SDBeaconScanner.git
     from: 0.0.2
+  Supabase:
+    url: "https://github.com/supabase/supabase-swift.git"
+    from: 2.0.0
 targets:
   Kapal-Lawd:
     type: application
@@ -45,6 +48,7 @@ targets:
       DEVELOPMENT_TEAM: ${DEVELOPMENT_TEAM_ID}
     dependencies:
         - package: SDBeaconScanner
+        - package: Supabase
   Kapal-LawdTests:
     type: bundle.unit-test
     platform: iOS
