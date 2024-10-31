@@ -11,11 +11,13 @@ struct SpotHomepageView: View {
     @State private var isExploring = false
     @State private var beaconId: String?
     @State private var trackBar = 0.0
+    @StateObject private var audioPlayerViewModel = AudioPlayerViewModel()
     
     var body: some View {
         NavigationStack {
             if isExploring {
                 FindAuditagView(isExploring: self.$isExploring, trackBar: self.$trackBar)
+                    .environmentObject(audioPlayerViewModel)
             } else {
                 Spacer()
                 VStack (spacing: 16) {
