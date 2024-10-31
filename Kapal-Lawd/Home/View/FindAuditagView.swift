@@ -24,9 +24,6 @@ struct FindAuditagView: View {
             
             if audioPlayerViewModel.isFindBeacon {
                 PlaylistView(isExploring: self.$isExploring, collections: self.$collections, trackBar: self.$trackBar)
-                    .onAppear{
-//                        audioPlayerViewModel.interactionSound(song: "AudiumTagConnect")
-                    }
                     .onChange(of: scenePhase) { newPhase, _ in
                         switch newPhase {
                         case .active:
@@ -81,6 +78,7 @@ struct FindAuditagView: View {
                             self.isExploring = false
                             audioPlayerViewModel.stopPlayback()
                             audioPlayerViewModel.stopBackground()
+                            ButtonHaptic()
                         }, label: {
                             Text("Stop Scanning")
                                 .foregroundColor(.gray)

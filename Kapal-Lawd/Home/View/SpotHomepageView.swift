@@ -39,6 +39,7 @@ struct SpotHomepageView: View {
                     VStack {
                         Button(action: {
                             isExploring = true
+                            ButtonHaptic()
                         }, label: {
                             Text("Start Exploration")
                                 .foregroundColor(.white)
@@ -46,7 +47,6 @@ struct SpotHomepageView: View {
                                 .frame(maxWidth: .infinity, maxHeight: 50)
                                 .background(.black)
                                 .cornerRadius(86)
-                            
                         })
                     }
                     .padding(.horizontal, 24)

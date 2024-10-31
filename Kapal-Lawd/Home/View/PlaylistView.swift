@@ -116,6 +116,7 @@ struct PlaylistView: View {
                                             
                                             Button(action: {
                                                 audioPlayerViewModel.startPlayback(song: playlist.name)
+                                                ButtonHaptic()
                                             })
                                             {
                                                 if audioPlayerViewModel.audioVideoManager.isPlaying && playlist.name == audioPlayerViewModel.audioVideoManager.currentSongTitle {
@@ -125,8 +126,8 @@ struct PlaylistView: View {
                                                         .foregroundColor(Color("AppLabel"))
                                                 }
                                             }
-                                            
-                                        }.frame(maxWidth: .infinity, maxHeight: 60)
+                                        }
+                                        .frame(maxWidth: .infinity, maxHeight: 60)
                                     }
                                     .listStyle(.plain)
                                     .padding(.bottom, 16)
