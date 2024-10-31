@@ -11,7 +11,7 @@ struct FindAuditagView: View {
     @Binding var isExploring: Bool
     @State private var isScanning = false
     @State private var cardOpacity = 0.0
-    @StateObject private var audioPlayerViewModel = AudioPlayerViewModel()
+    @EnvironmentObject private var audioPlayerViewModel: AudioPlayerViewModel
     @State var collections: [Collections] = []
     let pulseScan = Animation.easeOut(duration: 2).repeatForever(autoreverses: true)
     @Binding var trackBar: Double
@@ -24,9 +24,6 @@ struct FindAuditagView: View {
             
             if audioPlayerViewModel.isFindBeacon {
                 PlaylistView(isExploring: self.$isExploring, collections: self.$collections, trackBar: self.$trackBar)
-                    .onAppear{
-//                        audioPlayerViewModel.interactionSound(song: "AudiumTagConnect")
-                    }
                     .onChange(of: scenePhase) { newPhase, _ in
                         switch newPhase {
                         case .active:
@@ -34,11 +31,10 @@ struct FindAuditagView: View {
                         case .background:
                             audioPlayerViewModel.interactionSound(song: "AudiumTagConnect")
                         case .inactive:
-                            print("screen inactive")
+                            audioPlayerViewModel.microInteractionManager.stopPlayback()
                         @unknown default:
                             break
                         }
-                        
                     }
                     .environmentObject(audioPlayerViewModel)
             } else {
@@ -81,6 +77,7 @@ struct FindAuditagView: View {
                             self.isExploring = false
                             audioPlayerViewModel.stopPlayback()
                             audioPlayerViewModel.stopBackground()
+                            ButtonHaptic()
                         }, label: {
                             Text("Stop Scanning")
                                 .foregroundColor(.gray)

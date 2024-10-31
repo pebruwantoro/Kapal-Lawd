@@ -11,11 +11,13 @@ struct SpotHomepageView: View {
     @State private var isExploring = false
     @State private var beaconId: String?
     @State private var trackBar = 0.0
+    @StateObject private var audioPlayerViewModel = AudioPlayerViewModel()
     
     var body: some View {
         NavigationStack {
             if isExploring {
                 FindAuditagView(isExploring: self.$isExploring, trackBar: self.$trackBar)
+                    .environmentObject(audioPlayerViewModel)
             } else {
                 Spacer()
                 VStack (spacing: 16) {
@@ -39,6 +41,7 @@ struct SpotHomepageView: View {
                     VStack {
                         Button(action: {
                             isExploring = true
+                            ButtonHaptic()
                         }, label: {
                             Text("Start Exploration")
                                 .foregroundColor(.white)
@@ -46,7 +49,6 @@ struct SpotHomepageView: View {
                                 .frame(maxWidth: .infinity, maxHeight: 50)
                                 .background(.black)
                                 .cornerRadius(86)
-                            
                         })
                     }
                     .padding(.horizontal, 24)

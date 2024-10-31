@@ -45,11 +45,13 @@ struct PlayerView: View {
                         Button(action:  {
                             audioPlayerViewModel.previousPlaylist()
                             self.trackBar = 0.0
+                            ButtonHaptic()
                         }, label:  {
                             Image(systemName: "backward")
                                 .foregroundColor(Color("AppPlayer"))
                         })
                         .frame(width: 50, height: 50)
+                        
                         
                         Button(action:  {
                             
@@ -67,9 +69,11 @@ struct PlayerView: View {
                                 if !self.isPlaying {
                                     audioPlayerViewModel.resumePlayback()
                                     self.isPlaying = true
+                                    ButtonHaptic()
                                 } else {
                                     audioPlayerViewModel.pausePlayback()
                                     self.isPlaying = false
+                                    ButtonHaptic()
                                 }
                             }, label:  {
                                 Image(systemName: self.isPlaying ? "pause.fill" : "play.fill")
@@ -88,11 +92,13 @@ struct PlayerView: View {
                         Button(action:  {
                             audioPlayerViewModel.nextPlaylist()
                             self.trackBar = 0.0
+                            ButtonHaptic()
                         }, label:  {
                             Image(systemName: "forward")
                                 .foregroundColor(Color("AppPlayer"))
                         })
                         .frame(width: 50, height: 50)
+                        
                     }
                     .font(.title3)
                     .frame(maxWidth: .infinity)
