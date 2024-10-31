@@ -20,7 +20,7 @@ struct PlaylistView: View {
     var body: some View {
         Group {
             NavigationStack {
-                if showAlert {
+                if self.audioPlayerViewModel.isBeaconFar {
                     VStack {
                         FindAuditagView(isExploring: self.$isExploring, trackBar: self.$trackBar)
                             .environmentObject(audioPlayerViewModel)
