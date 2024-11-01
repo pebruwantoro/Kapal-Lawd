@@ -40,5 +40,4 @@ internal final class JSONUsersRepository: UsersRepository {
         
         return (result, nil)
     }
-    
 }

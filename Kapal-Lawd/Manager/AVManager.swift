@@ -19,25 +19,24 @@ class AVManager: ObservableObject {
     private var fadeTimer: Timer?
     private let fadeStepInterval: TimeInterval = 0.1 // Time between volume adjustments
     @Published var playlist: [Playlist] = []
-    private var _currentPlaylistIndex: Int = 0
     @Published var isPlaying = false
     @Published var currentSongTitle: String?
     private var commandHandlersSetup = false
-    var cancellable: AnyCancellable?
-    @Published var currentTimeInSeconds: Double = 0.0
+    @Published var currentTimeInSeconds: Double
     private var timeObserverToken: Any?
     
-    var currentPlaylistIndexPublisher = PassthroughSubject<Int, Never>()
+    @Published var currentPlaylistIndex: Int
     
-    var currentPlaylistIndex: Int {
-        get {
-            return _currentPlaylistIndex
-        }
-        set {
-            _currentPlaylistIndex = newValue
-            currentPlaylistIndexPublisher.send(newValue)
-            print("Curent Playlist On Index: \(newValue)")
-        }
+    init() {
+        currentTimeInSeconds = 0.0
+        currentPlaylistIndex = 0
+    }
+    
+    func reset() {
+        isPlaying = false
+        currentSongTitle = nil
+        currentTimeInSeconds = 0.0
+        currentPlaylistIndex = 0
     }
 
     func startPlayback(songTitle: String) {
@@ -124,7 +123,6 @@ class AVManager: ObservableObject {
             removeTimeObserver()
             self.currentPlaylistIndex += 1
             startPlayback(songTitle: playlist[currentPlaylistIndex].name)
-            setCancelabel()
         }
     }
 
@@ -133,13 +131,6 @@ class AVManager: ObservableObject {
             removeTimeObserver()
             self.currentPlaylistIndex -= 1
             startPlayback(songTitle: playlist[currentPlaylistIndex].name)
-            setCancelabel()
-        }
-    }
-    
-    private func setCancelabel() {
-        cancellable = currentPlaylistIndexPublisher.sink { newIndex in
-            print("Current playlist index changed to: \(newIndex)")
         }
     }
 }
@@ -252,6 +243,7 @@ extension AVManager {
         if let timeObserverToken = timeObserverToken {
             player?.removeTimeObserver(timeObserverToken)
             self.timeObserverToken = nil
+            self.currentTimeInSeconds = 0.0
         }
     }
     

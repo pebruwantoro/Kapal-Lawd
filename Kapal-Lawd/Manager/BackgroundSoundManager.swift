@@ -7,8 +7,6 @@
 
 import Foundation
 import AVKit
-import Combine
-import MediaPlayer
 
 class BackgroundSoundManager: ObservableObject {
     public static var shared = BackgroundSoundManager()
