@@ -37,6 +37,9 @@ targets:
             UIImageName: ""
           UISupportedInterfaceOrientations:
             - UIInterfaceOrientationPortrait
+            - UIInterfaceOrientationPortraitUpsideDown
+            - UIInterfaceOrientationLandscapeLeft
+            - UIInterfaceOrientationLandscapeRight
           CFBundleIconName: "AppIcon"
           CFBundleDisplayName: "Audium"
     sources: [Kapal-Lawd]
