@@ -39,8 +39,6 @@ targets:
             - UIInterfaceOrientationPortrait
           CFBundleIconName: "AppIcon"
           CFBundleDisplayName: "Audium"
-          SUPABASE_API_KEY: $(SUPABASE_API_KEY)
-          SUPABASE_BASE_URL: $(SUPABASE_BASE_URL)
     sources: [Kapal-Lawd]
     resources: [Resources]
     settings:
