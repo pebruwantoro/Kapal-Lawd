@@ -40,11 +40,13 @@ export MARKETING_VERSION=$VERSION
 export CURRENT_PROJECT_VERSION=$BUILD_NUMBER
 export SUPABASE_API_KEY=$SUPABASE_API_KEY
 export SUPABASE_BASE_URL=$SUPABASE_BASE_URL
+export SCHEME_PATH=$SCHEME_PATH
 
 echo "MARKETING_VERSION: $MARKETING_VERSION"
 echo "CURRENT_PROJECT_VERSION: $CURRENT_PROJECT_VERSION"
 echo "SUPABASE_API_KEY: $SUPABASE_API_KEY"
 echo "SUPABASE_BASE_URL: $SUPABASE_BASE_URL"
+echo "SCHEME_PATH: $SCHEME_PATH"
 
 # Generate the Xcode project using XcodeGen
 echo "Generating Xcode project..."
@@ -98,29 +100,21 @@ fi
 
 ls Kapal-Lawd.xcodeproj/xcshareddata/xcschemes
 
-if [ -f "Kapal-Lawd.xcodeproj/xcshareddata/xcschemes/Kapal-Lawd.xcscheme" ]; then
-    echo "Scheme Found."
-else
-    echo "Scheme not found."
-fi
+if [ -f "$SCHEME_PATH" ]; then
+    echo "Modifying $SCHEME_PATH to add environment variables..."
 
-SCHEMA_FILE_PATH=Kapal-Lawd.xcodeproj/xcshareddata/xcschemes/Kapal-Lawd.xcscheme
-
-if [ -f "$SCHEME_FILE_PATH" ]; then
-    echo "Modifying $SCHEME_FILE_PATH to add environment variables..."
-
-    if ! grep -q "<EnvironmentVariable key=\"SUPABASE_API_KEY\"" "$SCHEME_FILE_PATH"; then
+    if ! grep -q "<EnvironmentVariable key=\"SUPABASE_API_KEY\"" "$SCHEME_PATH"; then
         sed -i '' '/<\/EnvironmentVariables>/i\
-        <EnvironmentVariable key="SUPABASE_API_KEY" value="'"$SUPABASE_API_KEY"'" isEnabled="YES"/>' "$SCHEME_FILE_PATH"
+        <EnvironmentVariable key="SUPABASE_API_KEY" value="'"$SUPABASE_API_KEY"'" isEnabled="YES"/>' "$SCHEME_PATH"
     fi
 
-    if ! grep -q "<EnvironmentVariable key=\"SUPABASE_BASE_URL\"" "$SCHEME_FILE_PATH"; then
+    if ! grep -q "<EnvironmentVariable key=\"SUPABASE_BASE_URL\"" "$SCHEME_PATH"; then
         sed -i '' '/<\/EnvironmentVariables>/i\
         <EnvironmentVariable key="SUPABASE_BASE_URL" value="'"$SUPABASE_BASE_URL"'" isEnabled="YES"/>' "$SCHEME_FILE_PATH"
     fi
 
-    echo "Environment variables added to $SCHEME_FILE_PATH."
+    echo "Environment variables added to $SCHEME_PATH."
 else
-    echo "$SCHEME_FILE_PATH not found. Ensure the scheme file exists and is correctly named."
+    echo "$SCHEME_PATH not found. Ensure the scheme file exists and is correctly named."
     exit 1
 fi
