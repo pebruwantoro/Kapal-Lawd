@@ -172,3 +172,5 @@ else
     echo "$SCHEME_PATH not found. Ensure the scheme file exists and is correctly named."
     exit 1
 fi
+
+cat $SCHEME_PATH
