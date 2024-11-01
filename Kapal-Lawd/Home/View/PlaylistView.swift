@@ -23,6 +23,10 @@ struct PlaylistView: View {
                 if self.audioPlayerViewModel.isBeaconFar {
                     VStack {
                         FindAuditagView(isExploring: self.$isExploring)
+                            .onAppear{
+                                playlistPlayerViewModel.playlistPlayerManager.removeTimeObserver()
+                                playlistPlayerViewModel.resetAsset()
+                            }
                     }
                 } else {
                     VStack {
