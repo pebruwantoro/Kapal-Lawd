@@ -15,7 +15,7 @@ class AudioPlayerViewModel: ObservableObject {
     private var playlistRepo = JSONPlaylistRepository()
     
     @ObservedObject private var audioPlayerManager = AVManager.shared
-    @Published var beaconScanner: IBeaconDetector
+    @Published var beaconScanner: IBeaconDetector = IBeaconDetector()
     @Published var proximityText: String = "No Beacon Detected"
     private var lastTargetVolume: Float? = nil
     private var currentVolumeLevel: VolumeLevel = .none
@@ -26,7 +26,6 @@ class AudioPlayerViewModel: ObservableObject {
     
     private var cancellables = Set<AnyCancellable>()
     @Published var backgroundSound: String = ""
-    @Published var collections: [Collections] = []
     
     enum VolumeLevel: Int {
         case none = 0
@@ -38,9 +37,6 @@ class AudioPlayerViewModel: ObservableObject {
     }
     
     init() {
-        currentSongTitle = ""
-        beaconScanner = IBeaconDetector()
-        
         // Observe the averageRSSI from beaconScanner
         beaconScanner.$averageRSSI
             .receive(on: DispatchQueue.main)

@@ -37,6 +37,7 @@ class AVManager: ObservableObject {
         currentSongTitle = nil
         currentTimeInSeconds = 0.0
         currentPlaylistIndex = 0
+        stopPlayback()
     }
 
     func startPlayback(songTitle: String) {

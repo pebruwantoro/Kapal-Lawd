@@ -10,7 +10,8 @@ import Supabase
 
 struct SupabaseManager {
     static let shared = SupabaseClient(
-        supabaseURL: URL(string: "ganti url api mas e")!,
-        supabaseKey: "ganti api key mas e"
+        supabaseURL: URL(string: Bundle.main.infoDictionary?["SUPABASE_BASE_URL"] as? String ?? "")!,
+        supabaseKey: Bundle.main.infoDictionary?["SUPABASE_API_KEY"] as? String ?? ""
+        
     )
 }

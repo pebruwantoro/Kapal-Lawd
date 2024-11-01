@@ -12,7 +12,7 @@ struct PlaylistView: View {
     @Binding var collections: [Collections]
     @State var showAlert = false
     @State var list: [Playlist] = []
-    
+    @State private var isFirstPlaylistPlay: Bool = false
     @EnvironmentObject private var audioPlayerViewModel: AudioPlayerViewModel
     @EnvironmentObject private var playlistPlayerViewModel: PlaylistPlayerViewModel
     @EnvironmentObject private var backgroundPlayerViewModel: BackgroundPlayerViewModel
@@ -23,9 +23,15 @@ struct PlaylistView: View {
                 if self.audioPlayerViewModel.isBeaconFar {
                     VStack {
                         FindAuditagView(isExploring: self.$isExploring)
-                            .onAppear{
-                                playlistPlayerViewModel.playlistPlayerManager.removeTimeObserver()
-                                playlistPlayerViewModel.resetAsset()
+                            .onReceive(audioPlayerViewModel.$isFindBeacon) { isFind in
+                                if !isFind {
+                                    playlistPlayerViewModel.playlistPlayerManager.removeTimeObserver()
+                                    playlistPlayerViewModel.resetAsset()
+                                    backgroundPlayerViewModel.stopBackground()
+                                    self.collections.removeAll()
+                                    self.list.removeAll()
+                                    self.isFirstPlaylistPlay = false
+                                }
                             }
                     }
                 } else {
@@ -33,7 +39,6 @@ struct PlaylistView: View {
                         HStack {
                             Button(action:  {
                                 showAlert = true
-                                
                             }, label: {
                                 Image(systemName: "xmark")
                                     .foregroundColor(.gray)
@@ -136,27 +141,32 @@ struct PlaylistView: View {
                             
                             if !self.list.isEmpty {
                                 PlayerView(isPlaying: $playlistPlayerViewModel.playlistPlayerManager.isPlaying, list: $list)
-                                    .onAppear {
-                                        playlistPlayerViewModel.startPlayback(song: playlistPlayerViewModel.playlistPlayerManager.playlist[0].name)
+                                    .onReceive(audioPlayerViewModel.$isFindBeacon) { isFind in
+                                        if isFind && !self.isFirstPlaylistPlay {
+                                            self.isFirstPlaylistPlay = true
+                                            playlistPlayerViewModel.startPlayback(song: playlistPlayerViewModel.playlistPlayerManager.playlist[0].name)
+                                        }
+                                        
                                     }
                             }
                         }
                     }
                     .padding(.horizontal, 16)
+                    .onReceive(audioPlayerViewModel.$isFindBeacon) { isFind in
+                        if isFind && list.count == 0 {
+                            list = audioPlayerViewModel.fetchPlaylistByCollectionId(id: collections[0].uuid)
+                            playlistPlayerViewModel.playlistPlayerManager.playlist = list
+                        }
+                    }
+                    .onReceive(audioPlayerViewModel.beaconScanner.$averageRSSI) { rssi in
+                        audioPlayerViewModel.handleRSSIChange(rssi)
+                    }
+                    .onReceive(audioPlayerViewModel.$backgroundSound) { song in
+                        if !backgroundPlayerViewModel.backgroundSoundManager.isBackgroundPlaying && song != "" {
+                            backgroundPlayerViewModel.startBackgroundSound(song: song)
+                        }
+                    }
                 }
-            }
-        }
-        
-        .onAppear{
-            list = audioPlayerViewModel.fetchPlaylistByCollectionId(id: collections[0].uuid)
-            playlistPlayerViewModel.playlistPlayerManager.playlist = list
-        }
-        .onReceive(audioPlayerViewModel.beaconScanner.$averageRSSI) { rssi in
-            audioPlayerViewModel.handleRSSIChange(rssi)
-        }
-        .onReceive(audioPlayerViewModel.$backgroundSound) { song in
-            if !backgroundPlayerViewModel.backgroundSoundManager.isBackgroundPlaying && song != "" {
-                backgroundPlayerViewModel.startBackgroundSound(song: song)
             }
         }
     }

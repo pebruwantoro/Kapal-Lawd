@@ -12,13 +12,12 @@ struct FindAuditagView: View {
     @State private var isScanning = false
     @State private var cardOpacity = 0.0
     @State var collections: [Collections] = []
-    let pulseScan = Animation.easeOut(duration: 2).repeatForever(autoreverses: true)
+    @State var pulseScan = Animation.easeOut(duration: 2).repeatForever(autoreverses: true)
     @StateObject private var audioPlayerViewModel: AudioPlayerViewModel = AudioPlayerViewModel()
     @StateObject private var playlistPlayerViewModel: PlaylistPlayerViewModel = PlaylistPlayerViewModel()
     @StateObject private var backgroundPlayerViewModel: BackgroundPlayerViewModel = BackgroundPlayerViewModel()
     @StateObject private var interactionPlayerViewModel: InteractionPlayerViewModel = InteractionPlayerViewModel()
-    
-    @Environment(\.scenePhase) private var scenePhase
+    @State private var isPlayInteraction = false
     
     var body: some View {
         Group {
@@ -26,16 +25,10 @@ struct FindAuditagView: View {
             
             if audioPlayerViewModel.isFindBeacon {
                 PlaylistView(isExploring: self.$isExploring, collections: self.$collections)
-                    .onChange(of: scenePhase) { newPhase, _ in
-                        switch newPhase {
-                        case .active:
+                    .onReceive(audioPlayerViewModel.$isFindBeacon) { value in
+                        if !isPlayInteraction {
                             interactionPlayerViewModel.startInteractionSound(song: DeafultSong.interaction.rawValue)
-                        case .background:
-                            interactionPlayerViewModel.startInteractionSound(song: DeafultSong.interaction.rawValue)
-                        case .inactive:
-                            interactionPlayerViewModel.stopInteraction()
-                        @unknown default:
-                            break
+                            isPlayInteraction = value
                         }
                     }
                     .environmentObject(audioPlayerViewModel)
@@ -100,10 +93,10 @@ struct FindAuditagView: View {
             }
         }
         .onReceive(audioPlayerViewModel.$isFindBeacon) { value in
-            if value {
-                collections = audioPlayerViewModel.fetchCollectionByBeaconId(id: audioPlayerViewModel.beaconScanner.closestBeacon?.uuid.uuidString.lowercased() ?? "")
+            if !value {
+                self.collections.removeAll()
             } else {
-                collections = []
+                collections = audioPlayerViewModel.fetchCollectionByBeaconId(id: audioPlayerViewModel.beaconScanner.closestBeacon?.uuid.uuidString.lowercased() ?? "")
             }
         }
     }
