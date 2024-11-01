@@ -96,6 +96,14 @@ else
     exit 1
 fi
 
+ls Kapal-Lawd.xcodeproj/xcshareddata/xcschemes
+
+if [ -f "Kapal-Lawd.xcodeproj/xcshareddata/xcschemes/Kapal-Lawd.xcscheme"]; then
+    echo "Scheme Found."
+else
+    echo "Scheme not found."
+fi
+
 SCHEMA_FILE_PATH="Kapal-Lawd.xcodeproj/xcshareddata/xcschemes/Kapal-Lawd.xcscheme"
 
 if [ -f "$SCHEME_FILE_PATH" ]; then
