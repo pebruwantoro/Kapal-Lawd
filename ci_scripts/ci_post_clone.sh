@@ -98,7 +98,7 @@ fi
 
 ls Kapal-Lawd.xcodeproj/xcshareddata/xcschemes
 
-if [ -f "Kapal-Lawd.xcodeproj/xcshareddata/xcschemes/Kapal-Lawd.xcscheme"]; then
+if [ -f "Kapal-Lawd.xcodeproj/xcshareddata/xcschemes/Kapal-Lawd.xcscheme" ]; then
     echo "Scheme Found."
 else
     echo "Scheme not found."
