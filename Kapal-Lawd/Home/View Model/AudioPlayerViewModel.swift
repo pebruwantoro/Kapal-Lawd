@@ -40,15 +40,6 @@ class AudioPlayerViewModel: ObservableObject {
         case level5 = 5 // 100% volume
     }
     
-    // Define RSSI thresholds with hysteresis
-    private let thresholds: [(enter: Double, exit: Double, volumeLevel: VolumeLevel, volume: Float)] = [
-        (enter: -60.0, exit: -62.0, volumeLevel: .level5, volume: 1.0),  // Level 5
-        (enter: -65.0, exit: -67.0, volumeLevel: .level4, volume: 0.8),  // Level 4
-        (enter: -70.0, exit: -72.0, volumeLevel: .level3, volume: 0.6),  // Level 3
-        (enter: -75.0, exit: -77.0, volumeLevel: .level2, volume: 0.4),  // Level 2
-        (enter: -80.0, exit: -82.0, volumeLevel: .level1, volume: 0.2)   // Level 1
-    ]
-    
     init() {
         // Observe the averageRSSI from beaconScanner
         beaconScanner.$averageRSSI
@@ -107,7 +98,7 @@ extension AudioPlayerViewModel {
         backgroundSoundManager.startPlayback(songTitle: song)
     }
     
-    func stopBackground(){
+    func stopBackground() {
         backgroundSoundManager.stopPlayback()
     }
     
@@ -115,7 +106,7 @@ extension AudioPlayerViewModel {
         microInteractionManager.startPlayback(songTitle: song)
     }
     
-    func stopInteractionSoundd(){
+    func stopInteractionSound() {
         microInteractionManager.stopPlayback()
     }
     
@@ -131,12 +122,27 @@ extension AudioPlayerViewModel {
         audioVideoManager.resumePlayback()
     }
     
-    func adjustAudioForRSSI(rssi: Double) {
+    func adjustAudioForRSSI(rssi: Double, minRssi: Double, maxRssi: Double) {
+        let levels = 5
+        let hysteresis = 2.0 // Adjust as needed
+        
+        // Calculate the delta between levels
+        let delta = (maxRssi - minRssi) / Double(levels)
+        
+        // Create dynamic thresholds
+        var thresholds: [(enter: Double, exit: Double, volumeLevel: VolumeLevel, volume: Float)] = []
+        
+        for i in 0..<levels {
+            let enter = maxRssi - Double(i) * delta
+            let exit = enter - hysteresis
+            let volumeLevel = VolumeLevel(rawValue: levels - i) ?? .none
+            let volume = Float(volumeLevel.rawValue) / Float(levels)
+            thresholds.append((enter: enter, exit: exit, volumeLevel: volumeLevel, volume: volume))
+        }
+        
         var targetVolume: Float = 0.0
         var newVolumeLevel: VolumeLevel = .none
-        let songTitle = fetchCurrentSong()
         
-        // Determine the new volume level based on RSSI and hysteresis
         for threshold in thresholds {
             if currentVolumeLevel == threshold.volumeLevel {
                 // Currently in this volume level, check exit condition
@@ -179,6 +185,8 @@ extension AudioPlayerViewModel {
             return
         }
         
+        let songTitle = fetchCurrentSong()
+        
         if audioVideoManager.currentSongTitle != songTitle || !audioVideoManager.isPlaying {
             // Start new playback
             self.stopPlayback()
@@ -200,30 +208,39 @@ extension AudioPlayerViewModel {
         if let closestBeacon = beaconScanner.closestBeacon, rssi > -100.0 {
             let identifier = beaconScanner.beaconIdentifier(for: closestBeacon)
             
-            proximityText = "Closest Beacon Found"
-            print("Beacon detected: \(identifier), Average RSSI: \(rssi) dBm")
-            
-            if rssi >= thresholds.last!.enter {
-                // Reset lostBeaconCount since we are within range
-                self.isFindBeacon = true
-                self.isBeaconFar = false
-                self.lostBeaconCount = 0
-                adjustAudioForRSSI(rssi: rssi)
-            } else {
-                // RSSI is lower than threshold
-                self.lostBeaconCount += 1
-                print("RSSI lower than threshold. Lost count: \(self.lostBeaconCount)")
-                if self.lostBeaconCount >= self.maxLostBeaconCount {
-                    proximityText = "Beacon is too far"
-                    self.isFindBeacon = false
-                    self.isBeaconFar = true
-                    stopPlayback()
-                    stopBackground()
-                    print("Beacon too far after \(maxLostBeaconCount) attempts")
-                    // Reset variables
-                    lastTargetVolume = nil
-                    currentVolumeLevel = .none
+            // Find the corresponding Beacons object
+            if let beaconInfo = beaconScanner.beacons.first(where: { $0.uuid.lowercased() == closestBeacon.uuid.uuidString.lowercased() }) {
+                
+                let minRssi = beaconInfo.minRssi
+                let maxRssi = beaconInfo.maxRssi
+                
+                proximityText = "Closest Beacon Found"
+                print("Beacon detected: \(identifier), Average RSSI: \(rssi) dBm")
+                
+                if rssi >= minRssi {
+                    // Reset lostBeaconCount since we are within range
+                    self.isFindBeacon = true
+                    self.isBeaconFar = false
+                    self.lostBeaconCount = 0
+                    adjustAudioForRSSI(rssi: rssi, minRssi: minRssi, maxRssi: maxRssi)
+                } else {
+                    // RSSI is lower than minRssi
+                    self.lostBeaconCount += 1
+                    print("RSSI lower than minRssi. Lost count: \(self.lostBeaconCount)")
+                    if self.lostBeaconCount >= self.maxLostBeaconCount {
+                        proximityText = "Beacon is too far"
+                        self.isFindBeacon = false
+                        self.isBeaconFar = true
+                        stopPlayback()
+                        stopBackground()
+                        print("Beacon too far after \(maxLostBeaconCount) attempts")
+                        // Reset variables
+                        lastTargetVolume = nil
+                        currentVolumeLevel = .none
+                    }
                 }
+            } else {
+                print("No matching beacon info found.")
             }
         } else {
             // No beacon detected
