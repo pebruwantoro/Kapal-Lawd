@@ -25,7 +25,7 @@ public class JsonManager {
             
             return .success(decodedData)
         } catch let error as DecodingError {
-            return .failure(.decodedFailed(error))
+            return .failure(.decodingFailed(error))
         } catch {
             return .failure(.dataCorrupted)
         }
