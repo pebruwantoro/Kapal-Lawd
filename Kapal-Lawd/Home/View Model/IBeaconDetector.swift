@@ -24,13 +24,9 @@ class IBeaconDetector: NSObject, ObservableObject, CLLocationManagerDelegate {
     private var emaRSSI: [String: Double] = [:]
     private let emaAlpha: Double = 0.2 // Smoothing factor
     
-    private var beaconLocalRepo = JSONBeaconsRepository()
+    private var beaconRepo = SupabaseBeaconsRepository()
     
     override init() {
-        // Get List Beacons
-        let result = beaconLocalRepo.fetchListBeacons()
-        self.beacons = result.0
-
         super.init()
         locationManager = CLLocationManager()
         locationManager?.delegate = self
@@ -38,10 +34,26 @@ class IBeaconDetector: NSObject, ObservableObject, CLLocationManagerDelegate {
 
         // Enable continuous location scanning
         locationManager?.allowsBackgroundLocationUpdates = true
-        
-        startMonitoring()
+
+        // Fetch beacons and then start monitoring
+        Task {
+            await self.fetchBeaconsAndStartMonitoring()
+        }
     }
     
+    private func fetchBeaconsAndStartMonitoring() async {
+        do {
+            let fetchedBeacons = try await beaconRepo.fetchListBeacons()
+            DispatchQueue.main.async {
+                self.beacons = fetchedBeacons
+                self.startMonitoring()
+            }
+        } catch {
+            print("Error fetching beacons: \(error.localizedDescription)")
+            // Handle error appropriately (e.g., show an alert or retry)
+        }
+    }
+
     func startMonitoring() {
         guard let locationManager = self.locationManager else { return }
         guard !self.beacons.isEmpty else { return }
@@ -123,7 +135,16 @@ class IBeaconDetector: NSObject, ObservableObject, CLLocationManagerDelegate {
 
     func locationManager(_ manager: CLLocationManager, didChangeAuthorization status: CLAuthorizationStatus) {
         if status == .authorizedAlways {
-            startMonitoring()
+            if self.beacons.isEmpty {
+                // Beacons not yet fetched; fetch and start monitoring
+                Task {
+                    await self.fetchBeaconsAndStartMonitoring()
+                }
+            } else {
+                // Beacons already fetched; start monitoring
+                startMonitoring()
+            }
         }
     }
 }
+
