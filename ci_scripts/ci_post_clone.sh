@@ -70,7 +70,7 @@ touch Kapal-Lawd.xcodeproj/project.xcworkspace/xcshareddata/swiftpm/Package.reso
 echo "Creating Package.resolved..."
 cat <<EOL > Kapal-Lawd.xcodeproj/project.xcworkspace/xcshareddata/swiftpm/Package.resolved
 {
-  "originHash" : "fc9f608b2604b47e8a4e8f6d34706a07df80b7a48044b46fc831990fd3c8aece",
+  "originHash" : "04c19fbbf2e3b911933c8c85d19cf193e0a802c75b5cad57a6af6f3faf87e10e",
   "pins" : [
     {
       "identity" : "sdbeaconscanner",
@@ -79,6 +79,60 @@ cat <<EOL > Kapal-Lawd.xcodeproj/project.xcworkspace/xcshareddata/swiftpm/Packag
       "state" : {
         "revision" : "1b9ce5a1ba30691f7c4d404e6efd8c9ed02c230e",
         "version" : "0.0.2"
+      }
+    },
+    {
+      "identity" : "supabase-swift",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/supabase/supabase-swift.git",
+      "state" : {
+        "revision" : "24c6b2252f35cdd45e546bb5ea2c684c963df726",
+        "version" : "2.20.5"
+      }
+    },
+    {
+      "identity" : "swift-asn1",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/apple/swift-asn1.git",
+      "state" : {
+        "revision" : "7faebca1ea4f9aaf0cda1cef7c43aecd2311ddf6",
+        "version" : "1.3.0"
+      }
+    },
+    {
+      "identity" : "swift-concurrency-extras",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/pointfreeco/swift-concurrency-extras",
+      "state" : {
+        "revision" : "6054df64b55186f08b6d0fd87152081b8ad8d613",
+        "version" : "1.2.0"
+      }
+    },
+    {
+      "identity" : "swift-crypto",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/apple/swift-crypto.git",
+      "state" : {
+        "revision" : "8fa345c2081cfbd4851dffff5dd5bed48efe6081",
+        "version" : "3.9.0"
+      }
+    },
+    {
+      "identity" : "swift-http-types",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/apple/swift-http-types.git",
+      "state" : {
+        "revision" : "ae67c8178eb46944fd85e4dc6dd970e1f3ed6ccd",
+        "version" : "1.3.0"
+      }
+    },
+    {
+      "identity" : "xctest-dynamic-overlay",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/pointfreeco/xctest-dynamic-overlay",
+      "state" : {
+        "revision" : "770f990d3e4eececb57ac04a6076e22f8c97daeb",
+        "version" : "1.4.2"
       }
     }
   ],
