@@ -9,15 +9,12 @@ import SwiftUI
 
 struct SpotHomepageView: View {
     @State private var isExploring = false
-    @State private var beaconId: String?
-    @State private var trackBar = 0.0
-    @StateObject private var audioPlayerViewModel = AudioPlayerViewModel()
-    
+    @ObservedObject private var playlistPlayerViewModel: PlaylistPlayerViewModel = PlaylistPlayerViewModel()
+   
     var body: some View {
         NavigationStack {
             if isExploring {
-                FindAuditagView(isExploring: self.$isExploring, trackBar: self.$trackBar)
-                    .environmentObject(audioPlayerViewModel)
+                FindAuditagView(isExploring: self.$isExploring)
             } else {
                 Spacer()
                 VStack (spacing: 16) {
@@ -58,6 +55,10 @@ struct SpotHomepageView: View {
                 .cornerRadius(36)
                 .shadow(radius: 5)
                 .padding(.horizontal, 16)
+                .onAppear{
+                    playlistPlayerViewModel.playlistPlayerManager.removeTimeObserver()
+                    playlistPlayerViewModel.resetAsset()
+                }
             }
         }
     }

@@ -8,12 +8,14 @@
 import SwiftUI
 
 struct PlayerView: View {
-    @Binding var trackBar: Double
+    @State var trackBar: Double = 0.0
     @Binding var isPlaying: Bool
     @Binding var list: [Playlist]
     @State private var currentSecond: String = "00:00"
-    @EnvironmentObject var audioPlayerViewModel: AudioPlayerViewModel
     @State private var currentSong: String = ""
+    @EnvironmentObject private var audioPlayerViewModel: AudioPlayerViewModel
+    @EnvironmentObject private var playlistPlayerViewModel: PlaylistPlayerViewModel
+    @EnvironmentObject private var backgroundPlayerViewModel: BackgroundPlayerViewModel
     
     let timer = Timer.publish(every: 0.1, on: .main, in: .common).autoconnect()
     
@@ -27,7 +29,7 @@ struct PlayerView: View {
                         .font(.body)
                         .foregroundColor(.gray)
                     
-                    ProgressView("", value: self.trackBar, total: convertToSeconds(from: list[audioPlayerViewModel.audioVideoManager.currentPlaylistIndex].duration)!)
+                    ProgressView("", value: self.trackBar, total: convertToSeconds(from: list[playlistPlayerViewModel.playlistPlayerManager.currentPlaylistIndex].duration)!)
                         .accentColor(Color("AppButton"))
                         .scaleEffect(x: 1, y: 1.5, anchor: .bottom)
                     
@@ -36,15 +38,14 @@ struct PlayerView: View {
                             .font(.subheadline)
                         
                         Spacer()
-                        Text(list[audioPlayerViewModel.audioVideoManager.currentPlaylistIndex].duration)
+                        Text(list[playlistPlayerViewModel.playlistPlayerManager.currentPlaylistIndex].duration)
                             .font(.subheadline)
                     }
                     .foregroundColor(.gray)
                     
                     HStack (spacing: 16) {
                         Button(action:  {
-                            audioPlayerViewModel.previousPlaylist()
-                            self.trackBar = 0.0
+                            playlistPlayerViewModel.previousPlaylist()
                             ButtonHaptic()
                         }, label:  {
                             Image(systemName: "backward")
@@ -67,11 +68,11 @@ struct PlayerView: View {
                             
                             Button(action:  {
                                 if !self.isPlaying {
-                                    audioPlayerViewModel.resumePlayback()
+                                    playlistPlayerViewModel.resumePlayback()
                                     self.isPlaying = true
                                     ButtonHaptic()
                                 } else {
-                                    audioPlayerViewModel.pausePlayback()
+                                    playlistPlayerViewModel.pausePlayback()
                                     self.isPlaying = false
                                     ButtonHaptic()
                                 }
@@ -90,8 +91,7 @@ struct PlayerView: View {
                         .frame(width: 50, height: 50)
                         
                         Button(action:  {
-                            audioPlayerViewModel.nextPlaylist()
-                            self.trackBar = 0.0
+                            playlistPlayerViewModel.nextPlaylist()
                             ButtonHaptic()
                         }, label:  {
                             Image(systemName: "forward")
@@ -112,12 +112,12 @@ struct PlayerView: View {
         .cornerRadius(36)
         .shadow(radius: 5)
         .padding(.horizontal, 16)
-        .onReceive(audioPlayerViewModel.audioVideoManager.$currentSongTitle) { song in
+        .onReceive(playlistPlayerViewModel.playlistPlayerManager.$currentSongTitle) { song in
             if let audio = song {
                 self.currentSong = audio
             }
         }
-        .onReceive(audioPlayerViewModel.audioVideoManager.$currentTimeInSeconds) { time in
+        .onReceive(playlistPlayerViewModel.playlistPlayerManager.$currentTimeInSeconds) { time in
             self.currentSecond = convertSecondsToTimeString(seconds: time)
             self.trackBar = time
         }
@@ -125,7 +125,7 @@ struct PlayerView: View {
 }
 
 #Preview {
-    PlayerView(trackBar: .constant(0.0), isPlaying: .constant(true), list: .constant([Playlist(
+    PlayerView(isPlaying: .constant(true), list: .constant([Playlist(
         uuid: "123e4567-e89b-12d3-a456-426614174000",
         collectionId: "collection-001",
         name: "My Playlist",

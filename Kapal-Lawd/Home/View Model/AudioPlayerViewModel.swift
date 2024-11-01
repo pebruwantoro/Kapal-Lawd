@@ -14,22 +14,18 @@ class AudioPlayerViewModel: ObservableObject {
     private var collectionRepo = JSONCollectionsRepository()
     private var playlistRepo = JSONPlaylistRepository()
     
-    @Published var audioVideoManager = AVManager.shared
-    @Published var backgroundSoundManager = BackgroundSoundManager.shared
-    @Published var microInteractionManager = MicroInteractionManager.shared
-    
-    @Published var beaconScanner = IBeaconDetector()
+    @ObservedObject private var audioPlayerManager = AVManager.shared
+    @Published var beaconScanner: IBeaconDetector = IBeaconDetector()
     @Published var proximityText: String = "No Beacon Detected"
     private var lastTargetVolume: Float? = nil
     private var currentVolumeLevel: VolumeLevel = .none
     private var lostBeaconCount: Int = 0
-    private let maxLostBeaconCount = 5 // Threshold for consecutive losses
+    private let maxLostBeaconCount = 6 // Threshold for consecutive losses
     @Published var isFindBeacon = false
     @Published var isBeaconFar = true
     
     private var cancellables = Set<AnyCancellable>()
     @Published var backgroundSound: String = ""
-    @Published var collections: [Collections] = []
     
     enum VolumeLevel: Int {
         case none = 0
@@ -77,51 +73,6 @@ class AudioPlayerViewModel: ObservableObject {
 }
 
 extension AudioPlayerViewModel {
-    func fetchCurrentSong() -> String {
-        currentSongTitle = audioVideoManager.currentSongTitle
-        return currentSongTitle ?? "none"
-    }
-    
-    func previousPlaylist() {
-        audioVideoManager.previousPlaylist()
-    }
-    
-    func nextPlaylist() {
-        audioVideoManager.nextPlaylist()
-    }
-    
-    func startPlayback(song: String) {
-        audioVideoManager.startPlayback(songTitle: song)
-    }
-    
-    func startBackgroundSound(song: String) {
-        backgroundSoundManager.startPlayback(songTitle: song)
-    }
-    
-    func stopBackground() {
-        backgroundSoundManager.stopPlayback()
-    }
-    
-    func interactionSound(song: String) {
-        microInteractionManager.startPlayback(songTitle: song)
-    }
-    
-    func stopInteractionSound() {
-        microInteractionManager.stopPlayback()
-    }
-    
-    func stopPlayback() {
-        audioVideoManager.stopPlayback()
-    }
-    
-    func pausePlayback() {
-        audioVideoManager.pausePlayback()
-    }
-    
-    func resumePlayback() {
-        audioVideoManager.resumePlayback()
-    }
-    
     func adjustAudioForRSSI(rssi: Double, minRssi: Double, maxRssi: Double) {
         let levels = 5
         let hysteresis = 2.0 // Adjust as needed
@@ -142,6 +93,7 @@ extension AudioPlayerViewModel {
         
         var targetVolume: Float = 0.0
         var newVolumeLevel: VolumeLevel = .none
+        let songTitle = audioPlayerManager.currentSongTitle
         
         for threshold in thresholds {
             if currentVolumeLevel == threshold.volumeLevel {
@@ -175,9 +127,9 @@ extension AudioPlayerViewModel {
         print("RSSI: \(rssi), Target Volume: \(targetVolume), Current Volume Level: \(currentVolumeLevel), New Volume Level: \(newVolumeLevel)")
         
         if targetVolume == 0.0 {
-            if audioVideoManager.isPlaying {
-                audioVideoManager.fadeToVolume(targetVolume: 0.0, duration: 1.0) {
-                    self.stopPlayback()
+            if audioPlayerManager.isPlaying {
+                audioPlayerManager.fadeToVolume(targetVolume: 0.0, duration: 1.0) {
+                    self.audioPlayerManager.stopPlayback()
                 }
             }
             currentVolumeLevel = .none
@@ -185,19 +137,16 @@ extension AudioPlayerViewModel {
             return
         }
         
-        let songTitle = fetchCurrentSong()
-        
-        if audioVideoManager.currentSongTitle != songTitle || !audioVideoManager.isPlaying {
+        if audioPlayerManager.currentSongTitle != songTitle || !audioPlayerManager.isPlaying {
             // Start new playback
-            self.stopPlayback()
-            self.currentSongTitle = songTitle
-            self.startPlayback(song: songTitle)
-            audioVideoManager.fadeToVolume(targetVolume: targetVolume, duration: 1.0)
+            audioPlayerManager.stopPlayback()
+            audioPlayerManager.currentSongTitle = songTitle
+            audioPlayerManager.fadeToVolume(targetVolume: targetVolume, duration: 1.0)
             lastTargetVolume = targetVolume
             currentVolumeLevel = newVolumeLevel
         } else {
             if lastTargetVolume != targetVolume {
-                audioVideoManager.fadeToVolume(targetVolume: targetVolume, duration: 1.0)
+                audioPlayerManager.fadeToVolume(targetVolume: targetVolume, duration: 1.0)
                 lastTargetVolume = targetVolume
                 currentVolumeLevel = newVolumeLevel
             }
@@ -207,7 +156,6 @@ extension AudioPlayerViewModel {
     func handleRSSIChange(_ rssi: Double) {
         if let closestBeacon = beaconScanner.closestBeacon, rssi > -100.0 {
             let identifier = beaconScanner.beaconIdentifier(for: closestBeacon)
-            
             // Find the corresponding Beacons object
             if let beaconInfo = beaconScanner.beacons.first(where: { $0.uuid.lowercased() == closestBeacon.uuid.uuidString.lowercased() }) {
                 
@@ -231,8 +179,8 @@ extension AudioPlayerViewModel {
                         proximityText = "Beacon is too far"
                         self.isFindBeacon = false
                         self.isBeaconFar = true
-                        stopPlayback()
-                        stopBackground()
+//                        stopPlayback()
+//                        stopBackground()
                         print("Beacon too far after \(maxLostBeaconCount) attempts")
                         // Reset variables
                         lastTargetVolume = nil
@@ -250,8 +198,7 @@ extension AudioPlayerViewModel {
                 self.isFindBeacon = false
                 self.isBeaconFar = true
                 proximityText = "No Beacon Detected"
-                stopPlayback()
-                stopBackground()
+                audioPlayerManager.stopPlayback()
                 print("No closest beacon found after \(maxLostBeaconCount) attempts")
                 // Reset variables
                 lastTargetVolume = nil

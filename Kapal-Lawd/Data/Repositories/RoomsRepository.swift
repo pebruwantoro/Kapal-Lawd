@@ -39,5 +39,4 @@ internal final class JSONRoomsRepository: RoomsRepository {
         }
         return (result, nil)
     }
-    
 }

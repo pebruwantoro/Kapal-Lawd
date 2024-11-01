@@ -7,8 +7,6 @@
 
 import Foundation
 import AVKit
-import Combine
-import MediaPlayer
 
 class BackgroundSoundManager: ObservableObject {
     public static var shared = BackgroundSoundManager()
@@ -54,7 +52,7 @@ class BackgroundSoundManager: ObservableObject {
         try? AVAudioSession.sharedInstance().setActive(true)
         
         self.player?.play()
-        self.player?.volume = 0.5
+        self.player?.volume = 0.3
         self.isBackgroundPlaying = true
     }
     

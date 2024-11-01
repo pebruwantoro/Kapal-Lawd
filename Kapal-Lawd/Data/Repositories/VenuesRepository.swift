@@ -40,5 +40,4 @@ internal final class JSONVenuesRepository: VenuesRepository {
         
         return (result, nil)
     }
-    
 }

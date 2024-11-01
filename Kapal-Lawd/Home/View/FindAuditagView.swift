@@ -11,32 +11,29 @@ struct FindAuditagView: View {
     @Binding var isExploring: Bool
     @State private var isScanning = false
     @State private var cardOpacity = 0.0
-    @EnvironmentObject private var audioPlayerViewModel: AudioPlayerViewModel
     @State var collections: [Collections] = []
-    let pulseScan = Animation.easeOut(duration: 2).repeatForever(autoreverses: true)
-    @Binding var trackBar: Double
+    @State var pulseScan = Animation.easeOut(duration: 2).repeatForever(autoreverses: true)
+    @StateObject private var audioPlayerViewModel: AudioPlayerViewModel = AudioPlayerViewModel()
+    @StateObject private var playlistPlayerViewModel: PlaylistPlayerViewModel = PlaylistPlayerViewModel()
+    @StateObject private var backgroundPlayerViewModel: BackgroundPlayerViewModel = BackgroundPlayerViewModel()
+    @StateObject private var interactionPlayerViewModel: InteractionPlayerViewModel = InteractionPlayerViewModel()
+    @State private var isPlayInteraction = false
     
-    @Environment(\.scenePhase) private var scenePhase
-
     var body: some View {
         Group {
             Spacer()
             
             if audioPlayerViewModel.isFindBeacon {
-                PlaylistView(isExploring: self.$isExploring, collections: self.$collections, trackBar: self.$trackBar)
-                    .onChange(of: scenePhase) { newPhase, _ in
-                        switch newPhase {
-                        case .active:
-                            audioPlayerViewModel.interactionSound(song: "AudiumTagConnect")
-                        case .background:
-                            audioPlayerViewModel.interactionSound(song: "AudiumTagConnect")
-                        case .inactive:
-                            audioPlayerViewModel.microInteractionManager.stopPlayback()
-                        @unknown default:
-                            break
+                PlaylistView(isExploring: self.$isExploring, collections: self.$collections)
+                    .onReceive(audioPlayerViewModel.$isFindBeacon) { value in
+                        if !isPlayInteraction {
+                            interactionPlayerViewModel.startInteractionSound(song: DeafultSong.interaction.rawValue)
+                            isPlayInteraction = value
                         }
                     }
                     .environmentObject(audioPlayerViewModel)
+                    .environmentObject(playlistPlayerViewModel)
+                    .environmentObject(backgroundPlayerViewModel)
             } else {
                 VStack(spacing: 16) {
                     ZStack {
@@ -75,8 +72,6 @@ struct FindAuditagView: View {
                     VStack {
                         Button(action: {
                             self.isExploring = false
-                            audioPlayerViewModel.stopPlayback()
-                            audioPlayerViewModel.stopBackground()
                             ButtonHaptic()
                         }, label: {
                             Text("Stop Scanning")
@@ -97,22 +92,16 @@ struct FindAuditagView: View {
                 .opacity(cardOpacity)
             }
         }
-        .onAppear{
-            audioPlayerViewModel.audioVideoManager.removeTimeObserver()
-        }
         .onReceive(audioPlayerViewModel.$isFindBeacon) { value in
-            if value {
-                collections = audioPlayerViewModel.fetchCollectionByBeaconId(id: audioPlayerViewModel.beaconScanner.closestBeacon?.uuid.uuidString.lowercased() ?? "")
-                if !audioPlayerViewModel.microInteractionManager.isInteractionPlaying {
-                    audioPlayerViewModel.interactionSound(song: "AudiumTagConnect")
-                }
+            if !value {
+                self.collections.removeAll()
             } else {
-                collections = []
+                collections = audioPlayerViewModel.fetchCollectionByBeaconId(id: audioPlayerViewModel.beaconScanner.closestBeacon?.uuid.uuidString.lowercased() ?? "")
             }
         }
     }
 }
 
 #Preview {
-    FindAuditagView(isExploring: .constant(false), trackBar: .constant(0.0))
+    FindAuditagView(isExploring: .constant(false))
 }
