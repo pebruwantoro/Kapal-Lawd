@@ -46,7 +46,6 @@ struct PlayerView: View {
                     HStack (spacing: 16) {
                         Button(action:  {
                             playlistPlayerViewModel.previousPlaylist()
-//                            self.trackBar = 0.0
                             ButtonHaptic()
                         }, label:  {
                             Image(systemName: "backward")
@@ -93,7 +92,6 @@ struct PlayerView: View {
                         
                         Button(action:  {
                             playlistPlayerViewModel.nextPlaylist()
-//                            self.trackBar = 0.0
                             ButtonHaptic()
                         }, label:  {
                             Image(systemName: "forward")
