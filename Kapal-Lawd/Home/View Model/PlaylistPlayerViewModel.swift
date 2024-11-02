@@ -43,4 +43,12 @@ class PlaylistPlayerViewModel: ObservableObject {
     func resetAsset() {
         playlistPlayerManager.reset()
     }
+    
+    func seekBackward() {
+        playlistPlayerManager.seekBackward(seconds: 15)
+    }
+    
+    func seekForward() {
+        playlistPlayerManager.seekForward(seconds: 15)
+    }
 }

@@ -55,7 +55,8 @@ struct PlayerView: View {
                         
                         
                         Button(action:  {
-                            
+                            playlistPlayerViewModel.seekBackward()
+                            ButtonHaptic()
                         }, label:  {
                             Image(systemName: "15.arrow.trianglehead.counterclockwise")
                                 .foregroundColor(Color("AppPlayer"))
@@ -84,6 +85,8 @@ struct PlayerView: View {
                         .frame(width: 50, height: 50)
                         
                         Button(action:  {
+                            playlistPlayerViewModel.seekForward()
+                            ButtonHaptic()
                         }, label:  {
                             Image(systemName: "15.arrow.trianglehead.clockwise")
                                 .foregroundColor(Color("AppPlayer"))
