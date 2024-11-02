@@ -43,7 +43,7 @@ class AVManager: ObservableObject {
     func startPlayback(songTitle: String) {
         removeTimeObserver()
         
-        guard let url = Bundle.main.url(forResource: songTitle, withExtension: "mp3") else {
+        guard let url = Bundle.main.url(forResource: songTitle, withExtension: "wav") else {
             print("Audio file not found: \(songTitle)")
             return
         }
@@ -274,5 +274,20 @@ extension AVManager {
         player?.play()
         self.isPlaying = true
         updateNowPlayingInfo(songTitle: currentSongTitle ?? "")
+    }
+    
+    func seekForward(seconds: Int64) {
+        guard let currentTime = player?.currentItem?.currentTime() else { return }
+        let newTime = CMTimeAdd(currentTime, CMTimeMake(value: seconds, timescale: 1))
+        player?.seek(to: newTime, toleranceBefore: .zero, toleranceAfter: .zero)
+    }
+
+  func seekBackward(seconds: Int64) {
+      guard let currentTime = player?.currentItem?.currentTime() else { return }
+      let newTime = CMTimeSubtract(currentTime, CMTimeMake(value: seconds, timescale: 1))
+      
+      let seekTime = CMTime(seconds: max(CMTimeGetSeconds(newTime), 0), preferredTimescale: 1)
+      
+      player?.seek(to: seekTime, toleranceBefore: .zero, toleranceAfter: .zero)
     }
 }

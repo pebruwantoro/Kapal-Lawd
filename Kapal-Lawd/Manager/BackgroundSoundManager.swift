@@ -52,7 +52,7 @@ class BackgroundSoundManager: ObservableObject {
         try? AVAudioSession.sharedInstance().setActive(true)
         
         self.player?.play()
-        self.player?.volume = 0.3
+        self.player?.volume = 0.1
         self.isBackgroundPlaying = true
     }
     
