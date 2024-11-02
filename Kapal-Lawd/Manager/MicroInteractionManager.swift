@@ -17,7 +17,7 @@ class MicroInteractionManager: ObservableObject {
     @Published var isInteractionPlaying = false
     
     func startPlayback(songTitle: String) {
-        guard let url = Bundle.main.url(forResource: songTitle, withExtension: "mp3") else {
+        guard let url = Bundle.main.url(forResource: songTitle, withExtension: "wav") else {
             print("Audio file not found: \(songTitle)")
             return
         }

@@ -155,36 +155,10 @@ else
     exit 1
 fi
 
-ls Kapal-Lawd.xcodeproj/xcshareddata/xcschemes
-
-if [ -f "$SCHEME_PATH" ]; then
-    echo "Modifying $SCHEME_PATH to add environment variables..."
-
-    # Add <EnvironmentVariables> section if it does not exist
-    xmlstarlet ed --inplace -s "//LaunchAction" -t elem -n "EnvironmentVariables" "$SCHEME_PATH"
-
-    # Add SUPABASE_API_KEY environment variable
-    if ! xmlstarlet sel -t -v "//EnvironmentVariable[@key='SUPABASE_API_KEY']" "$SCHEME_PATH" >/dev/null; then
-        xmlstarlet ed --inplace -s "//LaunchAction/EnvironmentVariables" -t elem -n "EnvironmentVariable" \
-            --insert "//EnvironmentVariable[not(@key)]" -t attr -n "key" -v "SUPABASE_API_KEY" \
-            --insert "//EnvironmentVariable[@key='SUPABASE_API_KEY']" -t attr -n "value" -v "$SUPABASE_API_KEY" \
-            --insert "//EnvironmentVariable[@key='SUPABASE_API_KEY']" -t attr -n "isEnabled" -v "YES" \
-            "$SCHEME_PATH"
-    fi
-
-    # Add SUPABASE_BASE_URL environment variable
-    if ! xmlstarlet sel -t -v "//EnvironmentVariable[@key='SUPABASE_BASE_URL']" "$SCHEME_PATH" >/dev/null; then
-        xmlstarlet ed --inplace -s "//LaunchAction/EnvironmentVariables" -t elem -n "EnvironmentVariable" \
-            --insert "//EnvironmentVariable[not(@key)]" -t attr -n "key" -v "SUPABASE_BASE_URL" \
-            --insert "//EnvironmentVariable[@key='SUPABASE_BASE_URL']" -t attr -n "value" -v "$SUPABASE_BASE_URL" \
-            --insert "//EnvironmentVariable[@key='SUPABASE_BASE_URL']" -t attr -n "isEnabled" -v "YES" \
-            "$SCHEME_PATH"
-    fi
-
-    echo "Environment variables added to $SCHEME_PATH."
+if [ -f "Kapal-Lawd/Info.plist" ]; then
+    echo "Info.plist file found."
+    cat Kapal-Lawd/Info.plist
 else
-    echo "$SCHEME_PATH not found. Ensure the scheme file exists and is correctly named."
+    echo "Info.plist file not found."
     exit 1
 fi
-
-cat $SCHEME_PATH

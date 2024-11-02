@@ -128,10 +128,17 @@ struct PlayerView: View {
 }
 
 #Preview {
+    @Previewable var audioPlayerViewModel: AudioPlayerViewModel = AudioPlayerViewModel()
+    @Previewable var playlistPlayerViewModel: PlaylistPlayerViewModel = PlaylistPlayerViewModel()
+    @Previewable var backgroundPlayerViewModel: BackgroundPlayerViewModel = BackgroundPlayerViewModel()
+
     PlayerView(isPlaying: .constant(true), list: .constant([Playlist(
         uuid: "123e4567-e89b-12d3-a456-426614174000",
         collectionId: "collection-001",
         name: "My Playlist",
         duration: "04:30"
     )]))
+    .environmentObject(audioPlayerViewModel)
+    .environmentObject(playlistPlayerViewModel)
+    .environmentObject(backgroundPlayerViewModel)
 }

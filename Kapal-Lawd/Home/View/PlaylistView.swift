@@ -55,6 +55,7 @@ struct PlaylistView: View {
                                     },
                                     secondaryButton: .destructive(Text("End Session")) {
                                         isExploring = false
+                                        print("end session")
                                         playlistPlayerViewModel.stopPlayback()
                                         backgroundPlayerViewModel.stopBackground()
                                     }
@@ -142,12 +143,16 @@ struct PlaylistView: View {
                             if !self.list.isEmpty {
                                 PlayerView(isPlaying: $playlistPlayerViewModel.playlistPlayerManager.isPlaying, list: $list)
                                     .onReceive(audioPlayerViewModel.$isFindBeacon) { isFind in
-                                        if isFind && !self.isFirstPlaylistPlay {
-                                            self.isFirstPlaylistPlay = true
-                                            playlistPlayerViewModel.startPlayback(song: playlistPlayerViewModel.playlistPlayerManager.playlist[0].name)
+                                        delay(DefaultDelay.interaction.rawValue) {
+                                            if isFind && !self.isFirstPlaylistPlay {
+                                                self.isFirstPlaylistPlay = true
+                                                playlistPlayerViewModel.startPlayback(song: playlistPlayerViewModel.playlistPlayerManager.playlist[0].name)
+                                            }
                                         }
-                                        
                                     }
+                                    .environmentObject(audioPlayerViewModel)
+                                    .environmentObject(playlistPlayerViewModel)
+                                    .environmentObject(backgroundPlayerViewModel)
                             }
                         }
                     }
@@ -162,8 +167,10 @@ struct PlaylistView: View {
                         audioPlayerViewModel.handleRSSIChange(rssi)
                     }
                     .onReceive(audioPlayerViewModel.$backgroundSound) { song in
-                        if !backgroundPlayerViewModel.backgroundSoundManager.isBackgroundPlaying && song != "" {
-                            backgroundPlayerViewModel.startBackgroundSound(song: song)
+                        delay(DefaultDelay.backSound.rawValue) {
+                            if !backgroundPlayerViewModel.backgroundSoundManager.isBackgroundPlaying && song != "" {
+                                backgroundPlayerViewModel.startBackgroundSound(song: song)
+                            }
                         }
                     }
                 }
@@ -173,8 +180,12 @@ struct PlaylistView: View {
 }
 
 #Preview {
+    @Previewable var audioPlayerViewModel: AudioPlayerViewModel = AudioPlayerViewModel()
+    @Previewable var playlistPlayerViewModel: PlaylistPlayerViewModel = PlaylistPlayerViewModel()
+    @Previewable var backgroundPlayerViewModel: BackgroundPlayerViewModel = BackgroundPlayerViewModel()
+
     PlaylistView(
-        isExploring: .constant(false),
+        isExploring: .constant(true),
         collections: .constant(
             [
                 Collections(
@@ -190,4 +201,7 @@ struct PlaylistView: View {
             ]
         )
     )
+    .environmentObject(audioPlayerViewModel)
+    .environmentObject(playlistPlayerViewModel)
+    .environmentObject(backgroundPlayerViewModel)
 }

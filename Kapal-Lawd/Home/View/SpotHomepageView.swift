@@ -10,6 +10,7 @@ import SwiftUI
 struct SpotHomepageView: View {
     @State private var isExploring = false
     @ObservedObject private var playlistPlayerViewModel: PlaylistPlayerViewModel = PlaylistPlayerViewModel()
+    @ObservedObject private var backgroundPlayerViewModel: BackgroundPlayerViewModel = BackgroundPlayerViewModel()
    
     var body: some View {
         NavigationStack {
@@ -58,6 +59,8 @@ struct SpotHomepageView: View {
                 .onAppear{
                     playlistPlayerViewModel.playlistPlayerManager.removeTimeObserver()
                     playlistPlayerViewModel.resetAsset()
+                    print("home page destruct all")
+                    backgroundPlayerViewModel.stopBackground()
                 }
             }
         }

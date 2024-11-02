@@ -226,8 +226,9 @@ extension AVManager {
     @objc
     private func playerDidFinishPlaying(_ notification: Notification) {
         NotificationCenter.default.removeObserver(self, name: .AVPlayerItemDidPlayToEndTime, object: playerItem)
-        
-        nextPlaylist()
+        delay(DefaultDelay.song.rawValue) {
+            self.nextPlaylist()
+        }
     }
     
     private func startObservingCurrentTime() {
