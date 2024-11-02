@@ -33,6 +33,11 @@ targets:
             - location
             - audio
             - bluetooth-central
+            - processing
+            - fetch
+          BGTaskSchedulerPermittedIdentifiers:
+            - "com.Kapal-Lawd.Kapal-Lawd.refresh"
+            - "com.Kapal-Lawd.Kapal-Lawd.processing"
           UILaunchScreen:
             UIImageName: ""
           UISupportedInterfaceOrientations:
@@ -42,6 +47,8 @@ targets:
             - UIInterfaceOrientationLandscapeRight
           CFBundleIconName: "AppIcon"
           CFBundleDisplayName: "Audium"
+          SUPABASE_API_KEY: ${SUPABASE_API_KEY}
+          SUPABASE_BASE_URL: ${SUPABASE_BASE_URL}
     sources: [Kapal-Lawd]
     resources: [Resources]
     settings:

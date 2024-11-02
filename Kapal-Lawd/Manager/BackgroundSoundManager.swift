@@ -58,9 +58,12 @@ class BackgroundSoundManager: ObservableObject {
     
     func stopPlayback() {
         self.player?.pause()
-        self.player?.pause()
         self.player = nil
         self.playerItem = nil
         self.isBackgroundPlaying = false
+    }
+    
+    func resey() {
+        stopPlayback()
     }
 }

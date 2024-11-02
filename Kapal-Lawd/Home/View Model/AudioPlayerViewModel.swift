@@ -179,8 +179,6 @@ extension AudioPlayerViewModel {
                         proximityText = "Beacon is too far"
                         self.isFindBeacon = false
                         self.isBeaconFar = true
-//                        stopPlayback()
-//                        stopBackground()
                         print("Beacon too far after \(maxLostBeaconCount) attempts")
                         // Reset variables
                         lastTargetVolume = nil
