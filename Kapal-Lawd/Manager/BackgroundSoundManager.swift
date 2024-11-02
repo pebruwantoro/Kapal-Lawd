@@ -40,7 +40,7 @@ class BackgroundSoundManager: ObservableObject {
     }
     
     func startPlayback(songTitle: String) {
-        guard let url = Bundle.main.url(forResource: songTitle, withExtension: "mp3") else {
+        guard let url = Bundle.main.url(forResource: songTitle, withExtension: "wav") else {
             print("Audio file not found: \(songTitle)")
             return
         }
@@ -61,9 +61,5 @@ class BackgroundSoundManager: ObservableObject {
         self.player = nil
         self.playerItem = nil
         self.isBackgroundPlaying = false
-    }
-    
-    func resey() {
-        stopPlayback()
     }
 }

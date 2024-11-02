@@ -59,7 +59,6 @@ struct SpotHomepageView: View {
                 .onAppear{
                     playlistPlayerViewModel.playlistPlayerManager.removeTimeObserver()
                     playlistPlayerViewModel.resetAsset()
-                    print("home page destruct all")
                     backgroundPlayerViewModel.stopBackground()
                 }
             }

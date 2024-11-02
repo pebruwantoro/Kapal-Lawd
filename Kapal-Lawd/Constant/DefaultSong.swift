@@ -10,7 +10,7 @@ enum DeafultSong: String {
 }
 
 enum DefaultDelay: Double {
-    case interaction = 1.50
-    case backSound = 1.55
-    case song = 2.00
+    case interaction = 2.80
+    case backSound = 2.90
+    case song = 3
 }

@@ -1,33 +1,43 @@
 [
   {
     "uuid": "1be649c9-c897-4f62-bc97-895eef69d46b",
-    "rooms_id": "room-001",
+    "rooms_id": "Section-1",
     "name": "Dynamic Lines of Life",
     "beacon_id": "9d38c8b0-77f8-4e23-8dba-1546c4d035a4",
-    "long_contents": "Explore the world of Arief Witjaksana, where unbroken lines and dynamic forms intertwine to capture life’s intersections and endless possibilities. With a blend of digital and physical elements, Arief’s work bridges contemporary art and technology, offering a fresh perspective on human experience in the web3 era.",
-    "short_contents": "Explore the wonders of Ancient Egypt.",
-    "authored_by": "Arief Witjaksana",
+    "long_contents": "In this section, visitors are introduced to Galeri Zen1—a sanctuary born from the passion of an art enthusiast with over a decade of experience. The gallery serves as a hub for both local and international contemporary artists, featuring a futuristic, minimalist, and industrial interior design. Additionally, visitors are introduced to the Audium App, an innovative technology that provides automatic audio narratives to enhance the visiting experience.",
+    "short_contents": "Experience the evolution of modern art.",
+    "authored_by": "RE:VISIT",
     "authored_at": "2024-11-03"
   },
   {
     "uuid": "4cb46a79-5f62-470f-b31c-98bd5169b22c",
-    "rooms_id": "room-002",
-    "name": "Modern Art",
+    "rooms_id": "Section-2",
+    "name": "Exploring Contemporary Artworks",
     "beacon_id": "3d023d21-83d9-4c48-94fb-48718e22aa14",
-    "long_contents": "A diverse collection showcasing modern art from the 20th century to contemporary works.",
+    "long_contents": "This section invites visitors to explore a range of vibrant and imaginative artworks rich in color and technology. Through emotional narratives, guests can delve into the meanings behind pieces such as \"The Last Innkeeper,\" \"Pray,\" and \"E(X)it.\" The available AR features also allow for a deeper, interactive experience.",
     "short_contents": "Experience the evolution of modern art.",
-    "authored_by": "Sabach",
-    "authored_at": "2024-10-10"
+    "authored_by": "RE:VISIT",
+    "authored_at": "2024-11-03"
   },
   {
     "uuid": "bd322d14-698c-4434-aa7b-2112b75ec5f9",
-    "rooms_id": "room-003",
-    "name": "Modern Art",
+    "rooms_id": "Section-3",
+    "name": "Immersing in Symbolic Worlds",
     "beacon_id": "2d7a9f0c-e0e8-4cc9-a71b-a21db2d034a1",
-    "long_contents": "A diverse collection showcasing modern art from the 20th century to contemporary works.",
+    "long_contents": "Here, visitors are presented with artworks known for dynamic lines and profound symbolism. The piece \"Stay With Me\" encourages contemplation on themes of presence and commitment through captivating visuals and touching narratives.",
     "short_contents": "Experience the evolution of modern art.",
-    "authored_by": "Sabach",
-    "authored_at": "2024-10-10"
+    "authored_by": "RE:VISIT",
+    "authored_at": "2024-11-03"
+  },
+  {
+    "uuid": "ee1dd565-fb64-429f-b54e-2ef25631bb19",
+    "rooms_id": "Section-4",
+    "name": "Journeys and Guardianship in Art",
+    "beacon_id": "8c40139d-48f2-46ed-8668-0a3898d7c38e",
+    "long_contents": "The final section showcases two significant works, \"Hasrat Perjalanan\" (\"Desire of Journey\") and \"Penjaga Sarang\" (\"The Nest Keeper\"). Through the perspective of an art commentator, visitors are invited to reflect on the meaning of life's journey and the role of guardianship. These pieces depict the complexities of human emotion and our relationships with nature and the things we hold dear.",
+    "short_contents": "Experience the evolution of modern art.",
+    "authored_by": "RE:VISIT",
+    "authored_at": "2024-11-03"
   }
 ]
 
