@@ -5,7 +5,10 @@ if ! command -v xcodegen &> /dev/null; then
     echo "XcodeGen not found. Installing..."
     brew install xcodegen
 fi
-
+if ! command -v xmlstarlet &> /dev/null; then
+    echo "xmlstarlet not found. Installing..."
+    brew install xmlstarlet
+fi
 ls .
 
 # Change to the project directory
@@ -40,11 +43,13 @@ export MARKETING_VERSION=$VERSION
 export CURRENT_PROJECT_VERSION=$BUILD_NUMBER
 export SUPABASE_API_KEY=$SUPABASE_API_KEY
 export SUPABASE_BASE_URL=$SUPABASE_BASE_URL
+export SCHEME_PATH=$SCHEME_PATH
 
 echo "MARKETING_VERSION: $MARKETING_VERSION"
 echo "CURRENT_PROJECT_VERSION: $CURRENT_PROJECT_VERSION"
 echo "SUPABASE_API_KEY: $SUPABASE_API_KEY"
 echo "SUPABASE_BASE_URL: $SUPABASE_BASE_URL"
+echo "SCHEME_PATH: $SCHEME_PATH"
 
 # Generate the Xcode project using XcodeGen
 echo "Generating Xcode project..."
@@ -68,7 +73,7 @@ touch Kapal-Lawd.xcodeproj/project.xcworkspace/xcshareddata/swiftpm/Package.reso
 echo "Creating Package.resolved..."
 cat <<EOL > Kapal-Lawd.xcodeproj/project.xcworkspace/xcshareddata/swiftpm/Package.resolved
 {
-  "originHash" : "fc9f608b2604b47e8a4e8f6d34706a07df80b7a48044b46fc831990fd3c8aece",
+  "originHash" : "04c19fbbf2e3b911933c8c85d19cf193e0a802c75b5cad57a6af6f3faf87e10e",
   "pins" : [
     {
       "identity" : "sdbeaconscanner",
@@ -77,6 +82,60 @@ cat <<EOL > Kapal-Lawd.xcodeproj/project.xcworkspace/xcshareddata/swiftpm/Packag
       "state" : {
         "revision" : "1b9ce5a1ba30691f7c4d404e6efd8c9ed02c230e",
         "version" : "0.0.2"
+      }
+    },
+    {
+      "identity" : "supabase-swift",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/supabase/supabase-swift.git",
+      "state" : {
+        "revision" : "24c6b2252f35cdd45e546bb5ea2c684c963df726",
+        "version" : "2.20.5"
+      }
+    },
+    {
+      "identity" : "swift-asn1",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/apple/swift-asn1.git",
+      "state" : {
+        "revision" : "7faebca1ea4f9aaf0cda1cef7c43aecd2311ddf6",
+        "version" : "1.3.0"
+      }
+    },
+    {
+      "identity" : "swift-concurrency-extras",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/pointfreeco/swift-concurrency-extras",
+      "state" : {
+        "revision" : "6054df64b55186f08b6d0fd87152081b8ad8d613",
+        "version" : "1.2.0"
+      }
+    },
+    {
+      "identity" : "swift-crypto",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/apple/swift-crypto.git",
+      "state" : {
+        "revision" : "8fa345c2081cfbd4851dffff5dd5bed48efe6081",
+        "version" : "3.9.0"
+      }
+    },
+    {
+      "identity" : "swift-http-types",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/apple/swift-http-types.git",
+      "state" : {
+        "revision" : "ae67c8178eb46944fd85e4dc6dd970e1f3ed6ccd",
+        "version" : "1.3.0"
+      }
+    },
+    {
+      "identity" : "xctest-dynamic-overlay",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/pointfreeco/xctest-dynamic-overlay",
+      "state" : {
+        "revision" : "770f990d3e4eececb57ac04a6076e22f8c97daeb",
+        "version" : "1.4.2"
       }
     }
   ],
@@ -96,23 +155,35 @@ else
     exit 1
 fi
 
-SCHEMA_FILE_PATH="/Kapal-Lawd.xcodeproj/xcshareddata/xcschemes/Kapal-Lawd.xcscheme"
+ls Kapal-Lawd.xcodeproj/xcshareddata/xcschemes
 
-if [ -f "$SCHEME_FILE_PATH" ]; then
-    echo "Modifying $SCHEME_FILE_PATH to add environment variables..."
+if [ -f "$SCHEME_PATH" ]; then
+    echo "Modifying $SCHEME_PATH to add environment variables..."
 
-    if ! grep -q "<EnvironmentVariable key=\"SUPABASE_API_KEY\"" "$SCHEME_FILE_PATH"; then
-        sed -i '' '/<\/EnvironmentVariables>/i\
-        <EnvironmentVariable key="SUPABASE_API_KEY" value="'"$SUPABASE_API_KEY"'" isEnabled="YES"/>' "$SCHEME_FILE_PATH"
+    # Add SUPABASE_API_KEY if it doesn't exist
+    if ! xmlstarlet sel -t -v "//EnvironmentVariable[@key='SUPABASE_API_KEY']" "$SCHEME_PATH" >/dev/null; then
+        xmlstarlet ed --inplace -s "//CommandLineArguments" -t elem -n "EnvironmentVariable" \
+            -v "" \
+            --insert "//EnvironmentVariable[not(@key)]" -t attr -n "key" -v "SUPABASE_API_KEY" \
+            --insert "//EnvironmentVariable[@key='SUPABASE_API_KEY']" -t attr -n "value" -v "$SUPABASE_API_KEY" \
+            --insert "//EnvironmentVariable[@key='SUPABASE_API_KEY']" -t attr -n "isEnabled" -v "YES" \
+            "$SCHEME_PATH"
     fi
 
-    if ! grep -q "<EnvironmentVariable key=\"SUPABASE_BASE_URL\"" "$SCHEME_FILE_PATH"; then
-        sed -i '' '/<\/EnvironmentVariables>/i\
-        <EnvironmentVariable key="SUPABASE_BASE_URL" value="'"$SUPABASE_BASE_URL"'" isEnabled="YES"/>' "$SCHEME_FILE_PATH"
+    # Add SUPABASE_BASE_URL if it doesn't exist
+    if ! xmlstarlet sel -t -v "//EnvironmentVariable[@key='SUPABASE_BASE_URL']" "$SCHEME_PATH" >/dev/null; then
+        xmlstarlet ed --inplace -s "//CommandLineArguments" -t elem -n "EnvironmentVariable" \
+            -v "" \
+            --insert "//EnvironmentVariable[not(@key)]" -t attr -n "key" -v "SUPABASE_BASE_URL" \
+            --insert "//EnvironmentVariable[@key='SUPABASE_BASE_URL']" -t attr -n "value" -v "$SUPABASE_BASE_URL" \
+            --insert "//EnvironmentVariable[@key='SUPABASE_BASE_URL']" -t attr -n "isEnabled" -v "YES" \
+            "$SCHEME_PATH"
     fi
 
-    echo "Environment variables added to $SCHEME_FILE_PATH."
+    echo "Environment variables added to $SCHEME_PATH."
 else
-    echo "$SCHEME_FILE_PATH not found. Ensure the scheme file exists and is correctly named."
+    echo "$SCHEME_PATH not found. Ensure the scheme file exists and is correctly named."
     exit 1
 fi
+
+cat $SCHEME_PATH
