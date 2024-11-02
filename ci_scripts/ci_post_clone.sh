@@ -160,20 +160,21 @@ ls Kapal-Lawd.xcodeproj/xcshareddata/xcschemes
 if [ -f "$SCHEME_PATH" ]; then
     echo "Modifying $SCHEME_PATH to add environment variables..."
 
-    # Add SUPABASE_API_KEY if it doesn't exist
+    # Add <EnvironmentVariables> section if it does not exist
+    xmlstarlet ed --inplace -s "//LaunchAction" -t elem -n "EnvironmentVariables" "$SCHEME_PATH"
+
+    # Add SUPABASE_API_KEY environment variable
     if ! xmlstarlet sel -t -v "//EnvironmentVariable[@key='SUPABASE_API_KEY']" "$SCHEME_PATH" >/dev/null; then
-        xmlstarlet ed --inplace -s "//CommandLineArguments" -t elem -n "EnvironmentVariable" \
-            -v "" \
+        xmlstarlet ed --inplace -s "//LaunchAction/EnvironmentVariables" -t elem -n "EnvironmentVariable" \
             --insert "//EnvironmentVariable[not(@key)]" -t attr -n "key" -v "SUPABASE_API_KEY" \
             --insert "//EnvironmentVariable[@key='SUPABASE_API_KEY']" -t attr -n "value" -v "$SUPABASE_API_KEY" \
             --insert "//EnvironmentVariable[@key='SUPABASE_API_KEY']" -t attr -n "isEnabled" -v "YES" \
             "$SCHEME_PATH"
     fi
 
-    # Add SUPABASE_BASE_URL if it doesn't exist
+    # Add SUPABASE_BASE_URL environment variable
     if ! xmlstarlet sel -t -v "//EnvironmentVariable[@key='SUPABASE_BASE_URL']" "$SCHEME_PATH" >/dev/null; then
-        xmlstarlet ed --inplace -s "//CommandLineArguments" -t elem -n "EnvironmentVariable" \
-            -v "" \
+        xmlstarlet ed --inplace -s "//LaunchAction/EnvironmentVariables" -t elem -n "EnvironmentVariable" \
             --insert "//EnvironmentVariable[not(@key)]" -t attr -n "key" -v "SUPABASE_BASE_URL" \
             --insert "//EnvironmentVariable[@key='SUPABASE_BASE_URL']" -t attr -n "value" -v "$SUPABASE_BASE_URL" \
             --insert "//EnvironmentVariable[@key='SUPABASE_BASE_URL']" -t attr -n "isEnabled" -v "YES" \
