@@ -80,7 +80,11 @@ struct PlaylistView: View {
                                 VStack (alignment: .leading) {
                                     Text(collections[0].name)
                                         .fontWeight(.semibold)
-                                    
+                                        .lineLimit(nil)
+                                        .multilineTextAlignment(.leading)
+                                        .frame(maxWidth: 350, alignment: .leading)
+                                        .fixedSize(horizontal: false, vertical: true)
+                
                                     Text(collections[0].authoredBy)
                                         .font(.footnote)
                                     
@@ -94,8 +98,11 @@ struct PlaylistView: View {
                             .frame(maxWidth: .infinity, maxHeight: 80)
                             
                             VStack {
-                                Text(collections[0].longContents)
-                                    .font(.footnote)
+                                ScrollView {
+                                    Text(collections[0].longContents)
+                                        .font(.footnote)
+                                        .padding(.horizontal, 8)
+                                }
                             }
                             .frame(maxWidth: .infinity, maxHeight: 108)
                             .padding(.top, 12)

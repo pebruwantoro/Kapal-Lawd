@@ -20,7 +20,7 @@ class AudioPlayerViewModel: ObservableObject {
     private var lastTargetVolume: Float? = nil
     private var currentVolumeLevel: VolumeLevel = .none
     private var lostBeaconCount: Int = 0
-    private let maxLostBeaconCount = 6 // Threshold for consecutive losses
+    private let maxLostBeaconCount = 8 // Threshold for consecutive losses
     @Published var isFindBeacon = false
     @Published var isBeaconFar = true
     

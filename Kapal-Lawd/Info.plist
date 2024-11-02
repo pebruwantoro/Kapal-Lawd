@@ -40,7 +40,7 @@
 	<key>Privacy - Location When In Use Usage Description</key>
 	<string>Your app needs access to your location to provide personalized services when the app is in use.</string>
 	<key>SUPABASE_API_KEY</key>
-	<string>${SUPABASE_API_KET}</string>
+	<string>${SUPABASE_API_KEY}</string>
 	<key>SUPABASE_BASE_URL</key>
 	<string>${SUPABASE_BASE_URL}</string>
 	<key>UIBackgroundModes</key>
