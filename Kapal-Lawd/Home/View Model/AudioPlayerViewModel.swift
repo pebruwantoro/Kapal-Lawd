@@ -164,8 +164,9 @@ extension AudioPlayerViewModel {
                 
                 proximityText = "Closest Beacon Found"
                 print("Beacon detected: \(identifier), Average RSSI: \(rssi) dBm")
-                
-                if rssi >= minRssi {
+                if minRssi >= rssi && rssi >= maxRssi && rssi != 0 {
+                    print("in range rssi: \(closestBeacon.rssi)")
+
                     // Reset lostBeaconCount since we are within range
                     self.isFindBeacon = true
                     self.isBeaconFar = false
@@ -183,6 +184,7 @@ extension AudioPlayerViewModel {
                         // Reset variables
                         lastTargetVolume = nil
                         currentVolumeLevel = .none
+                        print("not in range rssi: \(closestBeacon.rssi)")
                     }
                 }
             } else {
