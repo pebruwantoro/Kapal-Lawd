@@ -96,7 +96,9 @@ struct FindAuditagView: View {
         }
         .onReceive(beaconScanner.$isFindBeacon) { isFind in
             if !isFind {
-                self.collections.removeAll()
+//                self.collections.removeAll()
+                self.playlistPlayerViewModel.stopPlayback()
+                self.backgroundPlayerViewModel.stopBackground()
             } else {
                 collections = audioPlayerViewModel.fetchCollectionByBeaconId(id: beaconScanner.closestBeacon?.uuid.uuidString.lowercased() ?? "")
             }

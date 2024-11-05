@@ -145,10 +145,10 @@ struct PlaylistView: View {
                                     .listStyle(.plain)
                                     .padding(.bottom, 16)
                                     .onReceive(beaconScanner.$isFindBeacon.combineLatest(beaconScanner.$isBeaconChange)) { (isFind, isChange) in
-                                        if isChange {
-                                            list.removeAll()
-                                        }
-                                        if isFind && list.count == 0 {
+//                                        if isChange {
+//                                            list.removeAll()
+//                                        }
+                                        if isFind && !isChange && list.count == 0 {
                                             list = audioPlayerViewModel.fetchPlaylistByCollectionId(id: collections[0].uuid)
                                             playlistPlayerViewModel.playlistPlayerManager.playlist = list
                                         }
@@ -176,19 +176,19 @@ struct PlaylistView: View {
                     .padding(.horizontal, 16)
                     .onReceive(beaconScanner.$isFindBeacon.combineLatest(beaconScanner.$isBeaconChange)) { (isFind, isChange) in
                         if isChange {
-                            list.removeAll()
+//                            list.removeAll()
                             self.isFirstPlaylistPlay = false
                         }
-                        if isFind && list.count == 0 {
+                        if isFind && !isChange && list.count == 0 {
                             list = audioPlayerViewModel.fetchPlaylistByCollectionId(id: collections[0].uuid)
                             playlistPlayerViewModel.playlistPlayerManager.playlist = list
                         }
                         
-                        if let beaconId = beaconScanner.closestBeacon?.uuid.uuidString.lowercased() {
-                            Task {
-                                await audioPlayerViewModel.fetchBeaconById(id: beaconId)
-                            }
-                        }
+//                        if let beaconId = beaconScanner.closestBeacon?.uuid.uuidString.lowercased() {
+//                            Task {
+//                                await audioPlayerViewModel.fetchBeaconById(id: beaconId)
+//                            }
+//                        }
                     }
                     .onReceive(audioPlayerViewModel.$backgroundSound) { song in
                         delay(DefaultDelay.backSound.rawValue) {

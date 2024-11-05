@@ -125,20 +125,6 @@ struct PlayerView: View {
             self.currentSecond = convertSecondsToTimeString(seconds: time)
             self.trackBar = time
         }
-        .onReceive(beaconScanner.$closestBeacon.combineLatest(beaconScanner.$isFindBeacon, beaconScanner.$isBeaconChange)) { (beacon, isFind, isChange) in
-            print("beacon data: \(beacon)")
-            if beacon != nil && isFind && !isChange{
-                if let beaconId = beacon?.uuid.uuidString.lowercased() {
-                    Task {
-                        await audioPlayerViewModel.fetchBeaconById(id: beaconId)
-                    }
-                }
-                
-//                audioPlayerViewModel.adjustAudioForRSSI(rssi: Double((beacon?.rssi)!), maxRssi: audioPlayerViewModel.currentBeacon!.maxRssi, minRssi: audioPlayerViewModel.currentBeacon!.minRssi)
-            }
-            
-            
-        }
     }
 }
 

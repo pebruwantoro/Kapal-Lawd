@@ -7,20 +7,28 @@
 
 import CoreLocation
 import Combine
+import SwiftUI
 
 class IBeaconDetector: NSObject, ObservableObject, CLLocationManagerDelegate {
     private var locationManager: CLLocationManager?
-    private var beaconRepo = SupabaseBeaconsRepository()
+//    private var beaconRepo = SupabaseBeaconsRepository()
+    private var beaconRepo = JSONBeaconsRepository()
     private var currentBeaconId: String?
     private let beaconIdentifier = "AUDIUM"
+    private var beaconData: Beacons?
+    private var lastTargetVolume: Float? = nil
+    private var currentVolumeLevel: VolumeLevel = .none
     var dataBeacons: [Beacons] = []
+    @ObservedObject private var audioPlayerManager = AVManager.shared
     @Published var isFindBeacon = false
     @Published var isBeaconFar = true
     @Published var isBeaconChange = false
     @Published var backgroundSound: String = ""
     @Published var detectedBeacons: [CLBeacon] = []
+    @Published var detectedDataBeacons: [Beacons] = []
     @Published var closestBeacon: CLBeacon?
     @Published var isSessionActive: Bool = false
+    @Published var currentSongTitle: String?
     
     override init() {
         super.init()
@@ -123,8 +131,11 @@ class IBeaconDetector: NSObject, ObservableObject, CLLocationManagerDelegate {
     func locationManager(_ manager: CLLocationManager, didRange beacons: [CLBeacon], satisfying beaconConstraint: CLBeaconIdentityConstraint) {
         DispatchQueue.main.async {
             for beacon in beacons as [CLBeacon]{
-                for data in self.dataBeacons as [Beacons]{
-                    if beacon.rssi != 0 || Double(beacon.rssi) >= data.minRssi && Double(beacon.rssi) <= data.maxRssi {
+                if let dataBeacon = self.dataBeacons.first(where: { $0.uuid == beacon.uuid.uuidString.lowercased()}) {
+//                    print("logs beacon properties: \(beacon), rssi: \(beacon.rssi)")
+//                    print("logs beacon properties from database: \(dataBeacon), min rssi: \(dataBeacon.minRssi), max rssi: \(dataBeacon.maxRssi)")
+                    
+                    if beacon.rssi != 0 &&  Double(beacon.rssi) >= dataBeacon.maxRssi && Double(beacon.rssi) <= dataBeacon.minRssi{
                         
                         let beaconExists = self.detectedBeacons.contains { existingBeacon in
                             return existingBeacon.uuid == beacon.uuid
@@ -133,8 +144,17 @@ class IBeaconDetector: NSObject, ObservableObject, CLLocationManagerDelegate {
                         if !beaconExists {
                             self.detectedBeacons.append(beacon)
                         }
+                        
+                        let dataExists = self.detectedDataBeacons.contains{ exist in
+                            return exist.uuid == dataBeacon.uuid
+                        }
+                        
+                        if !dataExists {
+                            self.detectedDataBeacons.append(dataBeacon)
+                        }
                     } else {
                         self.detectedBeacons = []
+                        self.detectedDataBeacons = []
                         self.makeDisactive()
                     }
                 }
@@ -142,18 +162,24 @@ class IBeaconDetector: NSObject, ObservableObject, CLLocationManagerDelegate {
             
             if let nearestBeacon = self.detectedBeacons.max(by: { $0.rssi < $1.rssi }) {
                 if self.currentBeaconId != nearestBeacon.uuid.uuidString {
-                    self.closestBeacon = nearestBeacon
-                    self.currentBeaconId = nearestBeacon.uuid.uuidString
                     self.isBeaconChange = true
                 } else {
                     self.isBeaconChange = false
-//                    self.startMonitoring()
                 }
                 
+                self.closestBeacon = nearestBeacon
+                self.currentBeaconId = nearestBeacon.uuid.uuidString
+                self.beaconData = self.detectedDataBeacons.first { $0.uuid == nearestBeacon.uuid.uuidString.lowercased()}
                 self.makeActive()
+                self.adjustAudioForRSSI(rssi: Double(nearestBeacon.rssi), maxRssi: self.beaconData!.maxRssi, minRssi: self.beaconData!.minRssi)
+            } else {
+                self.makeDisactive()
             }
         }
         
+        
+        print("detected beacons: \(detectedBeacons)")
+        print("detected data beacons: \(detectedDataBeacons)")
         print("current beacon: \(currentBeaconId)")
     }
     
@@ -162,9 +188,89 @@ class IBeaconDetector: NSObject, ObservableObject, CLLocationManagerDelegate {
         self.isFindBeacon = true
     }
     
-    private  func makeDisactive() {
+    private func makeDisactive() {
         self.isBeaconFar = true
         self.isFindBeacon = false
+    }
+    
+    func adjustAudioForRSSI(rssi: Double, maxRssi: Double, minRssi: Double) {
+        let levels = 5
+        let hysteresis = 2.0 // Adjust as needed
+        
+        // Calculate the delta between levels
+        let delta = (maxRssi - minRssi) / Double(levels)
+        
+        // Create dynamic thresholds
+        var thresholds: [(enter: Double, exit: Double, volumeLevel: VolumeLevel, volume: Float)] = []
+        
+        for i in 0..<levels {
+            let enter = maxRssi - Double(i) * delta
+            let exit = enter - hysteresis
+            let volumeLevel = VolumeLevel(rawValue: levels - i) ?? .none
+            let volume = Float(volumeLevel.rawValue) / Float(levels)
+            thresholds.append((enter: enter, exit: exit, volumeLevel: volumeLevel, volume: volume))
+        }
+        
+        var targetVolume: Float = 0.0
+        var newVolumeLevel: VolumeLevel = .none
+        let songTitle = audioPlayerManager.currentSongTitle
+        
+        for threshold in thresholds {
+            if currentVolumeLevel == threshold.volumeLevel {
+                // Currently in this volume level, check exit condition
+                if rssi < threshold.exit {
+                    continue
+                } else {
+                    newVolumeLevel = threshold.volumeLevel
+                    targetVolume = threshold.volume
+                    break
+                }
+            } else {
+                // Not in this volume level, check enter condition
+                if rssi >= threshold.enter {
+                    newVolumeLevel = threshold.volumeLevel
+                    targetVolume = threshold.volume
+                    break
+                }
+            }
+        }
+        
+        if newVolumeLevel == .none {
+            targetVolume = 0.0
+        }
+        
+        if newVolumeLevel == currentVolumeLevel {
+            // No change in volume level
+            return
+        }
+        
+        print("RSSI: \(rssi), Target Volume: \(targetVolume), Current Volume Level: \(currentVolumeLevel), New Volume Level: \(newVolumeLevel)")
+        
+        if targetVolume == 0.0 {
+            if audioPlayerManager.isPlaying {
+                audioPlayerManager.fadeToVolume(targetVolume: 0.0, duration: 1.0) {
+                    self.audioPlayerManager.stopPlayback()
+                }
+            }
+            currentVolumeLevel = .none
+            lastTargetVolume = nil
+            return
+        }
+        
+        if audioPlayerManager.currentSongTitle != songTitle || !audioPlayerManager.isPlaying {
+            // Start new playback
+            audioPlayerManager.stopPlayback()
+            audioPlayerManager.currentSongTitle = songTitle
+            audioPlayerManager.fadeToVolume(targetVolume: targetVolume, duration: 1.0)
+            lastTargetVolume = targetVolume
+            currentVolumeLevel = newVolumeLevel
+        } else {
+            if lastTargetVolume != targetVolume {
+                audioPlayerManager.fadeToVolume(targetVolume: targetVolume, duration: 1.0)
+                lastTargetVolume = targetVolume
+                currentVolumeLevel = newVolumeLevel
+            }
+        }
     }
 }
 
