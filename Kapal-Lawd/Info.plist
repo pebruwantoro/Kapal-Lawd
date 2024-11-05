@@ -40,9 +40,9 @@
 	<key>Privacy - Location When In Use Usage Description</key>
 	<string>Your app needs access to your location to provide personalized services when the app is in use.</string>
 	<key>SUPABASE_API_KEY</key>
-	<string>${SUPABASE_API_KEY}</string>
+	<string>eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1vYWppY3BiY3d6bXZpdXNrdWNwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MjkxNDIxOTcsImV4cCI6MjA0NDcxODE5N30.3qk4UMeGKoDjnBHI0eO5Bb1efSBU6mR5uGzo-AyQw6A</string>
 	<key>SUPABASE_BASE_URL</key>
-	<string>${SUPABASE_BASE_URL}</string>
+	<string>https://moajicpbcwzmviuskucp.supabase.co</string>
 	<key>UIBackgroundModes</key>
 	<array>
 		<string>location</string>

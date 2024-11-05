@@ -11,24 +11,22 @@ import SwiftUI
 
 class IBeaconDetector: NSObject, ObservableObject, CLLocationManagerDelegate {
     private var locationManager: CLLocationManager?
-//    private var beaconRepo = SupabaseBeaconsRepository()
-    private var beaconRepo = JSONBeaconsRepository()
-    private var currentBeaconId: String?
-    private let beaconIdentifier = "AUDIUM"
+    private var beaconRepo = SupabaseBeaconsRepository()
     private var beaconData: Beacons?
     private var lastTargetVolume: Float? = nil
     private var currentVolumeLevel: VolumeLevel = .none
     var dataBeacons: [Beacons] = []
+    var beaconBLE: [String: CLBeacon] = [:]
     @ObservedObject private var audioPlayerManager = AVManager.shared
     @Published var isFindBeacon = false
     @Published var isBeaconFar = true
     @Published var isBeaconChange = false
     @Published var backgroundSound: String = ""
     @Published var detectedBeacons: [CLBeacon] = []
-    @Published var detectedDataBeacons: [Beacons] = []
     @Published var closestBeacon: CLBeacon?
     @Published var isSessionActive: Bool = false
     @Published var currentSongTitle: String?
+    @Published var currentBeaconId: String?
     
     override init() {
         super.init()
@@ -38,11 +36,14 @@ class IBeaconDetector: NSObject, ObservableObject, CLLocationManagerDelegate {
         locationManager?.allowsBackgroundLocationUpdates = true
 
         Task {
-            await self.fetchBeaconsAndStartMonitoring()
+            await self.fetchBeacons()
         }
+        
+//        startMonitoring()
     }
+
     
-    private func fetchBeaconsAndStartMonitoring() async {
+    private func fetchBeacons() async {
         do {
             let fetchedBeacons = try await beaconRepo.fetchListBeacons()
             DispatchQueue.main.async {
@@ -61,7 +62,7 @@ class IBeaconDetector: NSObject, ObservableObject, CLLocationManagerDelegate {
         
         for beacon in self.dataBeacons {
             if let uuid = UUID(uuidString: beacon.uuid) {
-                let beaconRegion = CLBeaconRegion(uuid: uuid, identifier: beaconIdentifier)
+                let beaconRegion = CLBeaconRegion(uuid: uuid, identifier: uuid.uuidString)
                 beaconRegion.notifyEntryStateOnDisplay = true
                 locationManager.startMonitoring(for: beaconRegion)
                 locationManager.startRangingBeacons(satisfying: beaconRegion.beaconIdentityConstraint)
@@ -116,10 +117,9 @@ class IBeaconDetector: NSObject, ObservableObject, CLLocationManagerDelegate {
         switch status {
         case .authorizedAlways, .authorizedWhenInUse:
             if isSessionActive {
-                Task {
-                    await self.fetchBeaconsAndStartMonitoring()
+                delay(1) {
+                    self.startMonitoring()
                 }
-                startMonitoring()
             }
         default:
             if isSessionActive {
@@ -129,58 +129,34 @@ class IBeaconDetector: NSObject, ObservableObject, CLLocationManagerDelegate {
     }
     
     func locationManager(_ manager: CLLocationManager, didRange beacons: [CLBeacon], satisfying beaconConstraint: CLBeaconIdentityConstraint) {
-        DispatchQueue.main.async {
-            for beacon in beacons as [CLBeacon]{
+        delay(2) {
+            for beacon in beacons {
                 if let dataBeacon = self.dataBeacons.first(where: { $0.uuid == beacon.uuid.uuidString.lowercased()}) {
-//                    print("logs beacon properties: \(beacon), rssi: \(beacon.rssi)")
-//                    print("logs beacon properties from database: \(dataBeacon), min rssi: \(dataBeacon.minRssi), max rssi: \(dataBeacon.maxRssi)")
-                    
-                    if beacon.rssi != 0 &&  Double(beacon.rssi) >= dataBeacon.maxRssi && Double(beacon.rssi) <= dataBeacon.minRssi{
-                        
-                        let beaconExists = self.detectedBeacons.contains { existingBeacon in
-                            return existingBeacon.uuid == beacon.uuid
-                        }
-                        
-                        if !beaconExists {
-                            self.detectedBeacons.append(beacon)
-                        }
-                        
-                        let dataExists = self.detectedDataBeacons.contains{ exist in
-                            return exist.uuid == dataBeacon.uuid
-                        }
-                        
-                        if !dataExists {
-                            self.detectedDataBeacons.append(dataBeacon)
-                        }
+                    self.beaconData = dataBeacon
+                    if beacon.rssi != 0 && Double(beacon.rssi) >= dataBeacon.maxRssi {
+                        self.beaconBLE[beacon.uuid.uuidString.lowercased()] = beacon
                     } else {
-                        self.detectedBeacons = []
-                        self.detectedDataBeacons = []
-                        self.makeDisactive()
+                        self.beaconBLE[beacon.uuid.uuidString.lowercased()] = beacon
                     }
                 }
             }
             
-            if let nearestBeacon = self.detectedBeacons.max(by: { $0.rssi < $1.rssi }) {
+            if let nearestBeacon = self.beaconBLE.values.max(by: { $0.rssi < $1.rssi }) {
                 if self.currentBeaconId != nearestBeacon.uuid.uuidString {
                     self.isBeaconChange = true
+                    self.currentBeaconId = nearestBeacon.uuid.uuidString
+                    self.closestBeacon = nearestBeacon
                 } else {
                     self.isBeaconChange = false
+                    self.currentBeaconId = nearestBeacon.uuid.uuidString
+                    self.closestBeacon = nearestBeacon
                 }
                 
-                self.closestBeacon = nearestBeacon
-                self.currentBeaconId = nearestBeacon.uuid.uuidString
-                self.beaconData = self.detectedDataBeacons.first { $0.uuid == nearestBeacon.uuid.uuidString.lowercased()}
                 self.makeActive()
+                
                 self.adjustAudioForRSSI(rssi: Double(nearestBeacon.rssi), maxRssi: self.beaconData!.maxRssi, minRssi: self.beaconData!.minRssi)
-            } else {
-                self.makeDisactive()
             }
         }
-        
-        
-        print("detected beacons: \(detectedBeacons)")
-        print("detected data beacons: \(detectedDataBeacons)")
-        print("current beacon: \(currentBeaconId)")
     }
     
     private func makeActive() {

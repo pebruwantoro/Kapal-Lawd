@@ -7,16 +7,14 @@
 
 import AVFoundation
 import SwiftUI
-import Combine
 
 class AudioPlayerViewModel: ObservableObject {
     private var collectionRepo = JSONCollectionsRepository()
     private var playlistRepo = JSONPlaylistRepository()
     private var beaconRepo = SupabaseBeaconsRepository()
-    
+    @ObservedObject private var beaconScanner = IBeaconDetector()
     @Published var currentBeacon: Beacons?
     @Published var backgroundSound: String?
-    @Published var isFind = false
     
     func fetchCollectionByBeaconId(id: String) -> [Collections] {
         let result = collectionRepo.fetchListCollectionsByBeaconId(req: CollectionsRequest(beaconId: id))
@@ -40,38 +38,7 @@ class AudioPlayerViewModel: ObservableObject {
         return result.0
     }
     
-    func fetchBeaconById(id: String) async {
-        do {
-            let beacon = try await beaconRepo.fetchListBeaconsByUUID(req: BeaconsRequest(uuid: id))
-            DispatchQueue.main.async {
-                print("fetch beacon: \(beacon)")
-                self.currentBeacon = beacon[0]
-                self.backgroundSound = beacon[0].backgroundSound
-            }
-        } catch {
-            print("Error fetching beacons: \(error.localizedDescription)")
-            // Handle error appropriately (e.g., show an alert or retry)
-        }
+    func fetchBeaconById(id: String) -> Beacons? {
+        return beaconScanner.dataBeacons.first { $0.uuid == id }
     }
 }
-
-
-
-//            // Reset lostBeaconCount since we are within range
-//            self.isFindBeacon = true
-//            self.isBeaconFar = false
-//            self.lostBeaconCount = 0
-//            adjustAudioForRSSI(rssi: rssi, minRssi: minRssi, maxRssi: maxRssi)
-//        
-//           
-//                self.isFindBeacon = false
-//                self.isBeaconFar = true
-//                lastTargetVolume = nil
-//                currentVolumeLevel = .none
-//                
-//    self.lostBeaconCount += 1
-//        self.isFindBeacon = false
-//        self.isBeaconFar = true
-//        audioPlayerManager.stopPlayback()
-//        lastTargetVolume = nil
-//        currentVolumeLevel = .none
