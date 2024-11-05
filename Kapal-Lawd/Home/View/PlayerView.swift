@@ -16,6 +16,7 @@ struct PlayerView: View {
     @EnvironmentObject private var audioPlayerViewModel: AudioPlayerViewModel
     @EnvironmentObject private var playlistPlayerViewModel: PlaylistPlayerViewModel
     @EnvironmentObject private var backgroundPlayerViewModel: BackgroundPlayerViewModel
+    @EnvironmentObject private var beaconScanner: IBeaconDetector
     
     let timer = Timer.publish(every: 0.1, on: .main, in: .common).autoconnect()
     
@@ -123,6 +124,20 @@ struct PlayerView: View {
         .onReceive(playlistPlayerViewModel.playlistPlayerManager.$currentTimeInSeconds) { time in
             self.currentSecond = convertSecondsToTimeString(seconds: time)
             self.trackBar = time
+        }
+        .onReceive(beaconScanner.$closestBeacon.combineLatest(beaconScanner.$isFindBeacon, beaconScanner.$isBeaconChange)) { (beacon, isFind, isChange) in
+            print("beacon data: \(beacon)")
+            if beacon != nil && isFind && !isChange{
+                if let beaconId = beacon?.uuid.uuidString.lowercased() {
+                    Task {
+                        await audioPlayerViewModel.fetchBeaconById(id: beaconId)
+                    }
+                }
+                
+//                audioPlayerViewModel.adjustAudioForRSSI(rssi: Double((beacon?.rssi)!), maxRssi: audioPlayerViewModel.currentBeacon!.maxRssi, minRssi: audioPlayerViewModel.currentBeacon!.minRssi)
+            }
+            
+            
         }
     }
 }

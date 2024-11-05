@@ -16,14 +16,15 @@ struct PlaylistView: View {
     @EnvironmentObject private var audioPlayerViewModel: AudioPlayerViewModel
     @EnvironmentObject private var playlistPlayerViewModel: PlaylistPlayerViewModel
     @EnvironmentObject private var backgroundPlayerViewModel: BackgroundPlayerViewModel
+    @EnvironmentObject private var beaconScanner: IBeaconDetector
     
     var body: some View {
         Group {
             NavigationStack {
-                if self.audioPlayerViewModel.isBeaconFar {
+                if self.beaconScanner.isBeaconFar {
                     VStack {
                         FindAuditagView(isExploring: self.$isExploring)
-                            .onReceive(audioPlayerViewModel.$isFindBeacon) { isFind in
+                            .onReceive(beaconScanner.$isFindBeacon) { isFind in
                                 if !isFind {
                                     playlistPlayerViewModel.playlistPlayerManager.removeTimeObserver()
                                     playlistPlayerViewModel.resetAsset()
@@ -55,7 +56,6 @@ struct PlaylistView: View {
                                     },
                                     secondaryButton: .destructive(Text("End Session")) {
                                         isExploring = false
-                                        print("end session")
                                         playlistPlayerViewModel.stopPlayback()
                                         backgroundPlayerViewModel.stopBackground()
                                     }
@@ -144,12 +144,21 @@ struct PlaylistView: View {
                                     }
                                     .listStyle(.plain)
                                     .padding(.bottom, 16)
+                                    .onReceive(beaconScanner.$isFindBeacon.combineLatest(beaconScanner.$isBeaconChange)) { (isFind, isChange) in
+                                        if isChange {
+                                            list.removeAll()
+                                        }
+                                        if isFind && list.count == 0 {
+                                            list = audioPlayerViewModel.fetchPlaylistByCollectionId(id: collections[0].uuid)
+                                            playlistPlayerViewModel.playlistPlayerManager.playlist = list
+                                        }
+                                    }
                                 }
                             }.padding(.bottom, 16)
                             
                             if !self.list.isEmpty {
                                 PlayerView(isPlaying: $playlistPlayerViewModel.playlistPlayerManager.isPlaying, list: $list)
-                                    .onReceive(audioPlayerViewModel.$isFindBeacon) { isFind in
+                                    .onReceive(beaconScanner.$isFindBeacon) { isFind in
                                         delay(DefaultDelay.interaction.rawValue) {
                                             if isFind && !self.isFirstPlaylistPlay {
                                                 self.isFirstPlaylistPlay = true
@@ -160,23 +169,35 @@ struct PlaylistView: View {
                                     .environmentObject(audioPlayerViewModel)
                                     .environmentObject(playlistPlayerViewModel)
                                     .environmentObject(backgroundPlayerViewModel)
+                                    .environmentObject(beaconScanner)
                             }
                         }
                     }
                     .padding(.horizontal, 16)
-                    .onReceive(audioPlayerViewModel.$isFindBeacon) { isFind in
+                    .onReceive(beaconScanner.$isFindBeacon.combineLatest(beaconScanner.$isBeaconChange)) { (isFind, isChange) in
+                        if isChange {
+                            list.removeAll()
+                            self.isFirstPlaylistPlay = false
+                        }
                         if isFind && list.count == 0 {
                             list = audioPlayerViewModel.fetchPlaylistByCollectionId(id: collections[0].uuid)
                             playlistPlayerViewModel.playlistPlayerManager.playlist = list
                         }
-                    }
-                    .onReceive(audioPlayerViewModel.beaconScanner.$averageRSSI) { rssi in
-                        audioPlayerViewModel.handleRSSIChange(rssi)
+                        
+                        if let beaconId = beaconScanner.closestBeacon?.uuid.uuidString.lowercased() {
+                            Task {
+                                await audioPlayerViewModel.fetchBeaconById(id: beaconId)
+                            }
+                        }
                     }
                     .onReceive(audioPlayerViewModel.$backgroundSound) { song in
                         delay(DefaultDelay.backSound.rawValue) {
-                            if !backgroundPlayerViewModel.backgroundSoundManager.isBackgroundPlaying && song != "" {
-                                backgroundPlayerViewModel.startBackgroundSound(song: song)
+                            if song != nil {
+                                if !backgroundPlayerViewModel.backgroundSoundManager.isBackgroundPlaying {
+                                    backgroundPlayerViewModel.startBackgroundSound(song: song!)
+                                }
+                            } else {
+                                backgroundPlayerViewModel.stopBackground()
                             }
                         }
                     }
@@ -190,6 +211,7 @@ struct PlaylistView: View {
     @Previewable var audioPlayerViewModel: AudioPlayerViewModel = AudioPlayerViewModel()
     @Previewable var playlistPlayerViewModel: PlaylistPlayerViewModel = PlaylistPlayerViewModel()
     @Previewable var backgroundPlayerViewModel: BackgroundPlayerViewModel = BackgroundPlayerViewModel()
+    @Previewable var beaconScanner: IBeaconDetector = IBeaconDetector()
 
     PlaylistView(
         isExploring: .constant(true),
@@ -211,4 +233,5 @@ struct PlaylistView: View {
     .environmentObject(audioPlayerViewModel)
     .environmentObject(playlistPlayerViewModel)
     .environmentObject(backgroundPlayerViewModel)
+    .environmentObject(beaconScanner)
 }

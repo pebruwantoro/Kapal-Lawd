@@ -9,33 +9,26 @@ import CoreLocation
 import Combine
 
 class IBeaconDetector: NSObject, ObservableObject, CLLocationManagerDelegate {
-    // Published properties
+    private var locationManager: CLLocationManager?
+    private var beaconRepo = SupabaseBeaconsRepository()
+    private var currentBeaconId: String?
+    private let beaconIdentifier = "AUDIUM"
+    var dataBeacons: [Beacons] = []
+    @Published var isFindBeacon = false
+    @Published var isBeaconFar = true
+    @Published var isBeaconChange = false
+    @Published var backgroundSound: String = ""
     @Published var detectedBeacons: [CLBeacon] = []
     @Published var closestBeacon: CLBeacon?
-    @Published var averageRSSI: Double = -100.0 // Smoothed RSSI value
-
-    // Private properties
-    private var locationManager: CLLocationManager?
-    
-    var beacons: [Beacons] = []
-    
-    private let beaconIdentifier = "MyBeacons"
-
-    private var emaRSSI: [String: Double] = [:]
-    private let emaAlpha: Double = 0.2 // Smoothing factor
-    
-    private var beaconRepo = SupabaseBeaconsRepository()
+    @Published var isSessionActive: Bool = false
     
     override init() {
         super.init()
         locationManager = CLLocationManager()
         locationManager?.delegate = self
         locationManager?.requestAlwaysAuthorization()
-
-        // Enable continuous location scanning
         locationManager?.allowsBackgroundLocationUpdates = true
 
-        // Fetch beacons and then start monitoring
         Task {
             await self.fetchBeaconsAndStartMonitoring()
         }
@@ -45,7 +38,7 @@ class IBeaconDetector: NSObject, ObservableObject, CLLocationManagerDelegate {
         do {
             let fetchedBeacons = try await beaconRepo.fetchListBeacons()
             DispatchQueue.main.async {
-                self.beacons = fetchedBeacons
+                self.dataBeacons = fetchedBeacons
                 self.startMonitoring()
             }
         } catch {
@@ -56,65 +49,37 @@ class IBeaconDetector: NSObject, ObservableObject, CLLocationManagerDelegate {
 
     func startMonitoring() {
         guard let locationManager = self.locationManager else { return }
-        guard !self.beacons.isEmpty else { return }
+        guard !self.dataBeacons.isEmpty else { return }
         
-        for beacon in self.beacons {
+        for beacon in self.dataBeacons {
             if let uuid = UUID(uuidString: beacon.uuid) {
                 let beaconRegion = CLBeaconRegion(uuid: uuid, identifier: beaconIdentifier)
+                beaconRegion.notifyEntryStateOnDisplay = true
                 locationManager.startMonitoring(for: beaconRegion)
                 locationManager.startRangingBeacons(satisfying: beaconRegion.beaconIdentityConstraint)
             }
         }
-
-        // Ensure the app continues location updates in the background
+        
+        self.isSessionActive = true
         locationManager.startUpdatingLocation()
+    }
+    
+    func stopMonitoring() {
+        for beacon in self.dataBeacons {
+            if let uuid = UUID(uuidString: beacon.uuid) {
+                let beaconRegion = CLBeaconRegion(uuid: uuid, identifier: uuid.uuidString)
+                locationManager?.stopMonitoring(for: beaconRegion)
+                locationManager?.stopRangingBeacons(satisfying: beaconRegion.beaconIdentityConstraint)
+            }
+        }
+        
+        self.isSessionActive = false
     }
 
     // Helper function to create a unique identifier for a beacon
     func beaconIdentifier(for beacon: CLBeacon) -> String {
         // Modify as needed to include major and minor if necessary
         return "\(beacon.uuid.uuidString.lowercased())"
-    }
-
-    // CLLocationManagerDelegate methods
-    func locationManager(
-        _ manager: CLLocationManager,
-        didRange beacons: [CLBeacon],
-        satisfying beaconConstraint: CLBeaconIdentityConstraint
-    ) {
-        if self.beacons.isEmpty {
-            closestBeacon = nil
-            averageRSSI = -100.0
-            return
-        }
-
-        detectedBeacons = beacons
-        
-        // Find the beacon with the strongest signal (highest RSSI)
-        if let nearestBeacon = beacons.max(by: { $0.rssi > $1.rssi }) {
-            let identifier = beaconIdentifier(for: nearestBeacon)
-            let smoothedRSSI = smoothRSSI(rssi: nearestBeacon.rssi, for: identifier)
-            self.closestBeacon = nearestBeacon
-            self.averageRSSI = smoothedRSSI
-        } else {
-            self.closestBeacon = nil
-            self.averageRSSI = -100.0
-        }
-    }
-
-    // Smooth the RSSI values using EMA
-    private func smoothRSSI(rssi: Int, for beaconIdentifier: String) -> Double {
-        if rssi == 0 {
-            return -100.0 // Invalid RSSI, return a low value
-        }
-
-        // Exponential Moving Average (EMA) for RSSI
-        if emaRSSI[beaconIdentifier] == nil {
-            emaRSSI[beaconIdentifier] = Double(rssi)
-        } else {
-            emaRSSI[beaconIdentifier] = emaAlpha * Double(rssi) + (1 - emaAlpha) * emaRSSI[beaconIdentifier]!
-        }
-        return emaRSSI[beaconIdentifier]!
     }
 
     func locationManager(_ manager: CLLocationManager, didEnterRegion region: CLRegion) {
@@ -124,8 +89,14 @@ class IBeaconDetector: NSObject, ObservableObject, CLLocationManagerDelegate {
     }
 
     func locationManager(_ manager: CLLocationManager, didExitRegion region: CLRegion) {
-        if let beaconRegion = region as? CLBeaconRegion {
-            locationManager?.stopRangingBeacons(satisfying: beaconRegion.beaconIdentityConstraint)
+        DispatchQueue.main.async {
+            self.dataBeacons.removeAll { $0.uuid == region.identifier }
+            if self.closestBeacon?.uuid.uuidString == region.identifier {
+                if let beaconRegion = region as? CLBeaconRegion {
+                    self.locationManager?.stopRangingBeacons(satisfying: beaconRegion.beaconIdentityConstraint)
+                }
+            }
+            self.makeDisactive()
         }
     }
 
@@ -134,17 +105,66 @@ class IBeaconDetector: NSObject, ObservableObject, CLLocationManagerDelegate {
     }
 
     func locationManager(_ manager: CLLocationManager, didChangeAuthorization status: CLAuthorizationStatus) {
-        if status == .authorizedAlways {
-            if self.beacons.isEmpty {
-                // Beacons not yet fetched; fetch and start monitoring
+        switch status {
+        case .authorizedAlways, .authorizedWhenInUse:
+            if isSessionActive {
                 Task {
                     await self.fetchBeaconsAndStartMonitoring()
                 }
-            } else {
-                // Beacons already fetched; start monitoring
                 startMonitoring()
             }
+        default:
+            if isSessionActive {
+                stopMonitoring()
+            }
         }
+    }
+    
+    func locationManager(_ manager: CLLocationManager, didRange beacons: [CLBeacon], satisfying beaconConstraint: CLBeaconIdentityConstraint) {
+        DispatchQueue.main.async {
+            for beacon in beacons as [CLBeacon]{
+                for data in self.dataBeacons as [Beacons]{
+                    if beacon.rssi != 0 || Double(beacon.rssi) >= data.minRssi && Double(beacon.rssi) <= data.maxRssi {
+                        
+                        let beaconExists = self.detectedBeacons.contains { existingBeacon in
+                            return existingBeacon.uuid == beacon.uuid
+                        }
+                        
+                        if !beaconExists {
+                            self.detectedBeacons.append(beacon)
+                        }
+                    } else {
+                        self.detectedBeacons = []
+                        self.makeDisactive()
+                    }
+                }
+            }
+            
+            if let nearestBeacon = self.detectedBeacons.max(by: { $0.rssi < $1.rssi }) {
+                if self.currentBeaconId != nearestBeacon.uuid.uuidString {
+                    self.closestBeacon = nearestBeacon
+                    self.currentBeaconId = nearestBeacon.uuid.uuidString
+                    self.isBeaconChange = true
+                } else {
+                    self.isBeaconChange = false
+//                    self.startMonitoring()
+                }
+                
+                self.makeActive()
+            }
+        }
+        
+        print("current beacon: \(currentBeaconId)")
+    }
+    
+    private func makeActive() {
+        self.isBeaconFar = false
+        self.isFindBeacon = true
+    }
+    
+    private  func makeDisactive() {
+        self.isBeaconFar = true
+        self.isFindBeacon = false
     }
 }
 

@@ -10,70 +10,56 @@ import SwiftUI
 import Combine
 
 class AudioPlayerViewModel: ObservableObject {
-    @Published var currentSongTitle: String?
     private var collectionRepo = JSONCollectionsRepository()
     private var playlistRepo = JSONPlaylistRepository()
-    
-    @ObservedObject private var audioPlayerManager = AVManager.shared
-    @Published var beaconScanner: IBeaconDetector = IBeaconDetector()
-    @Published var proximityText: String = "No Beacon Detected"
+    private var beaconRepo = SupabaseBeaconsRepository()
     private var lastTargetVolume: Float? = nil
     private var currentVolumeLevel: VolumeLevel = .none
-    private var lostBeaconCount: Int = 0
-    private let maxLostBeaconCount = 8 // Threshold for consecutive losses
-    @Published var isFindBeacon = false
-    @Published var isBeaconFar = true
-    
-    private var cancellables = Set<AnyCancellable>()
-    @Published var backgroundSound: String = ""
-    
-    enum VolumeLevel: Int {
-        case none = 0
-        case level1 = 1 // 20% volume
-        case level2 = 2 // 40% volume
-        case level3 = 3 // 60% volume
-        case level4 = 4 // 80% volume
-        case level5 = 5 // 100% volume
-    }
-    
-    init() {
-        // Observe the averageRSSI from beaconScanner
-        beaconScanner.$averageRSSI
-            .receive(on: DispatchQueue.main)
-            .sink { [weak self] rssi in
-                self?.handleRSSIChange(rssi)
-            }
-            .store(in: &cancellables)
-    }
+    @Published var currentSongTitle: String?
+    @Published var currentBeacon: Beacons?
+    @ObservedObject private var audioPlayerManager = AVManager.shared
+    @Published var backgroundSound: String?
+    @Published var isFind = false
     
     func fetchCollectionByBeaconId(id: String) -> [Collections] {
-        for beacon in beaconScanner.beacons {
-            if beacon.uuid.lowercased() == beaconScanner.closestBeacon?.uuid.uuidString.lowercased() {
-                self.backgroundSound = beacon.backgroundSound
-            }
-        }
-        
         let result = collectionRepo.fetchListCollectionsByBeaconId(req: CollectionsRequest(beaconId: id))
         let errorHandler = result.1
+        
         if let errorHandler = errorHandler {
             print("error: \(errorHandler)")
         }
+        
         return result.0
     }
     
     func fetchPlaylistByCollectionId(id: String) -> [Playlist] {
         let result = playlistRepo.fetchPlaylistByCollectionId(req: PlaylistRequest(collectionId: id))
         let errorHandler = result.1
+        
         if let errorHandler = errorHandler {
             print("error: \(errorHandler)")
         }
         
         return result.0
     }
+    
+    func fetchBeaconById(id: String) async {
+        do {
+            let beacon = try await beaconRepo.fetchListBeaconsByUUID(req: BeaconsRequest(uuid: id))
+            DispatchQueue.main.async {
+                print("fetch beacon: \(beacon)")
+                self.currentBeacon = beacon[0]
+                self.backgroundSound = beacon[0].backgroundSound
+            }
+        } catch {
+            print("Error fetching beacons: \(error.localizedDescription)")
+            // Handle error appropriately (e.g., show an alert or retry)
+        }
+    }
 }
 
 extension AudioPlayerViewModel {
-    func adjustAudioForRSSI(rssi: Double, minRssi: Double, maxRssi: Double) {
+    func adjustAudioForRSSI(rssi: Double, maxRssi: Double, minRssi: Double) {
         let levels = 5
         let hysteresis = 2.0 // Adjust as needed
         
@@ -152,58 +138,25 @@ extension AudioPlayerViewModel {
             }
         }
     }
-    
-    func handleRSSIChange(_ rssi: Double) {
-        if let closestBeacon = beaconScanner.closestBeacon, rssi > -100.0 {
-            let identifier = beaconScanner.beaconIdentifier(for: closestBeacon)
-            // Find the corresponding Beacons object
-            if let beaconInfo = beaconScanner.beacons.first(where: { $0.uuid.lowercased() == closestBeacon.uuid.uuidString.lowercased() }) {
-                
-                let minRssi = beaconInfo.minRssi
-                let maxRssi = beaconInfo.maxRssi
-                
-                proximityText = "Closest Beacon Found"
-                print("Beacon detected: \(identifier), Average RSSI: \(rssi) dBm")
-                if minRssi >= rssi && rssi >= maxRssi && rssi != 0 {
-                    print("in range rssi: \(closestBeacon.rssi)")
-
-                    // Reset lostBeaconCount since we are within range
-                    self.isFindBeacon = true
-                    self.isBeaconFar = false
-                    self.lostBeaconCount = 0
-                    adjustAudioForRSSI(rssi: rssi, minRssi: minRssi, maxRssi: maxRssi)
-                } else {
-                    // RSSI is lower than minRssi
-                    self.lostBeaconCount += 1
-                    print("RSSI lower than minRssi. Lost count: \(self.lostBeaconCount)")
-                    if self.lostBeaconCount >= self.maxLostBeaconCount {
-                        proximityText = "Beacon is too far"
-                        self.isFindBeacon = false
-                        self.isBeaconFar = true
-                        print("Beacon too far after \(maxLostBeaconCount) attempts")
-                        // Reset variables
-                        lastTargetVolume = nil
-                        currentVolumeLevel = .none
-                        print("not in range rssi: \(closestBeacon.rssi)")
-                    }
-                }
-            } else {
-                print("No matching beacon info found.")
-            }
-        } else {
-            // No beacon detected
-            self.lostBeaconCount += 1
-            print("Beacon not detected or invalid RSSI. Lost count: \(self.lostBeaconCount)")
-            if self.lostBeaconCount >= self.maxLostBeaconCount {
-                self.isFindBeacon = false
-                self.isBeaconFar = true
-                proximityText = "No Beacon Detected"
-                audioPlayerManager.stopPlayback()
-                print("No closest beacon found after \(maxLostBeaconCount) attempts")
-                // Reset variables
-                lastTargetVolume = nil
-                currentVolumeLevel = .none
-            }
-        }
-    }
 }
+
+
+
+//            // Reset lostBeaconCount since we are within range
+//            self.isFindBeacon = true
+//            self.isBeaconFar = false
+//            self.lostBeaconCount = 0
+//            adjustAudioForRSSI(rssi: rssi, minRssi: minRssi, maxRssi: maxRssi)
+//        
+//           
+//                self.isFindBeacon = false
+//                self.isBeaconFar = true
+//                lastTargetVolume = nil
+//                currentVolumeLevel = .none
+//                
+//    self.lostBeaconCount += 1
+//        self.isFindBeacon = false
+//        self.isBeaconFar = true
+//        audioPlayerManager.stopPlayback()
+//        lastTargetVolume = nil
+//        currentVolumeLevel = .none

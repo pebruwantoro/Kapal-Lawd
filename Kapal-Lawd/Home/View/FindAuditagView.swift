@@ -17,15 +17,16 @@ struct FindAuditagView: View {
     @StateObject private var playlistPlayerViewModel: PlaylistPlayerViewModel = PlaylistPlayerViewModel()
     @StateObject private var backgroundPlayerViewModel: BackgroundPlayerViewModel = BackgroundPlayerViewModel()
     @StateObject private var interactionPlayerViewModel: InteractionPlayerViewModel = InteractionPlayerViewModel()
+    @StateObject private var beaconScanner: IBeaconDetector = IBeaconDetector()
     @State private var isPlayInteraction = false
     
     var body: some View {
         Group {
             Spacer()
             
-            if audioPlayerViewModel.isFindBeacon {
+            if beaconScanner.isFindBeacon {
                 PlaylistView(isExploring: self.$isExploring, collections: self.$collections)
-                    .onReceive(audioPlayerViewModel.$isFindBeacon) { value in
+                    .onReceive(beaconScanner.$isFindBeacon) { value in
                         if !isPlayInteraction {
                             interactionPlayerViewModel.startInteractionSound(song: DeafultSong.interaction.rawValue)
                             isPlayInteraction = value
@@ -34,6 +35,7 @@ struct FindAuditagView: View {
                     .environmentObject(audioPlayerViewModel)
                     .environmentObject(playlistPlayerViewModel)
                     .environmentObject(backgroundPlayerViewModel)
+                    .environmentObject(beaconScanner)
             } else {
                 VStack(spacing: 16) {
                     ZStack {
@@ -92,11 +94,11 @@ struct FindAuditagView: View {
                 .opacity(cardOpacity)
             }
         }
-        .onReceive(audioPlayerViewModel.$isFindBeacon) { value in
-            if !value {
+        .onReceive(beaconScanner.$isFindBeacon) { isFind in
+            if !isFind {
                 self.collections.removeAll()
             } else {
-                collections = audioPlayerViewModel.fetchCollectionByBeaconId(id: audioPlayerViewModel.beaconScanner.closestBeacon?.uuid.uuidString.lowercased() ?? "")
+                collections = audioPlayerViewModel.fetchCollectionByBeaconId(id: beaconScanner.closestBeacon?.uuid.uuidString.lowercased() ?? "")
             }
         }
     }

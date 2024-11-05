@@ -53,7 +53,6 @@ internal final class SupabaseBeaconsRepository: BeaconsRepository {
                 .select("id, created_at, UUID, background_sound, min_rssi, max_rssi")
                 .execute()
                 .value
-            print(beacons)
             return beacons
         } catch {
             throw mapErrorToErrorHandler(error)
