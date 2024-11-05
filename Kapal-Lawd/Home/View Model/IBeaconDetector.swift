@@ -7,45 +7,47 @@
 
 import CoreLocation
 import Combine
+import SwiftUI
 
 class IBeaconDetector: NSObject, ObservableObject, CLLocationManagerDelegate {
-    // Published properties
+    private var locationManager: CLLocationManager?
+    private var beaconRepo = SupabaseBeaconsRepository()
+    private var beaconData: Beacons?
+    private var lastTargetVolume: Float? = nil
+    private var currentVolumeLevel: VolumeLevel = .none
+    var dataBeacons: [Beacons] = []
+    var beaconBLE: [String: CLBeacon] = [:]
+    @ObservedObject private var audioPlayerManager = AVManager.shared
+    @Published var isFindBeacon = false
+    @Published var isBeaconFar = true
+    @Published var isBeaconChange = false
+    @Published var backgroundSound: String = ""
     @Published var detectedBeacons: [CLBeacon] = []
     @Published var closestBeacon: CLBeacon?
-    @Published var averageRSSI: Double = -100.0 // Smoothed RSSI value
-
-    // Private properties
-    private var locationManager: CLLocationManager?
-    
-    var beacons: [Beacons] = []
-    
-    private let beaconIdentifier = "MyBeacons"
-
-    private var emaRSSI: [String: Double] = [:]
-    private let emaAlpha: Double = 0.2 // Smoothing factor
-    
-    private var beaconRepo = SupabaseBeaconsRepository()
+    @Published var isSessionActive: Bool = false
+    @Published var currentSongTitle: String?
+    @Published var currentBeaconId: String?
     
     override init() {
         super.init()
         locationManager = CLLocationManager()
         locationManager?.delegate = self
         locationManager?.requestAlwaysAuthorization()
-
-        // Enable continuous location scanning
         locationManager?.allowsBackgroundLocationUpdates = true
 
-        // Fetch beacons and then start monitoring
         Task {
-            await self.fetchBeaconsAndStartMonitoring()
+            await self.fetchBeacons()
         }
+        
+//        startMonitoring()
     }
+
     
-    private func fetchBeaconsAndStartMonitoring() async {
+    private func fetchBeacons() async {
         do {
             let fetchedBeacons = try await beaconRepo.fetchListBeacons()
             DispatchQueue.main.async {
-                self.beacons = fetchedBeacons
+                self.dataBeacons = fetchedBeacons
                 self.startMonitoring()
             }
         } catch {
@@ -56,65 +58,37 @@ class IBeaconDetector: NSObject, ObservableObject, CLLocationManagerDelegate {
 
     func startMonitoring() {
         guard let locationManager = self.locationManager else { return }
-        guard !self.beacons.isEmpty else { return }
+        guard !self.dataBeacons.isEmpty else { return }
         
-        for beacon in self.beacons {
+        for beacon in self.dataBeacons {
             if let uuid = UUID(uuidString: beacon.uuid) {
-                let beaconRegion = CLBeaconRegion(uuid: uuid, identifier: beaconIdentifier)
+                let beaconRegion = CLBeaconRegion(uuid: uuid, identifier: uuid.uuidString)
+                beaconRegion.notifyEntryStateOnDisplay = true
                 locationManager.startMonitoring(for: beaconRegion)
                 locationManager.startRangingBeacons(satisfying: beaconRegion.beaconIdentityConstraint)
             }
         }
-
-        // Ensure the app continues location updates in the background
+        
+        self.isSessionActive = true
         locationManager.startUpdatingLocation()
+    }
+    
+    func stopMonitoring() {
+        for beacon in self.dataBeacons {
+            if let uuid = UUID(uuidString: beacon.uuid) {
+                let beaconRegion = CLBeaconRegion(uuid: uuid, identifier: uuid.uuidString)
+                locationManager?.stopMonitoring(for: beaconRegion)
+                locationManager?.stopRangingBeacons(satisfying: beaconRegion.beaconIdentityConstraint)
+            }
+        }
+        
+        self.isSessionActive = false
     }
 
     // Helper function to create a unique identifier for a beacon
     func beaconIdentifier(for beacon: CLBeacon) -> String {
         // Modify as needed to include major and minor if necessary
         return "\(beacon.uuid.uuidString.lowercased())"
-    }
-
-    // CLLocationManagerDelegate methods
-    func locationManager(
-        _ manager: CLLocationManager,
-        didRange beacons: [CLBeacon],
-        satisfying beaconConstraint: CLBeaconIdentityConstraint
-    ) {
-        if self.beacons.isEmpty {
-            closestBeacon = nil
-            averageRSSI = -100.0
-            return
-        }
-
-        detectedBeacons = beacons
-        
-        // Find the beacon with the strongest signal (highest RSSI)
-        if let nearestBeacon = beacons.max(by: { $0.rssi > $1.rssi }) {
-            let identifier = beaconIdentifier(for: nearestBeacon)
-            let smoothedRSSI = smoothRSSI(rssi: nearestBeacon.rssi, for: identifier)
-            self.closestBeacon = nearestBeacon
-            self.averageRSSI = smoothedRSSI
-        } else {
-            self.closestBeacon = nil
-            self.averageRSSI = -100.0
-        }
-    }
-
-    // Smooth the RSSI values using EMA
-    private func smoothRSSI(rssi: Int, for beaconIdentifier: String) -> Double {
-        if rssi == 0 {
-            return -100.0 // Invalid RSSI, return a low value
-        }
-
-        // Exponential Moving Average (EMA) for RSSI
-        if emaRSSI[beaconIdentifier] == nil {
-            emaRSSI[beaconIdentifier] = Double(rssi)
-        } else {
-            emaRSSI[beaconIdentifier] = emaAlpha * Double(rssi) + (1 - emaAlpha) * emaRSSI[beaconIdentifier]!
-        }
-        return emaRSSI[beaconIdentifier]!
     }
 
     func locationManager(_ manager: CLLocationManager, didEnterRegion region: CLRegion) {
@@ -124,8 +98,14 @@ class IBeaconDetector: NSObject, ObservableObject, CLLocationManagerDelegate {
     }
 
     func locationManager(_ manager: CLLocationManager, didExitRegion region: CLRegion) {
-        if let beaconRegion = region as? CLBeaconRegion {
-            locationManager?.stopRangingBeacons(satisfying: beaconRegion.beaconIdentityConstraint)
+        DispatchQueue.main.async {
+            self.dataBeacons.removeAll { $0.uuid == region.identifier }
+            if self.closestBeacon?.uuid.uuidString == region.identifier {
+                if let beaconRegion = region as? CLBeaconRegion {
+                    self.locationManager?.stopRangingBeacons(satisfying: beaconRegion.beaconIdentityConstraint)
+                }
+            }
+            self.makeDisactive()
         }
     }
 
@@ -134,15 +114,137 @@ class IBeaconDetector: NSObject, ObservableObject, CLLocationManagerDelegate {
     }
 
     func locationManager(_ manager: CLLocationManager, didChangeAuthorization status: CLAuthorizationStatus) {
-        if status == .authorizedAlways {
-            if self.beacons.isEmpty {
-                // Beacons not yet fetched; fetch and start monitoring
-                Task {
-                    await self.fetchBeaconsAndStartMonitoring()
+        switch status {
+        case .authorizedAlways, .authorizedWhenInUse:
+            if isSessionActive {
+                delay(1) {
+                    self.startMonitoring()
+                }
+            }
+        default:
+            if isSessionActive {
+                stopMonitoring()
+            }
+        }
+    }
+    
+    func locationManager(_ manager: CLLocationManager, didRange beacons: [CLBeacon], satisfying beaconConstraint: CLBeaconIdentityConstraint) {
+        delay(2) {
+            for beacon in beacons {
+                if let dataBeacon = self.dataBeacons.first(where: { $0.uuid == beacon.uuid.uuidString.lowercased()}) {
+                    self.beaconData = dataBeacon
+                    if beacon.rssi != 0 && Double(beacon.rssi) >= dataBeacon.maxRssi {
+                        self.beaconBLE[beacon.uuid.uuidString.lowercased()] = beacon
+                    } else {
+                        self.beaconBLE[beacon.uuid.uuidString.lowercased()] = beacon
+                    }
+                }
+            }
+            
+            if let nearestBeacon = self.beaconBLE.values.max(by: { $0.rssi < $1.rssi }) {
+                if self.currentBeaconId != nearestBeacon.uuid.uuidString {
+                    self.isBeaconChange = true
+                    self.currentBeaconId = nearestBeacon.uuid.uuidString
+                    self.closestBeacon = nearestBeacon
+                } else {
+                    self.isBeaconChange = false
+                    self.currentBeaconId = nearestBeacon.uuid.uuidString
+                    self.closestBeacon = nearestBeacon
+                }
+                
+                self.makeActive()
+                
+                self.adjustAudioForRSSI(rssi: Double(nearestBeacon.rssi), maxRssi: self.beaconData!.maxRssi, minRssi: self.beaconData!.minRssi)
+            }
+        }
+    }
+    
+    private func makeActive() {
+        self.isBeaconFar = false
+        self.isFindBeacon = true
+    }
+    
+    private func makeDisactive() {
+        self.isBeaconFar = true
+        self.isFindBeacon = false
+    }
+    
+    func adjustAudioForRSSI(rssi: Double, maxRssi: Double, minRssi: Double) {
+        let levels = 5
+        let hysteresis = 2.0 // Adjust as needed
+        
+        // Calculate the delta between levels
+        let delta = (maxRssi - minRssi) / Double(levels)
+        
+        // Create dynamic thresholds
+        var thresholds: [(enter: Double, exit: Double, volumeLevel: VolumeLevel, volume: Float)] = []
+        
+        for i in 0..<levels {
+            let enter = maxRssi - Double(i) * delta
+            let exit = enter - hysteresis
+            let volumeLevel = VolumeLevel(rawValue: levels - i) ?? .none
+            let volume = Float(volumeLevel.rawValue) / Float(levels)
+            thresholds.append((enter: enter, exit: exit, volumeLevel: volumeLevel, volume: volume))
+        }
+        
+        var targetVolume: Float = 0.0
+        var newVolumeLevel: VolumeLevel = .none
+        let songTitle = audioPlayerManager.currentSongTitle
+        
+        for threshold in thresholds {
+            if currentVolumeLevel == threshold.volumeLevel {
+                // Currently in this volume level, check exit condition
+                if rssi < threshold.exit {
+                    continue
+                } else {
+                    newVolumeLevel = threshold.volumeLevel
+                    targetVolume = threshold.volume
+                    break
                 }
             } else {
-                // Beacons already fetched; start monitoring
-                startMonitoring()
+                // Not in this volume level, check enter condition
+                if rssi >= threshold.enter {
+                    newVolumeLevel = threshold.volumeLevel
+                    targetVolume = threshold.volume
+                    break
+                }
+            }
+        }
+        
+        if newVolumeLevel == .none {
+            targetVolume = 0.0
+        }
+        
+        if newVolumeLevel == currentVolumeLevel {
+            // No change in volume level
+            return
+        }
+        
+        print("RSSI: \(rssi), Target Volume: \(targetVolume), Current Volume Level: \(currentVolumeLevel), New Volume Level: \(newVolumeLevel)")
+        
+        if targetVolume == 0.0 {
+            if audioPlayerManager.isPlaying {
+                audioPlayerManager.fadeToVolume(targetVolume: 0.0, duration: 1.0) {
+                    self.audioPlayerManager.stopPlayback()
+                }
+            }
+            currentVolumeLevel = .none
+            lastTargetVolume = nil
+            return
+        }
+        
+        if audioPlayerManager.currentSongTitle != songTitle || !audioPlayerManager.isPlaying {
+            // Start new playback
+            audioPlayerManager.stopPlayback()
+            audioPlayerManager.currentSongTitle = songTitle
+            audioPlayerManager.fadeToVolume(targetVolume: targetVolume, duration: 1.0)
+            lastTargetVolume = targetVolume
+            currentVolumeLevel = newVolumeLevel
+        } else {
+            if lastTargetVolume != targetVolume {
+                audioPlayerManager.fadeToVolume(targetVolume: targetVolume, duration: 1.0)
+                lastTargetVolume = targetVolume
+                currentVolumeLevel = newVolumeLevel
             }
         }
     }

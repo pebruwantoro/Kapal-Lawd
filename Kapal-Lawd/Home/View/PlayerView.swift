@@ -8,14 +8,17 @@
 import SwiftUI
 
 struct PlayerView: View {
-    @State var trackBar: Double = 0.0
     @Binding var isPlaying: Bool
     @Binding var list: [Playlist]
     @State private var currentSecond: String = "00:00"
     @State private var currentSong: String = ""
+    @State private var isFirstPlaylistPlay: Bool = false
+    @State var trackBar: Double = 0.0
+    @State var totalDuration: Double = 0.0
     @EnvironmentObject private var audioPlayerViewModel: AudioPlayerViewModel
     @EnvironmentObject private var playlistPlayerViewModel: PlaylistPlayerViewModel
     @EnvironmentObject private var backgroundPlayerViewModel: BackgroundPlayerViewModel
+    @EnvironmentObject private var beaconScanner: IBeaconDetector
     
     let timer = Timer.publish(every: 0.1, on: .main, in: .common).autoconnect()
     
@@ -29,7 +32,7 @@ struct PlayerView: View {
                         .font(.body)
                         .foregroundColor(.gray)
                     
-                    ProgressView("", value: self.trackBar, total: convertToSeconds(from: list[playlistPlayerViewModel.playlistPlayerManager.currentPlaylistIndex].duration)!)
+                    ProgressView("", value: self.trackBar, total: self.totalDuration)
                         .accentColor(Color("AppButton"))
                         .scaleEffect(x: 1, y: 1.5, anchor: .bottom)
                     
@@ -115,14 +118,35 @@ struct PlayerView: View {
         .cornerRadius(36)
         .shadow(radius: 5)
         .padding(.horizontal, 16)
+        .onReceive(beaconScanner.$isBeaconChange) { isChange in
+            if isChange {
+                self.isFirstPlaylistPlay = false
+                self.trackBar = 0.0
+            }
+        }
+        .onReceive(beaconScanner.$isFindBeacon) { isFind in
+            delay(DefaultDelay.interaction.rawValue) {
+                if isFind && !self.isFirstPlaylistPlay {
+                    self.isFirstPlaylistPlay = true
+                    playlistPlayerViewModel.startPlayback(song: list[0].name)
+                }
+            }
+            
+            self.playlistPlayerViewModel.playlistPlayerManager.playlist = list
+            
+            self.totalDuration = convertToSeconds(from: list[playlistPlayerViewModel.playlistPlayerManager.currentPlaylistIndex].duration)!
+        }
         .onReceive(playlistPlayerViewModel.playlistPlayerManager.$currentSongTitle) { song in
             if let audio = song {
                 self.currentSong = audio
             }
         }
         .onReceive(playlistPlayerViewModel.playlistPlayerManager.$currentTimeInSeconds) { time in
-            self.currentSecond = convertSecondsToTimeString(seconds: time)
-            self.trackBar = time
+            if self.isPlaying {
+                self.currentSecond = convertSecondsToTimeString(seconds: time)
+                self.trackBar = time
+            }
+            
         }
     }
 }

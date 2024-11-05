@@ -11,21 +11,24 @@ struct FindAuditagView: View {
     @Binding var isExploring: Bool
     @State private var isScanning = false
     @State private var cardOpacity = 0.0
-    @State var collections: [Collections] = []
+    @State private var collections: [Collections] = []
+    @State private var playlists: [Playlist] = []
     @State var pulseScan = Animation.easeOut(duration: 2).repeatForever(autoreverses: true)
     @StateObject private var audioPlayerViewModel: AudioPlayerViewModel = AudioPlayerViewModel()
     @StateObject private var playlistPlayerViewModel: PlaylistPlayerViewModel = PlaylistPlayerViewModel()
     @StateObject private var backgroundPlayerViewModel: BackgroundPlayerViewModel = BackgroundPlayerViewModel()
     @StateObject private var interactionPlayerViewModel: InteractionPlayerViewModel = InteractionPlayerViewModel()
+    @StateObject private var beaconScanner: IBeaconDetector = IBeaconDetector()
     @State private var isPlayInteraction = false
+    @State private var isContentReady = false
     
     var body: some View {
         Group {
             Spacer()
             
-            if audioPlayerViewModel.isFindBeacon {
-                PlaylistView(isExploring: self.$isExploring, collections: self.$collections)
-                    .onReceive(audioPlayerViewModel.$isFindBeacon) { value in
+            if isContentReady {
+                PlaylistView(isExploring: self.$isExploring, collections: $collections, list: $playlists)
+                    .onReceive(beaconScanner.$isFindBeacon) { value in
                         if !isPlayInteraction {
                             interactionPlayerViewModel.startInteractionSound(song: DeafultSong.interaction.rawValue)
                             isPlayInteraction = value
@@ -34,6 +37,7 @@ struct FindAuditagView: View {
                     .environmentObject(audioPlayerViewModel)
                     .environmentObject(playlistPlayerViewModel)
                     .environmentObject(backgroundPlayerViewModel)
+                    .environmentObject(beaconScanner)
             } else {
                 VStack(spacing: 16) {
                     ZStack {
@@ -92,13 +96,22 @@ struct FindAuditagView: View {
                 .opacity(cardOpacity)
             }
         }
-        .onReceive(audioPlayerViewModel.$isFindBeacon) { value in
-            if !value {
-                self.collections.removeAll()
+        .onReceive(beaconScanner.$isFindBeacon) { isFind in
+            if !isFind {
+                self.playlistPlayerViewModel.stopPlayback()
+                self.backgroundPlayerViewModel.stopBackground()
+                self.beaconScanner.startMonitoring()
+                self.playlistPlayerViewModel.playlistPlayerManager.removeTimeObserver()
+                self.isContentReady = false
             } else {
-                collections = audioPlayerViewModel.fetchCollectionByBeaconId(id: audioPlayerViewModel.beaconScanner.closestBeacon?.uuid.uuidString.lowercased() ?? "")
+                collections = audioPlayerViewModel.fetchCollectionByBeaconId(id: (beaconScanner.closestBeacon?.uuid.uuidString.lowercased())!)
+                    if collections.count > 0 {
+                        self.playlists = audioPlayerViewModel.fetchPlaylistByCollectionId(id: collections[0].uuid)
+                        self.isContentReady = true
+                    }
             }
         }
+        
     }
 }
 

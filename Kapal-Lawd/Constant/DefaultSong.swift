@@ -14,3 +14,12 @@ enum DefaultDelay: Double {
     case backSound = 2.90
     case song = 3
 }
+
+enum VolumeLevel: Int {
+    case none = 0
+    case level1 = 1 // 20% volume
+    case level2 = 2 // 40% volume
+    case level3 = 3 // 60% volume
+    case level4 = 4 // 80% volume
+    case level5 = 5 // 100% volume
+}

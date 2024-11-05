@@ -10,27 +10,27 @@ import SwiftUI
 struct PlaylistView: View {
     @Binding var isExploring: Bool
     @Binding var collections: [Collections]
-    @State var showAlert = false
-    @State var list: [Playlist] = []
-    @State private var isFirstPlaylistPlay: Bool = false
+    @Binding var list: [Playlist]
     @EnvironmentObject private var audioPlayerViewModel: AudioPlayerViewModel
     @EnvironmentObject private var playlistPlayerViewModel: PlaylistPlayerViewModel
     @EnvironmentObject private var backgroundPlayerViewModel: BackgroundPlayerViewModel
+    @EnvironmentObject private var beaconScanner: IBeaconDetector
+    @State var showAlert = false
+    @State private var isBackgroundPlay = false
     
     var body: some View {
         Group {
             NavigationStack {
-                if self.audioPlayerViewModel.isBeaconFar {
+                if self.beaconScanner.isBeaconFar {
                     VStack {
                         FindAuditagView(isExploring: self.$isExploring)
-                            .onReceive(audioPlayerViewModel.$isFindBeacon) { isFind in
+                            .onReceive(beaconScanner.$isFindBeacon) { isFind in
                                 if !isFind {
                                     playlistPlayerViewModel.playlistPlayerManager.removeTimeObserver()
                                     playlistPlayerViewModel.resetAsset()
                                     backgroundPlayerViewModel.stopBackground()
                                     self.collections.removeAll()
                                     self.list.removeAll()
-                                    self.isFirstPlaylistPlay = false
                                 }
                             }
                     }
@@ -55,7 +55,6 @@ struct PlaylistView: View {
                                     },
                                     secondaryButton: .destructive(Text("End Session")) {
                                         isExploring = false
-                                        print("end session")
                                         playlistPlayerViewModel.stopPlayback()
                                         backgroundPlayerViewModel.stopBackground()
                                     }
@@ -149,34 +148,24 @@ struct PlaylistView: View {
                             
                             if !self.list.isEmpty {
                                 PlayerView(isPlaying: $playlistPlayerViewModel.playlistPlayerManager.isPlaying, list: $list)
-                                    .onReceive(audioPlayerViewModel.$isFindBeacon) { isFind in
-                                        delay(DefaultDelay.interaction.rawValue) {
-                                            if isFind && !self.isFirstPlaylistPlay {
-                                                self.isFirstPlaylistPlay = true
-                                                playlistPlayerViewModel.startPlayback(song: playlistPlayerViewModel.playlistPlayerManager.playlist[0].name)
-                                            }
-                                        }
-                                    }
                                     .environmentObject(audioPlayerViewModel)
                                     .environmentObject(playlistPlayerViewModel)
                                     .environmentObject(backgroundPlayerViewModel)
+                                    .environmentObject(beaconScanner)
                             }
                         }
                     }
                     .padding(.horizontal, 16)
-                    .onReceive(audioPlayerViewModel.$isFindBeacon) { isFind in
-                        if isFind && list.count == 0 {
-                            list = audioPlayerViewModel.fetchPlaylistByCollectionId(id: collections[0].uuid)
-                            playlistPlayerViewModel.playlistPlayerManager.playlist = list
-                        }
-                    }
-                    .onReceive(audioPlayerViewModel.beaconScanner.$averageRSSI) { rssi in
-                        audioPlayerViewModel.handleRSSIChange(rssi)
-                    }
-                    .onReceive(audioPlayerViewModel.$backgroundSound) { song in
+                    .onReceive(beaconScanner.$isFindBeacon) { isFind in
                         delay(DefaultDelay.backSound.rawValue) {
-                            if !backgroundPlayerViewModel.backgroundSoundManager.isBackgroundPlaying && song != "" {
-                                backgroundPlayerViewModel.startBackgroundSound(song: song)
+                            if isFind && !isBackgroundPlay {
+                                if let beacon = audioPlayerViewModel.fetchBeaconById(id: (beaconScanner.closestBeacon?.uuid.uuidString.lowercased())!) {
+                                    self.isBackgroundPlay = true
+                                    backgroundPlayerViewModel.startBackgroundSound(song: beacon.backgroundSound)
+                                } else {
+                                    self.isBackgroundPlay = false
+                                    backgroundPlayerViewModel.stopBackground()
+                                }
                             }
                         }
                     }
@@ -190,6 +179,7 @@ struct PlaylistView: View {
     @Previewable var audioPlayerViewModel: AudioPlayerViewModel = AudioPlayerViewModel()
     @Previewable var playlistPlayerViewModel: PlaylistPlayerViewModel = PlaylistPlayerViewModel()
     @Previewable var backgroundPlayerViewModel: BackgroundPlayerViewModel = BackgroundPlayerViewModel()
+    @Previewable var beaconScanner: IBeaconDetector = IBeaconDetector()
 
     PlaylistView(
         isExploring: .constant(true),
@@ -206,9 +196,13 @@ struct PlaylistView: View {
                     authoredAt: "2024-10-10"
                 )
             ]
-        )
+        ),
+        list: .constant([
+            Playlist(uuid: "", collectionId: "", name: "", duration: "")
+        ])
     )
     .environmentObject(audioPlayerViewModel)
     .environmentObject(playlistPlayerViewModel)
     .environmentObject(backgroundPlayerViewModel)
+    .environmentObject(beaconScanner)
 }
