@@ -127,7 +127,7 @@ struct PlaylistView: View {
                                             Spacer()
                                             
                                             Button(action: {
-                                                playlistPlayerViewModel.startPlayback(song: playlist.name)
+                                                playlistPlayerViewModel.startPlayback(song: playlist.name, url: playlist.url)
                                                 ButtonHaptic()
                                             })
                                             {
@@ -198,7 +198,7 @@ struct PlaylistView: View {
             ]
         ),
         list: .constant([
-            Playlist(uuid: "", collectionId: "", name: "", duration: "")
+            Playlist(uuid: "", collectionId: "", name: "", duration: "", url: "")
         ])
     )
     .environmentObject(audioPlayerViewModel)

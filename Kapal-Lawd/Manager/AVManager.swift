@@ -40,11 +40,12 @@ class AVManager: ObservableObject {
         stopPlayback()
     }
 
-    func startPlayback(songTitle: String) {
+    func startPlayback(songTitle: String, url: String) {
         removeTimeObserver()
+        configureAudioSession()
         
-        guard let url = Bundle.main.url(forResource: songTitle, withExtension: "wav") else {
-            print("Audio file not found: \(songTitle)")
+        guard let url = URL(string: AudiumBackendService.baseURL+url) else {
+            print("Invalid URL")
             return
         }
         
@@ -52,8 +53,7 @@ class AVManager: ObservableObject {
         self.playerItem = AVPlayerItem(url: url)
         self.player = AVPlayer(playerItem: playerItem)
         
-        try? AVAudioSession.sharedInstance().setCategory(.playback, mode: .default)
-        try? AVAudioSession.sharedInstance().setActive(true)
+        
 
         self.player?.play()
         self.isPlaying = true
@@ -69,7 +69,7 @@ class AVManager: ObservableObject {
                                                selector: #selector(playerDidFinishPlaying(_:)),
                                                name: .AVPlayerItemDidPlayToEndTime,
                                                object: playerItem)
-        configureAudioSession()
+        
     }
     
     func stopPlayback() {
@@ -123,7 +123,7 @@ class AVManager: ObservableObject {
         if currentPlaylistIndex < playlist.count - 1 {
             removeTimeObserver()
             self.currentPlaylistIndex += 1
-            startPlayback(songTitle: playlist[currentPlaylistIndex].name)
+            startPlayback(songTitle: playlist[currentPlaylistIndex].name, url: playlist[currentPlaylistIndex].url)
         }
     }
 
@@ -131,7 +131,7 @@ class AVManager: ObservableObject {
         if currentPlaylistIndex > 0 {
             removeTimeObserver()
             self.currentPlaylistIndex -= 1
-            startPlayback(songTitle: playlist[currentPlaylistIndex].name)
+            startPlayback(songTitle: playlist[currentPlaylistIndex].name, url: playlist[currentPlaylistIndex].url)
         }
     }
 }

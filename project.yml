@@ -5,6 +5,7 @@ settings:
   DEVELOPMENT_TEAM: ${DEVELOPMENT_TEAM_ID}
   SUPABASE_API_KEY: ${SUPABASE_API_KEY}
   SUPABASE_BASE_URL: ${SUPABASE_BASE_URL}
+  AUDIUM_SERVER_BASE_URL: ${AUDIUM_SERVER_BASE_URL}
 options:
   bundleIdPrefix: com.Kapal-Lawd
   resolvePackagesAutomatically: true
@@ -29,6 +30,8 @@ targets:
           NSLocationAlwaysAndWhenInUseUsageDescription: "Your app needs access to your location to provide personalized services even when the app is in the background."
           NSBluetoothAlwaysUsageDescription: "This app requires continuous access to Bluetooth for background monitoring."
           NSBluetoothPeripheralUsageDescription: "This app requires access to Bluetooth for connecting to peripherals."
+          NSAppTransportSecurity:
+            NSAllowsArbitraryLoads: true
           UIBackgroundModes:
             - location
             - audio
@@ -49,6 +52,7 @@ targets:
           CFBundleDisplayName: "Audium"
           SUPABASE_API_KEY: ${SUPABASE_API_KEY}
           SUPABASE_BASE_URL: ${SUPABASE_BASE_URL}
+          AUDIUM_SERVER_BASE_URL: ${AUDIUM_SERVER_BASE_URL}
     sources: [Kapal-Lawd]
     resources: [Resources]
     settings:

@@ -17,9 +17,9 @@ enum DefaultDelay: Double {
 
 enum VolumeLevel: Int {
     case none = 0
-    case level1 = 1 // 20% volume
-    case level2 = 2 // 40% volume
-    case level3 = 3 // 60% volume
-    case level4 = 4 // 80% volume
-    case level5 = 5 // 100% volume
+    case level1 = 1
+    case level2 = 2
+    case level3 = 3
+    case level4 = 4
+    case level5 = 5
 }
