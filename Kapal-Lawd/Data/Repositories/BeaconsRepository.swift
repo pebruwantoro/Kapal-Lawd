@@ -23,7 +23,7 @@ internal final class JSONBeaconsRepository: BeaconsRepository {
         case .success(let beacons):
             return beacons
         case .failure(let error):
-            throw ErrorHandler.map(error)
+            throw mapErrorToErrorHandler(error)
         }
     }
     
@@ -47,7 +47,7 @@ internal final class SupabaseBeaconsRepository: BeaconsRepository {
                 .value
             return beacons
         } catch {
-            throw ErrorHandler.map(error)
+            throw mapErrorToErrorHandler(error)
         }
     }
     
@@ -61,7 +61,7 @@ internal final class SupabaseBeaconsRepository: BeaconsRepository {
                 .value
             return beacons
         } catch {
-            throw ErrorHandler.map(error)
+            throw mapErrorToErrorHandler(error)
         }
     }
 }

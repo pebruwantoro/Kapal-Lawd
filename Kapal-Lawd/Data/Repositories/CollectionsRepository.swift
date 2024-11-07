@@ -23,7 +23,7 @@ internal final class JSONCollectionsRepository: CollectionsRepository {
         case .success(let collections):
             return collections
         case .failure(let error):
-            throw ErrorHandler.map(error)
+            throw mapErrorToErrorHandler(error)
         }
     }
     
@@ -47,7 +47,7 @@ internal final class SupabaseCollectionsRepository: CollectionsRepository {
                 .value
             return collections
         } catch {
-            throw ErrorHandler.map(error)
+            throw mapErrorToErrorHandler(error)
         }
     }
     
@@ -61,7 +61,7 @@ internal final class SupabaseCollectionsRepository: CollectionsRepository {
                 .value
             return collections
         } catch {
-            throw ErrorHandler.map(error)
+            throw mapErrorToErrorHandler(error)
         }
     }
 }

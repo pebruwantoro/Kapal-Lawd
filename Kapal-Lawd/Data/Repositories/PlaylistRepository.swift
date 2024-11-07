@@ -22,7 +22,7 @@ internal final class JSONPlaylistRepository: PlaylistRepository {
         case .success(let playlist):
             return playlist
         case .failure(let error):
-            throw ErrorHandler.map(error)
+            throw mapErrorToErrorHandler(error)
         }
     }
     
@@ -46,7 +46,7 @@ internal final class SupabasePlaylistRepository: PlaylistRepository {
                 .value
             return playlist
         } catch {
-            throw ErrorHandler.map(error)
+            throw mapErrorToErrorHandler(error)
         }
     }
     
@@ -60,7 +60,7 @@ internal final class SupabasePlaylistRepository: PlaylistRepository {
                 .value
             return playlist
         } catch {
-            throw ErrorHandler.map(error)
+            throw mapErrorToErrorHandler(error)
         }
     }
 }
