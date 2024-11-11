@@ -44,7 +44,7 @@ class AVManager: ObservableObject {
         removeTimeObserver()
         configureAudioSession()
         
-        guard let url = URL(string: AudiumBackendService.baseURL+url) else {
+        guard let url = URL(string: url) else {
             print("Invalid URL")
             return
         }

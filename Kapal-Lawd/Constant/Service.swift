@@ -6,12 +6,6 @@
 //
 import Foundation
 
-enum AudiumBackendService {
-    static var baseURL: String {
-        return Bundle.main.infoDictionary?["AUDIUM_SERVER_BASE_URL"] as? String ?? ""
-    }
-}
-
 enum SupabaseSerivce {
     static var baseURL: String {
         return Bundle.main.infoDictionary?["SUPABASE_BASE_URL"] as? String ?? ""

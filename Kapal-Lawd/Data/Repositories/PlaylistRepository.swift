@@ -41,7 +41,7 @@ internal final class SupabasePlaylistRepository: PlaylistRepository {
         do {
             let playlist: [Playlist] = try await supabaseClient
                 .from("Playlist")
-                .select("id, created_at, uuid, collection_id, name, duration")
+                .select("uuid, collection_id, name, duration, url")
                 .execute()
                 .value
             return playlist
@@ -54,7 +54,7 @@ internal final class SupabasePlaylistRepository: PlaylistRepository {
         do {
             let playlist: [Playlist] = try await supabaseClient
                 .from("Playlist")
-                .select("id, created_at, uuid, collection_id, name, duration")
+                .select("uuid, collection_id, name, duration, url")
                 .eq("collection_id", value: req.collectionId)
                 .execute()
                 .value

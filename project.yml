@@ -5,7 +5,6 @@ settings:
   DEVELOPMENT_TEAM: ${DEVELOPMENT_TEAM_ID}
   SUPABASE_API_KEY: ${SUPABASE_API_KEY}
   SUPABASE_BASE_URL: ${SUPABASE_BASE_URL}
-  AUDIUM_SERVER_BASE_URL: ${AUDIUM_SERVER_BASE_URL}
 options:
   bundleIdPrefix: com.Kapal-Lawd
   resolvePackagesAutomatically: true
@@ -52,7 +51,6 @@ targets:
           CFBundleDisplayName: "Audium"
           SUPABASE_API_KEY: ${SUPABASE_API_KEY}
           SUPABASE_BASE_URL: ${SUPABASE_BASE_URL}
-          AUDIUM_SERVER_BASE_URL: ${AUDIUM_SERVER_BASE_URL}
     sources: [Kapal-Lawd]
     resources: [Resources]
     settings:

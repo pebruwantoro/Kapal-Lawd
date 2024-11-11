@@ -42,7 +42,7 @@ class BackgroundSoundManager: ObservableObject {
     func startPlayback(songTitle: String) {
         configureAudioSession()
         
-        guard let url = URL(string: AudiumBackendService.baseURL+songTitle) else {
+        guard let url = URL(string: songTitle) else {
             print("Invalid URL")
             return
         }

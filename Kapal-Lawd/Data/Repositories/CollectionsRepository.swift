@@ -42,7 +42,7 @@ internal final class SupabaseCollectionsRepository: CollectionsRepository {
         do {
             let collections: [Collections] = try await supabaseClient
                 .from("Collections")
-                .select("id, created_at, uuid, rooms_id, name, beacon_id, long_contents, short_contents, authored_by, authored_at")
+                .select("uuid, rooms_id, name, beacon_id, long_contents, short_contents, authored_by, authored_at")
                 .execute()
                 .value
             return collections
@@ -55,7 +55,7 @@ internal final class SupabaseCollectionsRepository: CollectionsRepository {
         do {
             let collections: [Collections] = try await supabaseClient
                 .from("Collections")
-                .select("id, created_at, uuid, rooms_id, name, beacon_id, long_contents, short_contents, authored_by, authored_at")
+                .select("uuid, rooms_id, name, beacon_id, long_contents, short_contents, authored_by, authored_at")
                 .eq("beacon_id", value: req.beaconId)
                 .execute()
                 .value
