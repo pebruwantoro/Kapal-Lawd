@@ -40,16 +40,15 @@ class BackgroundSoundManager: ObservableObject {
     }
     
     func startPlayback(songTitle: String) {
-        guard let url = Bundle.main.url(forResource: songTitle, withExtension: "wav") else {
-            print("Audio file not found: \(songTitle)")
+        configureAudioSession()
+        
+        guard let url = URL(string: songTitle) else {
+            print("Invalid URL")
             return
         }
         
         self.playerItem = AVPlayerItem(url: url)
         self.player = AVPlayer(playerItem: playerItem)
-        
-        try? AVAudioSession.sharedInstance().setCategory(.playback, mode: .default)
-        try? AVAudioSession.sharedInstance().setActive(true)
         
         self.player?.play()
         self.player?.volume = 0.1
@@ -61,5 +60,17 @@ class BackgroundSoundManager: ObservableObject {
         self.player = nil
         self.playerItem = nil
         self.isBackgroundPlaying = false
+    }
+    
+    func configureAudioSession() {
+        do {
+            let session = AVAudioSession.sharedInstance()
+            
+            try session.setCategory(.playback, mode: .default)
+            
+            try session.setActive(true)
+        } catch {
+            print("Error: \(error.localizedDescription)")
+        }
     }
 }

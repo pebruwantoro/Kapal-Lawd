@@ -12,11 +12,13 @@ struct Playlist: Codable {
     let collectionId: String
     let name: String
     let duration: String
+    let url: String
 
     enum CodingKeys: String, CodingKey {
         case uuid
         case collectionId = "collection_id"
         case name
         case duration
+        case url
     }
 }

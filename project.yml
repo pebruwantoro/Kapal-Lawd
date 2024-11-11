@@ -29,6 +29,8 @@ targets:
           NSLocationAlwaysAndWhenInUseUsageDescription: "Your app needs access to your location to provide personalized services even when the app is in the background."
           NSBluetoothAlwaysUsageDescription: "This app requires continuous access to Bluetooth for background monitoring."
           NSBluetoothPeripheralUsageDescription: "This app requires access to Bluetooth for connecting to peripherals."
+          NSAppTransportSecurity:
+            NSAllowsArbitraryLoads: true
           UIBackgroundModes:
             - location
             - audio
