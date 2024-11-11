@@ -54,6 +54,12 @@ struct PlayerView: View {
                         
                         ZStack {
                             Circle()
+
+
+                                .foregroundColor(Color("AppPlayer"))
+                                .frame(width: 50, height: 50)
+                            
+
                             
                             Button(action:  {
                                 isPlaying.toggle()
