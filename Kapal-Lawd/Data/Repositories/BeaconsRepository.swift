@@ -32,24 +32,16 @@ internal final class JSONBeaconsRepository: BeaconsRepository {
         let filteredBeacons = beacons.filter { $0.uuid == req.uuid }
         return filteredBeacons
     }
-    
-    private func mapErrorToErrorHandler(_ error: Error) -> ErrorHandler {
-        if let errorHandler = error as? ErrorHandler {
-            return errorHandler
-        } else {
-            return .unknownError(error)
-        }
-    }
 }
 
 internal final class SupabaseBeaconsRepository: BeaconsRepository {
     
     private let supabaseClient = SupabaseManager.shared
     
-    func fetchListBeacons() async throws -> [Beacons] {
+    func fetchListBeacons() async throws -> [Beacons] { 
         do {
             let beacons: [Beacons] = try await supabaseClient
-                .from("iBeacon")
+                .from("Beacons")
                 .select("id, created_at, UUID, background_sound, min_rssi, max_rssi")
                 .execute()
                 .value
@@ -62,7 +54,7 @@ internal final class SupabaseBeaconsRepository: BeaconsRepository {
     func fetchListBeaconsByUUID(req: BeaconsRequest) async throws -> [Beacons] {
         do {
             let beacons: [Beacons] = try await supabaseClient
-                .from("iBeacon")
+                .from("Beacons")
                 .select("id, created_at, UUID, background_sound, min_rssi, max_rssi")
                 .eq("UUID", value: req.uuid)
                 .execute()
@@ -70,17 +62,6 @@ internal final class SupabaseBeaconsRepository: BeaconsRepository {
             return beacons
         } catch {
             throw mapErrorToErrorHandler(error)
-        }
-    }
-    
-    // Helper method to map errors to your ErrorHandler enum
-    private func mapErrorToErrorHandler(_ error: Error) -> ErrorHandler {
-        if let decodingError = error as? DecodingError {
-            return .decodingFailed(decodingError)
-        } else if let urlError = error as? URLError {
-            return .networkError(urlError)
-        } else {
-            return .unknownError(error)
         }
     }
 }

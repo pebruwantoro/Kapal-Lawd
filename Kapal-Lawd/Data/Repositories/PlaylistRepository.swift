@@ -8,36 +8,59 @@
 import Foundation
 
 internal protocol PlaylistRepository {
-    func fetchListPlaylist() -> ([Playlist], ErrorHandler?)
-    func fetchPlaylistByCollectionId(req: PlaylistRequest) -> ([Playlist], ErrorHandler?)
+    func fetchListPlaylist() async throws -> [Playlist]
+    func fetchPlaylistByCollectionId(req: PlaylistRequest) async throws -> [Playlist]
 }
 
 internal final class JSONPlaylistRepository: PlaylistRepository {
     
     private let jsonManager = JsonManager.shared
     
-    func fetchListPlaylist() -> ([Playlist], ErrorHandler?) {
+    func fetchListPlaylist() async throws -> [Playlist] {
         let result = jsonManager.loadJSONData(from: "Playlists", as: [Playlist].self)
-       
         switch result {
         case .success(let playlist):
-            return (playlist, nil)
+            return playlist
         case .failure(let error):
-            return ([], error)
+            throw mapErrorToErrorHandler(error)
         }
     }
     
-    func fetchPlaylistByCollectionId(req: PlaylistRequest) -> ([Playlist], ErrorHandler?) {
-        let (playlist, errorHandler) = fetchListPlaylist()
-        
-        if let error = errorHandler {
-            return([], error)
+    func fetchPlaylistByCollectionId(req: PlaylistRequest) async throws -> [Playlist] {
+        let playlist = try await fetchListPlaylist()
+        let filteredPlaylist = playlist.filter { $0.collectionId == req.collectionId }
+        return filteredPlaylist
+    }
+}
+
+internal final class SupabasePlaylistRepository: PlaylistRepository {
+    
+    private let supabaseClient = SupabaseManager.shared
+    
+    func fetchListPlaylist() async throws -> [Playlist] {
+        do {
+            let playlist: [Playlist] = try await supabaseClient
+                .from("Playlist")
+                .select("id, created_at, uuid, collection_id, name, duration")
+                .execute()
+                .value
+            return playlist
+        } catch {
+            throw mapErrorToErrorHandler(error)
         }
-        
-        let result = playlist.filter {
-            $0.collectionId == req.collectionId
+    }
+    
+    func fetchPlaylistByCollectionId(req: PlaylistRequest) async throws -> [Playlist] {
+        do {
+            let playlist: [Playlist] = try await supabaseClient
+                .from("Playlist")
+                .select("id, created_at, uuid, collection_id, name, duration")
+                .eq("collection_id", value: req.collectionId)
+                .execute()
+                .value
+            return playlist
+        } catch {
+            throw mapErrorToErrorHandler(error)
         }
-        
-        return (result ,nil)
     }
 }
