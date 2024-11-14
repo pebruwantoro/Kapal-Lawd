@@ -11,10 +11,13 @@ import SwiftUI
 
 class IBeaconDetector: NSObject, ObservableObject, CLLocationManagerDelegate {
     private var locationManager: CLLocationManager?
-    private var beaconRepo = SupabaseBeaconsRepository()
+//    private var beaconRepo = SupabaseBeaconsRepository()
+    private var beaconRepo = JSONBeaconsRepository()
     private var beaconData: Beacons?
     private var lastTargetVolume: Float? = nil
     private var currentVolumeLevel: VolumeLevel = .none
+    private var detectedMultilaterationBeacons: [DetectedBeacon] = []
+    private var beaconsData = [BeaconData]()
     var dataBeacons: [Beacons] = []
     var beaconBLE: [String: CLBeacon] = [:]
     @ObservedObject private var audioPlayerManager = AVManager.shared
@@ -126,34 +129,35 @@ class IBeaconDetector: NSObject, ObservableObject, CLLocationManagerDelegate {
     }
     
     func locationManager(_ manager: CLLocationManager, didRange beacons: [CLBeacon], satisfying beaconConstraint: CLBeaconIdentityConstraint) {
+        startMonitoring()
         delay(2) {
             for beacon in beacons {
-                if let dataBeacon = self.dataBeacons.first(where: { $0.uuid == beacon.uuid.uuidString.lowercased()}) {
-                    self.beaconData = dataBeacon
-                    if beacon.rssi != 0 && Double(beacon.rssi) >= dataBeacon.maxRssi {
-                        self.beaconBLE[beacon.uuid.uuidString.lowercased()] = beacon
-                    } else {
-                        self.beaconBLE[beacon.uuid.uuidString.lowercased()] = beacon
-                    }
+                let tempBeacon = self.dataBeacons.first{ $0.uuid == beacon.uuid.uuidString.lowercased() }
+                
+                let distance = self.distanceFromRSSI(rssi: Double(beacon.rssi))
+                
+                if distance != -1 {
+                    let beaconData = BeaconData(
+                        uuid: beacon.uuid.uuidString.lowercased(),
+                        rssi: Double(beacon.rssi),
+                        distance: distance,
+                        position: Point(xPosition: tempBeacon!.xPosition, yPosition: tempBeacon!.yPosition)
+                    )
+                    
+                    self.beaconsData.append(beaconData)
                 }
             }
             
-            if let nearestBeacon = self.beaconBLE.values.max(by: { $0.rssi < $1.rssi }) {
-                if self.currentBeaconId != nearestBeacon.uuid.uuidString {
-                    self.isBeaconChange = true
-                    self.currentBeaconId = nearestBeacon.uuid.uuidString
-                    self.closestBeacon = nearestBeacon
-                } else {
-                    self.isBeaconChange = false
-                    self.currentBeaconId = nearestBeacon.uuid.uuidString
-                    self.closestBeacon = nearestBeacon
-                }
-                
-                self.makeActive()
-                
-                self.adjustAudioForRSSI(rssi: Double(nearestBeacon.rssi), maxRssi: self.beaconData!.maxRssi, minRssi: self.beaconData!.minRssi)
-            }
+            self.detectedMultilaterationBeacons = multilateration(data: Array(Set(self.beaconsData)))
+            
+            let nearestBeacon = self.detectedMultilaterationBeacons.min { $0.euclideanDistance < $1.euclideanDistance }
+        print("nearest beacon: \(nearestBeacon)")
+            self.currentBeaconId = nearestBeacon?.uuid
+            self.closestBeacon = beacons.first { $0.uuid.uuidString.lowercased() == nearestBeacon?.uuid }
+            
+//            self.makeActive()
         }
+        self.detectedMultilaterationBeacons.removeAll()
     }
     
     private func makeActive() {
@@ -244,6 +248,18 @@ class IBeaconDetector: NSObject, ObservableObject, CLLocationManagerDelegate {
                 currentVolumeLevel = newVolumeLevel
             }
         }
+    }
+    
+    func distanceFromRSSI(rssi: Double) -> Double {
+        guard rssi != 0 else {
+            print(ErrorHandler.errorRSSIZeroValue)
+            return -1.0
+        }
+        
+        let ratio = (-59 - rssi) / (10 * 2)
+        let distance = pow(10, ratio)
+        
+        return distance
     }
 }
 
