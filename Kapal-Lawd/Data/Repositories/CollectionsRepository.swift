@@ -41,7 +41,7 @@ internal final class SupabaseCollectionsRepository: CollectionsRepository {
     func fetchListCollections() async throws -> [Collections] {
         do {
             let collections: [Collections] = try await supabaseClient
-                .from("Collections")
+                .from("collections")
                 .select("uuid, rooms_id, name, beacon_id, long_contents, short_contents, authored_by, authored_at")
                 .execute()
                 .value
@@ -54,8 +54,8 @@ internal final class SupabaseCollectionsRepository: CollectionsRepository {
     func fetchListCollectionsByBeaconId(req: CollectionsRequest) async throws -> [Collections] {
         do {
             let collections: [Collections] = try await supabaseClient
-                .from("Collections")
-                .select("uuid, rooms_id, name, beacon_id, long_contents, short_contents, authored_by, authored_at")
+                .from("collections")
+                .select("uuid, room_id, name, beacon_id, long_contents, short_contents, authored_by, authored_at")
                 .eq("beacon_id", value: req.beaconId)
                 .execute()
                 .value

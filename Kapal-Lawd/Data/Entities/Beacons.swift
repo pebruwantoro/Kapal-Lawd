@@ -14,7 +14,7 @@ struct Beacons: Codable {
     let maxRssi: Double
     
     enum CodingKeys: String, CodingKey {
-        case uuid = "UUID"
+        case uuid = "uuid"
         case backgroundSound = "background_sound"
         case minRssi = "min_rssi"
         case maxRssi = "max_rssi"

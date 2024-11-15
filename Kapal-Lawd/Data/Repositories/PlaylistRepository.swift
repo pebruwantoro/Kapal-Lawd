@@ -40,7 +40,7 @@ internal final class SupabasePlaylistRepository: PlaylistRepository {
     func fetchListPlaylist() async throws -> [Playlist] {
         do {
             let playlist: [Playlist] = try await supabaseClient
-                .from("Playlist")
+                .from("playlists")
                 .select("uuid, collection_id, name, duration, url")
                 .execute()
                 .value
@@ -53,7 +53,7 @@ internal final class SupabasePlaylistRepository: PlaylistRepository {
     func fetchPlaylistByCollectionId(req: PlaylistRequest) async throws -> [Playlist] {
         do {
             let playlist: [Playlist] = try await supabaseClient
-                .from("Playlist")
+                .from("playlists")
                 .select("uuid, collection_id, name, duration, url")
                 .eq("collection_id", value: req.collectionId)
                 .execute()

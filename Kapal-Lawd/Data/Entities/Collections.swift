@@ -19,7 +19,7 @@ struct Collections: Codable {
 
     enum CodingKeys: String, CodingKey {
         case uuid
-        case roomId = "rooms_id"
+        case roomId = "room_id"
         case name
         case beaconId = "beacon_id"
         case longContents = "long_contents"
