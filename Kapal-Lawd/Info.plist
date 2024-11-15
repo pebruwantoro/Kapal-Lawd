@@ -46,11 +46,11 @@
 	<string>${SUPABASE_BASE_URL}</string>
 	<key>UIBackgroundModes</key>
 	<array>
-		<string>location</string>
-		<string>audio</string>
-		<string>bluetooth-central</string>
-		<string>processing</string>
-		<string>fetch</string>
+		<string>Audium needs continuous location updates to maintain accurate proximity detection as you move through the exhibition. This allows the app to play audio narrations at the right time without requiring you to actively keep the app open.</string>
+		<string>Audium plays audio content as you approach different exhibits, enhancing your experience with immersive narrations. Background audio playback ensures you can continue listening to narrations even when switching apps or locking your device.</string>
+		<string>Audium uses CoreBluetooth to connect with iBeacons at the exhibition. This connection enables the app to detect your proximity to different exhibits, triggering relevant audio narrations in real time as you navigate the gallery.</string>
+		<string>To deliver uninterrupted, hands-free audio narrations, Audium processes data in the background. This ensures that proximity to exhibits is continuously monitored, so you receive audio content seamlessly without needing to interact with your device.</string>
+		<string>Audium may occasionally need to download updated audio content or exhibit information to provide the best possible experience. Background downloading allows the app to stay current and deliver accurate narrations for each exhibit without interruption.</string>
 	</array>
 	<key>UILaunchScreen</key>
 	<dict>
