@@ -41,8 +41,8 @@ internal final class SupabaseBeaconsRepository: BeaconsRepository {
     func fetchListBeacons() async throws -> [Beacons] { 
         do {
             let beacons: [Beacons] = try await supabaseClient
-                .from("Beacons")
-                .select("UUID, background_sound, min_rssi, max_rssi")
+                .from("beacons")
+                .select("uuid, background_sound, min_rssi, max_rssi")
                 .execute()
                 .value
             return beacons
@@ -54,8 +54,8 @@ internal final class SupabaseBeaconsRepository: BeaconsRepository {
     func fetchListBeaconsByUUID(req: BeaconsRequest) async throws -> [Beacons] {
         do {
             let beacons: [Beacons] = try await supabaseClient
-                .from("Beacons")
-                .select("UUID, background_sound, min_rssi, max_rssi")
+                .from("beacons")
+                .select("uuid, background_sound, min_rssi, max_rssi")
                 .eq("UUID", value: req.uuid)
                 .execute()
                 .value
