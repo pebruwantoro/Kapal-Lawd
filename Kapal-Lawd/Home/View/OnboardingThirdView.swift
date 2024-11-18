@@ -1,0 +1,88 @@
+//
+//  OnboardingThirdView.swift
+//  Kapal-Lawd
+//
+//  Created by Elsavira T on 14/11/24.
+//
+
+import SwiftUI
+
+struct OnboardingThirdView: View {
+    
+    @Binding var thirdOnboarding: Bool
+    @State private var finalOnboarding = false
+    
+    var body: some View {
+        if finalOnboarding {
+            OnboardingFinalView(finalOnboarding: self.$finalOnboarding)
+        } else {
+            
+            Spacer()
+            NavigationStack {
+                Image("imagethree")
+                    .resizable().scaledToFill()
+                    .frame(width: 370, height: 210)
+                    .clipShape(HalfRoundedRectangle(cornerRadius: 36))
+                    .offset(y: -38)
+                
+                VStack {
+                    Text("Booth dengan AudiTag™")
+                        .font(.title).bold()
+                        .frame(width: 318, alignment: .leading)
+                    
+                    VStack (spacing: 16) {
+                        Text("Kunjungi booth dengan tanda Tersedia di Audium")
+                            .italic()
+                            .font(.subheadline)
+                            .frame(width: 313, alignment: .leading)
+                        
+                        
+                        Text("Dekati booth yang dilengkapi dengan AudiTag™, dan Audium akan memutar narasi saat Anda mendekat. Otomatis!")
+                            .font(.caption)
+                            .frame(width: 313, alignment: .leading)
+                    }
+                }
+                .padding(.bottom, 25)
+                
+                HStack (spacing: 12) {
+                    Button(action: {
+                        
+                    }, label: {
+                        Image(systemName: "arrow.left")
+                            .foregroundColor(Color("AppText"))
+                            .font(.body)
+                            .frame(maxWidth: 50, maxHeight: 50)
+                            .background(Color("AppGrey"))
+                            .cornerRadius(86)
+                    })
+                    
+                    Button(action: {
+                        finalOnboarding = true
+                        ButtonHaptic()
+                    }, label: {
+                        HStack {
+                            Text("Next (3/3)")
+                            Image(systemName: "arrow.right")
+                        }
+                        .foregroundColor(.white)
+                        .font(.body)
+                        .frame(maxWidth: .infinity, maxHeight: 50)
+                        .background(.black)
+                        .cornerRadius(86)
+                    })
+                }
+                .padding(.horizontal, 24)
+                
+            }
+            .frame(maxWidth: .infinity, maxHeight: 480)
+            .background(.white)
+            .cornerRadius(36)
+            .shadow(radius: 5)
+            .padding(.horizontal, 16)
+        }
+    }
+}
+
+#Preview {
+    OnboardingThirdView(thirdOnboarding: .constant(false))
+}
