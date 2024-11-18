@@ -11,7 +11,7 @@ import SwiftUI
 
 class IBeaconDetector: NSObject, ObservableObject, CLLocationManagerDelegate {
     private var locationManager: CLLocationManager?
-    private var beaconRepo = JSONBeaconsRepository()
+    private var beaconRepo = SupabaseBeaconsRepository()
     private var beaconData: Beacons?
     private var lastTargetVolume: Float? = nil
     private var currentVolumeLevel: VolumeLevel = .none
