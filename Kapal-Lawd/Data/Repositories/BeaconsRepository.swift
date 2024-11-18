@@ -42,7 +42,7 @@ internal final class SupabaseBeaconsRepository: BeaconsRepository {
         do {
             let beacons: [Beacons] = try await supabaseClient
                 .from("beacons")
-                .select("uuid, background_sound, min_rssi, max_rssi")
+                .select("uuid, background_sound, min_rssi, max_rssi, x_position, y_position")
                 .execute()
                 .value
             return beacons
@@ -55,8 +55,8 @@ internal final class SupabaseBeaconsRepository: BeaconsRepository {
         do {
             let beacons: [Beacons] = try await supabaseClient
                 .from("beacons")
-                .select("uuid, background_sound, min_rssi, max_rssi")
-                .eq("UUID", value: req.uuid)
+                .select("uuid, background_sound, min_rssi, max_rssi, x_position, y_position")
+                .eq("uuid", value: req.uuid)
                 .execute()
                 .value
             return beacons

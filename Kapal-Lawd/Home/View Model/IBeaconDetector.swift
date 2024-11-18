@@ -11,8 +11,7 @@ import SwiftUI
 
 class IBeaconDetector: NSObject, ObservableObject, CLLocationManagerDelegate {
     private var locationManager: CLLocationManager?
-//    private var beaconRepo = SupabaseBeaconsRepository()
-    private var beaconRepo = JSONBeaconsRepository()
+    private var beaconRepo = SupabaseBeaconsRepository()
     private var beaconData: Beacons?
     private var lastTargetVolume: Float? = nil
     private var currentVolumeLevel: VolumeLevel = .none
@@ -130,7 +129,7 @@ class IBeaconDetector: NSObject, ObservableObject, CLLocationManagerDelegate {
     
     func locationManager(_ manager: CLLocationManager, didRange beacons: [CLBeacon], satisfying beaconConstraint: CLBeaconIdentityConstraint) {
         startMonitoring()
-        delay(2) {
+        delay(0) {
             for beacon in beacons {
                 let tempBeacon = self.dataBeacons.first{ $0.uuid == beacon.uuid.uuidString.lowercased() }
                 
@@ -147,11 +146,11 @@ class IBeaconDetector: NSObject, ObservableObject, CLLocationManagerDelegate {
                     self.beaconsData.append(beaconData)
                 }
             }
-            
+            self.beaconsData.sort(by: { $0.distance < $1.distance})
             self.detectedMultilaterationBeacons = multilateration(data: Array(Set(self.beaconsData)))
             
-            let nearestBeacon = self.detectedMultilaterationBeacons.min { $0.euclideanDistance < $1.euclideanDistance }
-        print("nearest beacon: \(nearestBeacon)")
+            let nearestBeacon = self.detectedMultilaterationBeacons.min { abs($0.euclideanDistance - $0.estimatedDitance) < abs($1.euclideanDistance - $1.estimatedDitance) }
+            print("nearest beacon: \(nearestBeacon)")
             self.currentBeaconId = nearestBeacon?.uuid
             self.closestBeacon = beacons.first { $0.uuid.uuidString.lowercased() == nearestBeacon?.uuid }
             

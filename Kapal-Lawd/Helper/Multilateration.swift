@@ -16,6 +16,7 @@ func multilateration(data: [BeaconData]) -> [DetectedBeacon]{
     var A = [[Double]]()
     var B = [Double]()
     
+//    let refPoint = data[0].position
     let refPoint = Point(xPosition: 0.0, yPosition: 0.0)
     let d1 = data[0].distance
     
@@ -37,11 +38,11 @@ func multilateration(data: [BeaconData]) -> [DetectedBeacon]{
     let matrixA = A
     let vectorB = B
     
-    let AT = transpose(matrixA)
-    let ATA = matrixMultiply(AT, matrixA)
-    let ATB = matrixVectorMultiply(AT, vectorB)
+//    let AT = transpose(matrixA)
+//    let ATA = matrixMultiply(AT, matrixA)
+//    let ATB = matrixVectorMultiply(AT, vectorB)
     
-    guard let solution = solveLinearSystem(ATA, ATB) else {
+    guard let solution = solveLinearSystem(A, B) else {
         print(ErrorHandler.errorSolveLinearSystem.errorDescription!)
         return []
     }
@@ -62,12 +63,13 @@ func multilateration(data: [BeaconData]) -> [DetectedBeacon]{
         
         detectedBeacons.append(detectedBeacon)
     }
+    print("data beacons: \(data)")
     print("detectedBeacons: \(detectedBeacons)")
     return Array(Set(detectedBeacons))
 }
 
 private func euclideanDistanace(beaconPosition: Point, targetPosition: Point) -> Double {
-    return sqrt(pow(beaconPosition.xPosition - targetPosition.xPosition, 2) + pow(beaconPosition.yPosition, targetPosition.yPosition)) * 0.4 // SCALING POINT
+    return sqrt(pow(beaconPosition.xPosition - targetPosition.xPosition, 2) + pow(beaconPosition.yPosition, targetPosition.yPosition))
 }
 
 private func transpose(_ matrix: [[Double]]) -> [[Double]] {
