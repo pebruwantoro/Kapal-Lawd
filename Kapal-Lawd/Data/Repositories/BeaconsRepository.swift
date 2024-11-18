@@ -38,7 +38,7 @@ internal final class SupabaseBeaconsRepository: BeaconsRepository {
     
     private let supabaseClient = SupabaseManager.shared
     
-    func fetchListBeacons() async throws -> [Beacons] {
+    func fetchListBeacons() async throws -> [Beacons] { 
         do {
             let beacons: [Beacons] = try await supabaseClient
                 .from("beacons")

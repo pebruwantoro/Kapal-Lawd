@@ -9,34 +9,31 @@ import AVFoundation
 import SwiftUI
 
 class AudioPlayerViewModel: ObservableObject {
-    private var collectionRepo = JSONCollectionsRepository()
-    private var playlistRepo = JSONPlaylistRepository()
-//    private var beaconRepo = SupabaseBeaconsRepository()
-    private var beaconRepo = JSONBeaconsRepository()
+    private var collectionRepo = SupabaseCollectionsRepository()
+    private var playlistRepo = SupabasePlaylistRepository()
+    private var beaconRepo = SupabaseBeaconsRepository()
     @ObservedObject private var beaconScanner = IBeaconDetector()
     @Published var currentBeacon: Beacons?
     @Published var backgroundSound: String?
     
-    func fetchCollectionByBeaconId(id: String) -> [Collections] {
-        let result = collectionRepo.fetchListCollectionsByBeaconId(req: CollectionsRequest(beaconId: id))
-        let errorHandler = result.1
-        
-        if let errorHandler = errorHandler {
-            print("error: \(errorHandler)")
+    func fetchCollectionByBeaconId(id: String) async -> [Collections] {
+        do {
+            let collections = try await collectionRepo.fetchListCollectionsByBeaconId(req: CollectionsRequest(beaconId: id))
+            return collections
+        } catch {
+            print("Error fetching collections: \(error)")
+            return []
         }
-        
-        return result.0
     }
     
-    func fetchPlaylistByCollectionId(id: String) -> [Playlist] {
-        let result = playlistRepo.fetchPlaylistByCollectionId(req: PlaylistRequest(collectionId: id))
-        let errorHandler = result.1
-        
-        if let errorHandler = errorHandler {
-            print("error: \(errorHandler)")
+    func fetchPlaylistByCollectionId(id: String) async -> [Playlist] {
+        do {
+            let playlists = try await playlistRepo.fetchPlaylistByCollectionId(req: PlaylistRequest(collectionId: id))
+            return playlists
+        } catch {
+            print("Error fetching playlists: \(error)")
+            return []
         }
-        
-        return result.0
     }
     
     func fetchBeaconById(id: String) -> Beacons? {

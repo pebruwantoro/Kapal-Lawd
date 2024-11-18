@@ -112,11 +112,18 @@ struct FindAuditagView: View {
                 self.playlistPlayerViewModel.playlistPlayerManager.removeTimeObserver()
                 self.isContentReady = false
             } else {
-                collections = audioPlayerViewModel.fetchCollectionByBeaconId(id: (beaconScanner.closestBeacon?.uuid.uuidString.lowercased())!)
-                if collections.count > 0 {
-                    self.playlists = audioPlayerViewModel.fetchPlaylistByCollectionId(id: collections[0].uuid)
-                    self.isContentReady = true
-                    self.showModal = true
+                Task {
+                    let id = beaconScanner.closestBeacon?.uuid.uuidString.lowercased() ?? ""
+                    let collectionsResult = await audioPlayerViewModel.fetchCollectionByBeaconId(id: id)
+                    if collectionsResult.count > 0 {
+                        let playlistsResult = await audioPlayerViewModel.fetchPlaylistByCollectionId(id: collectionsResult[0].uuid)
+                        await MainActor.run {
+                            self.collections = collectionsResult
+                            self.playlists = playlistsResult
+                            self.isContentReady = true
+                            self.showModal = true
+                        }
+                    }
                 }
             }
         }

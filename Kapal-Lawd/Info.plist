@@ -27,18 +27,27 @@
 	<string>1.0</string>
 	<key>CFBundleVersion</key>
 	<string>1</string>
+	<key>NSAppTransportSecurity</key>
+	<dict>
+		<key>NSAllowsArbitraryLoads</key>
+		<true/>
+	</dict>
 	<key>NSBluetoothAlwaysUsageDescription</key>
-	<string>This app requires continuous access to Bluetooth for background monitoring.</string>
+	<string>Audium uses Bluetooth to detect your proximity to exhibits equipped with iBeacon. This allows the app to automatically play audio narrations when you approach each booth, enhancing your exhibition experience with hands-free interactions. Bluetooth detection is essential for delivering seamless, location-based audio content during your visit.</string>
 	<key>NSBluetoothPeripheralUsageDescription</key>
-	<string>This app requires access to Bluetooth for connecting to peripherals.</string>
+	<string>Audium requires Bluetooth access to connect with iBeacons at the exhibition. These beacons signal your proximity to different exhibits, allowing the app to automatically play relevant audio narrations as you move through the gallery. This enhances your experience by providing hands-free, location-aware content for each exhibit you encounter.</string>
 	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
-	<string>Your app needs access to your location to provide personalized services even when the app is in the background.</string>
+	<string>Audium uses your location to provide an immersive audio experience as you navigate the exhibition. By detecting your proximity to specific exhibits, the app can automatically play relevant audio narrations at the right moment. Continuous location access is required to ensure seamless playback as you explore different sections of the gallery without needing to interact with your device.</string>
 	<key>NSLocationWhenInUseUsageDescription</key>
-	<string>Your app needs access to your location to provide personalized services even when the app is in the background.</string>
+	<string>Audium requires access to your location while using the app to deliver a hands-free audio experience. When you approach an exhibit, Audium detects your proximity and plays a relevant audio narration. This location-based functionality allows for automatic, real-time content delivery without any additional interaction needed from you.</string>
+	<key>Privacy - Bluetooth Always Usage Description</key>
+	<string>Audium uses Bluetooth to detect your proximity to exhibits equipped with iBeacon. This allows the app to automatically play audio narrations when you approach each booth, enhancing your exhibition experience with hands-free interactions. Bluetooth detection is essential for delivering seamless, location-based audio content during your visit.</string>
+	<key>Privacy - Bluetooth Peripheral Usage Description</key>
+	<string>Audium requires Bluetooth access to connect with iBeacons at the exhibition. These beacons signal your proximity to different exhibits, allowing the app to automatically play relevant audio narrations as you move through the gallery. This enhances your experience by providing hands-free, location-aware content for each exhibit you encounter.</string>
 	<key>Privacy - Location Always and When In Use Usage Description</key>
-	<string>Your app needs access to your location to provide personalized services even when the app is in the background.</string>
+	<string>Audium uses your location to provide an immersive audio experience as you navigate the exhibition. By detecting your proximity to specific exhibits, the app can automatically play relevant audio narrations at the right moment. Continuous location access is required to ensure seamless playback as you explore different sections of the gallery without needing to interact with your device.</string>
 	<key>Privacy - Location When In Use Usage Description</key>
-	<string>Your app needs access to your location to provide personalized services when the app is in use.</string>
+	<string>Audium requires access to your location while using the app to deliver a hands-free audio experience. When you approach an exhibit, Audium detects your proximity and plays a relevant audio narration. This location-based functionality allows for automatic, real-time content delivery without any additional interaction needed from you.</string>
 	<key>SUPABASE_API_KEY</key>
 	<string>${SUPABASE_API_KEY}</string>
 	<key>SUPABASE_BASE_URL</key>

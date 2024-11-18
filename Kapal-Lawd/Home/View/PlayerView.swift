@@ -128,7 +128,7 @@ struct PlayerView: View {
             delay(DefaultDelay.interaction.rawValue) {
                 if isFind && !self.isFirstPlaylistPlay {
                     self.isFirstPlaylistPlay = true
-                    playlistPlayerViewModel.startPlayback(song: list[0].name)
+                    playlistPlayerViewModel.startPlayback(song: list[0].name, url: list[0].url)
                 }
             }
             
@@ -161,7 +161,8 @@ struct PlayerView: View {
         uuid: "123e4567-e89b-12d3-a456-426614174000",
         collectionId: "collection-001",
         name: "My Playlist",
-        duration: "04:30"
+        duration: "04:30",
+        url: ""
     )]))
     .environmentObject(audioPlayerViewModel)
     .environmentObject(playlistPlayerViewModel)

@@ -38,10 +38,7 @@ class IBeaconDetector: NSObject, ObservableObject, CLLocationManagerDelegate {
         Task {
             await self.fetchBeacons()
         }
-        
-//        startMonitoring()
     }
-
     
     private func fetchBeacons() async {
         do {

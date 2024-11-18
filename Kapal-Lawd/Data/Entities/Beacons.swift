@@ -8,17 +8,13 @@
 import Foundation
 
 struct Beacons: Codable {
-    let id: Int
-    let createdAt: String
     let uuid: String
     let backgroundSound: String
     let minRssi: Double
     let maxRssi: Double
     
     enum CodingKeys: String, CodingKey {
-        case id
-        case createdAt = "created_at"
-        case uuid = "UUID"
+        case uuid = "uuid"
         case backgroundSound = "background_sound"
         case minRssi = "min_rssi"
         case maxRssi = "max_rssi"

@@ -24,8 +24,8 @@ class PlaylistPlayerViewModel: ObservableObject {
         playlistPlayerManager.nextPlaylist()
     }
     
-    func startPlayback(song: String) {
-        playlistPlayerManager.startPlayback(songTitle: song)
+    func startPlayback(song: String, url: String) {
+        playlistPlayerManager.startPlayback(songTitle: song, url: url)
     }
     
     func stopPlayback() {
