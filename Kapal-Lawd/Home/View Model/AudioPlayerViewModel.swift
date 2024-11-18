@@ -11,7 +11,8 @@ import SwiftUI
 class AudioPlayerViewModel: ObservableObject {
     private var collectionRepo = JSONCollectionsRepository()
     private var playlistRepo = JSONPlaylistRepository()
-    private var beaconRepo = SupabaseBeaconsRepository()
+//    private var beaconRepo = SupabaseBeaconsRepository()
+    private var beaconRepo = JSONBeaconsRepository()
     @ObservedObject private var beaconScanner = IBeaconDetector()
     @Published var currentBeacon: Beacons?
     @Published var backgroundSound: String?

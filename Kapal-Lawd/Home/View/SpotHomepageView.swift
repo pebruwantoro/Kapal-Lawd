@@ -8,6 +8,8 @@
 import SwiftUI
 
 struct SpotHomepageView: View {
+    
+    @Binding var spotHomepage: Bool
     @State private var isExploring = false
     @ObservedObject private var playlistPlayerViewModel: PlaylistPlayerViewModel = PlaylistPlayerViewModel()
     @ObservedObject private var backgroundPlayerViewModel: BackgroundPlayerViewModel = BackgroundPlayerViewModel()
@@ -20,28 +22,31 @@ struct SpotHomepageView: View {
                 Spacer()
                 VStack (spacing: 16) {
                     VStack {
-                        Image("audiumlogo")
+                        Image("logoaudium")
                     }
-                    .frame(width: 313, alignment: .leading)
+                    .frame(width: 313, alignment: .center)
                     
-                    VStack {
-                        Text("Audium")
-                            .bold()
-                            .font(.title)
+                    VStack (spacing: 12) {
+                        Text("Pengalaman baru Anda dimulai di sini")
+                            .italic()
+                            .font(.body)
                             .foregroundColor(Color("AppText"))
-                            .frame(width: 317, alignment: .leading)
-                        Text("Begin your audio-guided museum experience")
-                            .font(.subheadline)
+                            .frame(width: 317)
+                            .multilineTextAlignment(.center)
+                        Text("Audium mengubah kunjungan pameran Anda, memungkinkan booth menjelaskan produknya sendiri dengan cara yang paling dekat dan personal.")
+                            .font(.caption)
                             .foregroundColor(Color("AppText"))
-                            .frame(width: 317, alignment: .leading)
+                            .frame(width: 317)
+                            .multilineTextAlignment(.center)
                     }
+                    
                     
                     VStack {
                         Button(action: {
                             isExploring = true
                             ButtonHaptic()
                         }, label: {
-                            Text("Start Exploration")
+                            Text("Mulai Memindai AudiTag™")
                                 .foregroundColor(.white)
                                 .font(.body)
                                 .frame(maxWidth: .infinity, maxHeight: 50)
@@ -51,7 +56,7 @@ struct SpotHomepageView: View {
                     }
                     .padding(.horizontal, 24)
                 }
-                .frame(maxWidth: .infinity, maxHeight: 230)
+                .frame(maxWidth: .infinity, maxHeight: 310)
                 .background(.white)
                 .cornerRadius(36)
                 .shadow(radius: 5)
@@ -67,5 +72,5 @@ struct SpotHomepageView: View {
 }
 
 #Preview {
-    SpotHomepageView()
+    SpotHomepageView(spotHomepage: .constant(false))
 }

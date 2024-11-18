@@ -32,14 +32,6 @@ internal final class JSONBeaconsRepository: BeaconsRepository {
         let filteredBeacons = beacons.filter { $0.uuid == req.uuid }
         return filteredBeacons
     }
-    
-    private func mapErrorToErrorHandler(_ error: Error) -> ErrorHandler {
-        if let errorHandler = error as? ErrorHandler {
-            return errorHandler
-        } else {
-            return .unknownError(error)
-        }
-    }
 }
 
 internal final class SupabaseBeaconsRepository: BeaconsRepository {
@@ -49,8 +41,8 @@ internal final class SupabaseBeaconsRepository: BeaconsRepository {
     func fetchListBeacons() async throws -> [Beacons] {
         do {
             let beacons: [Beacons] = try await supabaseClient
-                .from("iBeacon")
-                .select("id, created_at, UUID, background_sound, min_rssi, max_rssi")
+                .from("beacons")
+                .select("uuid, background_sound, min_rssi, max_rssi")
                 .execute()
                 .value
             return beacons
@@ -62,25 +54,14 @@ internal final class SupabaseBeaconsRepository: BeaconsRepository {
     func fetchListBeaconsByUUID(req: BeaconsRequest) async throws -> [Beacons] {
         do {
             let beacons: [Beacons] = try await supabaseClient
-                .from("iBeacon")
-                .select("id, created_at, UUID, background_sound, min_rssi, max_rssi")
+                .from("beacons")
+                .select("uuid, background_sound, min_rssi, max_rssi")
                 .eq("UUID", value: req.uuid)
                 .execute()
                 .value
             return beacons
         } catch {
             throw mapErrorToErrorHandler(error)
-        }
-    }
-    
-    // Helper method to map errors to your ErrorHandler enum
-    private func mapErrorToErrorHandler(_ error: Error) -> ErrorHandler {
-        if let decodingError = error as? DecodingError {
-            return .decodingFailed(decodingError)
-        } else if let urlError = error as? URLError {
-            return .networkError(urlError)
-        } else {
-            return .unknownError(error)
         }
     }
 }

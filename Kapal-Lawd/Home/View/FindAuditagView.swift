@@ -21,79 +21,87 @@ struct FindAuditagView: View {
     @StateObject private var beaconScanner: IBeaconDetector = IBeaconDetector()
     @State private var isPlayInteraction = false
     @State private var isContentReady = false
+    @State private var showModal = false
     
     var body: some View {
-        Group {
-            Spacer()
+        ZStack {
+            Color("AppBlue").ignoresSafeArea()
             
-            if isContentReady {
-                PlaylistView(isExploring: self.$isExploring, collections: $collections, list: $playlists)
-                    .onReceive(beaconScanner.$isFindBeacon) { value in
-                        if !isPlayInteraction {
-                            interactionPlayerViewModel.startInteractionSound(song: DeafultSong.interaction.rawValue)
-                            isPlayInteraction = value
-                        }
-                    }
-                    .environmentObject(audioPlayerViewModel)
-                    .environmentObject(playlistPlayerViewModel)
-                    .environmentObject(backgroundPlayerViewModel)
-                    .environmentObject(beaconScanner)
-            } else {
-                VStack(spacing: 16) {
-                    ZStack {
-                        Circle()
-                            .fill(Color(red: 0.89, green: 0, blue: 0.52).opacity(0.2))
-                            .frame(maxWidth: 70)
-                            .scaleEffect(isScanning ? 0.7 : 2.4)
-                            .animation(pulseScan.delay(0.6), value: isScanning)
-                            .animation(.easeInOut(duration: 1), value: isScanning)
-                        
-                        Image("scanning")
-                            .padding(.top, 45)
-                            .padding(.bottom, 45)
-                    }
-                    .onAppear {
-                        self.isScanning = true
-                        withAnimation(.easeOut(duration: 0.8)) {
-                            cardOpacity = 1.0
-                        }
-                    }
+            VStack {
+                Button(action: {
                     
-                    VStack {
-                        Text("Scanning AudiTag...")
-                            .bold()
-                            .font(.title3)
-                            .foregroundColor(Color("AppText"))
-                            .padding(.bottom, 12)
+                }, label: {
+                    Image("BackButton")
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .padding(.horizontal, 16)
+                        .padding(.top, 40)
+                })
+                Spacer()
+            }
+            
+            Group {
+                
+                if isContentReady {
+                    PlaylistView(isExploring: self.$isExploring, collections: $collections, list: $playlists)
+                        .onReceive(beaconScanner.$isFindBeacon) { value in
+                            if !isPlayInteraction {
+                                interactionPlayerViewModel.startInteractionSound(song: DeafultSong.interaction.rawValue)
+                                isPlayInteraction = value
+                            }
+                        }
+                        .environmentObject(audioPlayerViewModel)
+                        .environmentObject(playlistPlayerViewModel)
+                        .environmentObject(backgroundPlayerViewModel)
+                        .environmentObject(beaconScanner)
+                } else {
+                    VStack(spacing: 16) {
                         
-                        Text("Please come closer to the collection")
-                            .font(.callout)
-                            .foregroundColor(Color.gray)
-                            .multilineTextAlignment(.center)
+                        ZStack {
+                            Circle()
+                                .fill(Color("AppWhite").opacity(0.2))
+                                .frame(maxWidth: 70)
+                                .scaleEffect(isScanning ? 0.7 : 2.4)
+                                .animation(pulseScan.delay(0.6), value: isScanning)
+                                .animation(.easeInOut(duration: 1), value: isScanning)
+                            
+                            Circle()
+                                .fill(Color("AppWhite"))
+                                .frame(width: 65, height: 65)
+                                .padding(.top, 55)
+                                .padding(.bottom, 55)
+                            
+                        }
+                        .onAppear {
+                            self.isScanning = true
+                            withAnimation(.easeOut(duration: 0.8)) {
+                                cardOpacity = 1.0
+                            }
+                        }
+                        
+                        VStack {
+                            Text("Memindai AudiTag™")
+                                .bold()
+                                .font(.title3)
+                                .foregroundColor(Color("AppWhite"))
+                                .padding(.bottom, 12)
+                            
+                            Text("Dekati booth dengan tanda")
+                                .font(.callout)
+                                .foregroundColor(Color("AppWhite"))
+                                .multilineTextAlignment(.center)
+                            
+                            Text("Tersedia di Audium")
+                                .font(.callout)
+                                .italic()
+                                .foregroundColor(Color("AppWhite"))
+                                .multilineTextAlignment(.center)
+                            
+                            Image("BoothIcon")
+                                .padding(.top, 16)
+                        }
+                        .frame(maxWidth: 313)
                     }
-                    .frame(maxWidth: 313)
-                    
-                    VStack {
-                        Button(action: {
-                            self.isExploring = false
-                            ButtonHaptic()
-                        }, label: {
-                            Text("Stop Scanning")
-                                .foregroundColor(.gray)
-                                .font(.body)
-                                .frame(maxWidth: .infinity, maxHeight: 50)
-                                .background(Color(red: 0.94, green: 0.94, blue: 0.94))
-                                .cornerRadius(86)
-                        })
-                    }
-                    .padding(.horizontal, 24)
                 }
-                .frame(maxWidth: .infinity, maxHeight: 380)
-                .background(.white)
-                .cornerRadius(36)
-                .shadow(radius: 5)
-                .padding(.horizontal, 16)
-                .opacity(cardOpacity)
             }
         }
         .onReceive(beaconScanner.$isFindBeacon) { isFind in
@@ -105,13 +113,16 @@ struct FindAuditagView: View {
                 self.isContentReady = false
             } else {
                 collections = audioPlayerViewModel.fetchCollectionByBeaconId(id: (beaconScanner.closestBeacon?.uuid.uuidString.lowercased())!)
-                    if collections.count > 0 {
-                        self.playlists = audioPlayerViewModel.fetchPlaylistByCollectionId(id: collections[0].uuid)
-                        self.isContentReady = true
-                    }
+                if collections.count > 0 {
+                    self.playlists = audioPlayerViewModel.fetchPlaylistByCollectionId(id: collections[0].uuid)
+                    self.isContentReady = true
+                    self.showModal = true
+                }
             }
         }
-        
+        .sheet(isPresented: $showModal) {
+            SelectLocationView()
+        }
     }
 }
 

@@ -34,137 +34,135 @@ struct PlaylistView: View {
                                 }
                             }
                     }
+                    
                 } else {
-                    VStack {
-                        HStack {
-                            Button(action:  {
-                                showAlert = true
-                            }, label: {
-                                Image(systemName: "xmark")
-                                    .foregroundColor(.gray)
-                                    .font(.subheadline)
-                                    .frame(maxWidth: 28, maxHeight: 28)
-                                    .background(Color(red: 0.94, green: 0.94, blue: 0.94))
-                                    .cornerRadius(86)
-                            })
-                            .alert(isPresented: $showAlert) {
-                                Alert(
-                                    title: Text("End Exploration Session"),
-                                    message: Text("By stopping the session, your device will not perform AudiTag scanning"),
-                                    primaryButton: .default(Text("Continue Exploration")) {
-                                    },
-                                    secondaryButton: .destructive(Text("End Session")) {
-                                        isExploring = false
-                                        playlistPlayerViewModel.stopPlayback()
-                                        backgroundPlayerViewModel.stopBackground()
-                                    }
-                                )
-                            }
-                            
-                            Text("AudiTag Collections")
-                                .frame(maxWidth: 283)
-                                .font(.headline)
+                    ZStack {
+                        VStack {
+                            Image("headertitle")
+                                .resizable()
+                                .scaledToFit()
+                                .ignoresSafeArea()
+                            Spacer()
                         }
-                        .frame(maxWidth: .infinity, maxHeight: 50)
-                        .padding(.trailing, 50)
-                        
-                        if !collections.isEmpty {
-                            HStack (spacing: 16) {
-                                Image("witjk") // TODO: NEED CHANGE HOW TO GET THE IMAGE
-                                    .resizable()
-                                    .scaledToFit()
-                                    .frame(width: 80, height: 80)
-                                    .clipShape(RoundedRectangle(cornerRadius: 8))
+                        VStack {
+                            HStack {
+                                Button(action:  {
+                                    showAlert = true
+                                }, label: {
+                                    Image("BackButton")
+                                        .frame(maxWidth: 28, maxHeight: 28)
+                                })
+                                .alert(isPresented: $showAlert) {
+                                    Alert(
+                                        title: Text("End Exploration Session"),
+                                        message: Text("By stopping the session, your device will not perform AudiTag scanning"),
+                                        primaryButton: .default(Text("Continue Exploration")) {
+                                        },
+                                        secondaryButton: .destructive(Text("End Session")) {
+                                            isExploring = false
+                                            playlistPlayerViewModel.stopPlayback()
+                                            backgroundPlayerViewModel.stopBackground()
+                                        }
+                                    )
+                                }
                                 
-                                VStack (alignment: .leading) {
-                                    Text(collections[0].name)
-                                        .fontWeight(.semibold)
-                                        .lineLimit(nil)
-                                        .multilineTextAlignment(.leading)
-                                        .frame(maxWidth: 350, alignment: .leading)
-                                        .fixedSize(horizontal: false, vertical: true)
-                
-                                    Text(collections[0].authoredBy)
-                                        .font(.footnote)
+                            }
+                            .frame(maxWidth: .infinity, maxHeight: 50)
+                            .padding(.trailing, 50)
+                            
+                            if !collections.isEmpty {
+                                HStack (spacing: 16) {
+                                    Image("AppLogo") // TODO: NEED CHANGE HOW TO GET THE IMAGE
+                                        .resizable()
+                                        .scaledToFit()
+                                        .frame(width: 80, height: 80)
+                                        .clipShape(RoundedRectangle(cornerRadius: 8))
                                     
-                                    Text(formattedDate(collections[0].authoredAt))
-                                        .font(.footnote)
-                                        .foregroundColor(.gray)
-                                        .padding(.top, 8)
+                                    VStack (alignment: .leading) {
+                                        Text(collections[0].name)
+                                            .fontWeight(.semibold)
+                                            .lineLimit(nil)
+                                            .multilineTextAlignment(.leading)
+                                            .frame(maxWidth: 350, alignment: .leading)
+                                            .fixedSize(horizontal: false, vertical: true)
+                                        
+                                        Text(collections[0].authoredBy)
+                                            .font(.footnote)
+                                        
+                                        //TODO: date ganti jadi segmen tim
+                                        Text(formattedDate(collections[0].authoredAt))
+                                            .font(.footnote)
+                                            .foregroundColor(.gray)
+                                            .padding(.top, 8)
+                                    }
+                                    .padding(.trailing, 36)
                                 }
-                                .padding(.trailing, 36)
-                            }
-                            .frame(maxWidth: .infinity, maxHeight: 80)
-                            
-                            VStack {
-                                ScrollView {
-                                    Text(collections[0].longContents)
-                                        .font(.footnote)
-                                        .padding(.horizontal, 8)
-                                }
-                            }
-                            .frame(maxWidth: .infinity, maxHeight: 108)
-                            .padding(.top, 12)
-                            .padding(.bottom, 12)
-                            
-                            VStack (spacing: 16) {
-                                VStack (alignment: .leading) {
-                                    Text("TRACKLIST")
-                                        .font(.footnote)
-                                        .foregroundColor(.gray)
-                                }
-                                .frame(maxWidth: .infinity, maxHeight: 25, alignment: .topLeading)
+                                .frame(maxWidth: .infinity, maxHeight: 80)
                                 
-                                if !self.list.isEmpty {
-                                    List($list, id: \.uuid) { $playlist in
-                                        HStack {
-                                            VStack (alignment: .leading) {
-                                                Text(playlist.name)
-                                                    .bold()
-                                                Text(playlist.duration)
-                                            }
-                                            
-                                            Spacer()
-                                            
-                                            Button(action: {
-                                                playlistPlayerViewModel.startPlayback(song: playlist.name)
-                                                ButtonHaptic()
-                                            })
-                                            {
-                                                if playlistPlayerViewModel.playlistPlayerManager.isPlaying && playlist.name == playlistPlayerViewModel.playlistPlayerManager.currentSongTitle {
-                                                    Image("sound")
-                                                } else {
-                                                    Image(systemName: "play")
-                                                        .foregroundColor(Color("AppLabel"))
+                                VStack {
+                                    ScrollView {
+                                        Text(collections[0].longContents)
+                                            .font(.footnote)
+                                            .padding(.horizontal, 8)
+                                    }
+                                }
+                                .frame(maxWidth: .infinity, maxHeight: 108)
+                                .padding(.top, 12)
+                                .padding(.bottom, 12)
+                                
+                                VStack (spacing: 16) {
+                                    
+                                    if !self.list.isEmpty {
+                                        List($list, id: \.uuid) { $playlist in
+                                            HStack {
+                                                VStack (alignment: .leading) {
+                                                    Text(playlist.name)
+                                                        .bold()
+                                                    Text(playlist.duration)
+                                                }
+                                                
+                                                Spacer()
+                                                
+                                                Button(action: {
+                                                    playlistPlayerViewModel.startPlayback(song: playlist.name)
+                                                    ButtonHaptic()
+                                                })
+                                                {
+                                                    if playlistPlayerViewModel.playlistPlayerManager.isPlaying && playlist.name == playlistPlayerViewModel.playlistPlayerManager.currentSongTitle {
+                                                        Image("sounds")
+                                                    } else {
+                                                        Image(systemName: "play")
+                                                            .foregroundColor(Color("AppLabel"))
+                                                    }
                                                 }
                                             }
+                                            .frame(maxWidth: .infinity, maxHeight: 60)
                                         }
-                                        .frame(maxWidth: .infinity, maxHeight: 60)
+                                        .listStyle(.plain)
+                                        .padding(.bottom, 16)
                                     }
-                                    .listStyle(.plain)
-                                    .padding(.bottom, 16)
+                                }.padding(.bottom, 16)
+                                
+                                if !self.list.isEmpty {
+                                    PlayerView(isPlaying: $playlistPlayerViewModel.playlistPlayerManager.isPlaying, list: $list)
+                                        .environmentObject(audioPlayerViewModel)
+                                        .environmentObject(playlistPlayerViewModel)
+                                        .environmentObject(backgroundPlayerViewModel)
+                                        .environmentObject(beaconScanner)
                                 }
-                            }.padding(.bottom, 16)
-                            
-                            if !self.list.isEmpty {
-                                PlayerView(isPlaying: $playlistPlayerViewModel.playlistPlayerManager.isPlaying, list: $list)
-                                    .environmentObject(audioPlayerViewModel)
-                                    .environmentObject(playlistPlayerViewModel)
-                                    .environmentObject(backgroundPlayerViewModel)
-                                    .environmentObject(beaconScanner)
                             }
                         }
-                    }
-                    .padding(.horizontal, 16)
-                    .onReceive(beaconScanner.$isFindBeacon) { isFind in
-                        delay(DefaultDelay.backSound.rawValue) {
-                            if isFind && !isBackgroundPlay {
-                                if let beacon = audioPlayerViewModel.fetchBeaconById(id: (beaconScanner.closestBeacon?.uuid.uuidString.lowercased())!) {
-                                    self.isBackgroundPlay = true
-                                    backgroundPlayerViewModel.startBackgroundSound(song: beacon.backgroundSound)
-                                } else {
-                                    self.isBackgroundPlay = false
-                                    backgroundPlayerViewModel.stopBackground()
+                        .padding(.horizontal, 16)
+                        .onReceive(beaconScanner.$isFindBeacon) { isFind in
+                            delay(DefaultDelay.backSound.rawValue) {
+                                if isFind && !isBackgroundPlay {
+                                    if let beacon = audioPlayerViewModel.fetchBeaconById(id: (beaconScanner.closestBeacon?.uuid.uuidString.lowercased())!) {
+                                        self.isBackgroundPlay = true
+                                        backgroundPlayerViewModel.startBackgroundSound(song: beacon.backgroundSound)
+                                    } else {
+                                        self.isBackgroundPlay = false
+                                        backgroundPlayerViewModel.stopBackground()
+                                    }
                                 }
                             }
                         }
@@ -180,7 +178,7 @@ struct PlaylistView: View {
     @Previewable var playlistPlayerViewModel: PlaylistPlayerViewModel = PlaylistPlayerViewModel()
     @Previewable var backgroundPlayerViewModel: BackgroundPlayerViewModel = BackgroundPlayerViewModel()
     @Previewable var beaconScanner: IBeaconDetector = IBeaconDetector()
-
+    
     PlaylistView(
         isExploring: .constant(true),
         collections: .constant(

@@ -33,7 +33,7 @@ struct PlayerView: View {
                         .foregroundColor(.gray)
                     
                     ProgressView("", value: self.trackBar, total: self.totalDuration)
-                        .accentColor(Color("AppButton"))
+                        .accentColor(Color("AppBlue"))
                         .scaleEffect(x: 1, y: 1.5, anchor: .bottom)
                     
                     HStack {
@@ -155,6 +155,7 @@ struct PlayerView: View {
     @Previewable var audioPlayerViewModel: AudioPlayerViewModel = AudioPlayerViewModel()
     @Previewable var playlistPlayerViewModel: PlaylistPlayerViewModel = PlaylistPlayerViewModel()
     @Previewable var backgroundPlayerViewModel: BackgroundPlayerViewModel = BackgroundPlayerViewModel()
+    @Previewable var beaconScanner: IBeaconDetector = IBeaconDetector()
 
     PlayerView(isPlaying: .constant(true), list: .constant([Playlist(
         uuid: "123e4567-e89b-12d3-a456-426614174000",
@@ -165,4 +166,5 @@ struct PlayerView: View {
     .environmentObject(audioPlayerViewModel)
     .environmentObject(playlistPlayerViewModel)
     .environmentObject(backgroundPlayerViewModel)
+    .environmentObject(beaconScanner)
 }
