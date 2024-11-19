@@ -63,6 +63,34 @@ targets:
     dependencies:
       - package: SDBeaconScanner
       - package: Supabase
+  Kapal-LawdClip:
+    type: application.on-demand-install-capable
+    platform: iOS
+    deploymentTarget: "17.0"
+    entitlements:
+      path: Kapal-LawdClip/Kapal-LawdClip.entitlements
+      properties:
+        com.apple.developer.parent-application-identifiers:
+          [$(AppIdentifierPrefix)com.Kapal-Lawd.Kapal-Lawd]
+    info:
+      path: Kapal-LawdClip/Info.plist
+      properties:
+        CFBundleDisplayName: "Audium Clip"
+        CFBundleShortVersionString: ${MARKETING_VERSION}
+        CFBundleVersion: ${CURRENT_PROJECT_VERSION}
+        CFBundleIdentifier: com.Kapal-Lawd.Kapal-Lawd.Clip
+        NSAppClip:
+          NSAppClipRequestEphemeralUserNotification: false
+          NSAppClipRequestLocationConfirmation: false
+    sources: [Kapal-LawdClip]
+    resources: [Kapal-LawdClipResources]
+    settings:
+      PRODUCT_BUNDLE_IDENTIFIER: com.Kapal-Lawd.Kapal-Lawd.Clip
+      INFOPLIST_FILE: Kapal-LawdClip/Info.plist
+      GENERATE_INFOPLIST_FILE: true
+      DEVELOPMENT_TEAM: ${DEVELOPMENT_TEAM_ID}
+    dependencies:
+      - target: Kapal-Lawd
   Kapal-LawdTests:
     type: bundle.unit-test
     platform: iOS
@@ -81,8 +109,9 @@ schemes:
     build:
       targets:
         Kapal-Lawd: all
+        Kapal-LawdClip: all
         Kapal-LawdTests: all
     test:
       targets:
         - name: Kapal-LawdTests
-      gatherCoverageData: true
+          gatherCoverageData: true
