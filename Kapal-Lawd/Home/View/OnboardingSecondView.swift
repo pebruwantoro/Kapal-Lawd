@@ -11,10 +11,13 @@ struct OnboardingSecondView: View {
     
     @Binding var secondOnboarding: Bool
     @State private var thirdOnboarding = false
+    @State private var isBack = false
     
     var body: some View {
         if thirdOnboarding {
             OnboardingThirdView(thirdOnboarding: self.$thirdOnboarding)
+        } else if isBack {
+            OnboardingFirstView(startOnboarding: $isBack)
         } else {
             Spacer()
             NavigationStack {
@@ -45,7 +48,7 @@ struct OnboardingSecondView: View {
                 
                 HStack (spacing: 12) {
                     Button(action: {
-                        
+                        isBack = true
                     }, label: {
                         Image(systemName: "arrow.left")
                             .foregroundColor(Color("AppText"))

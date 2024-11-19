@@ -38,11 +38,11 @@ func multilateration(data: [BeaconData]) -> [DetectedBeacon]{
     let matrixA = A
     let vectorB = B
     
-//    let AT = transpose(matrixA)
-//    let ATA = matrixMultiply(AT, matrixA)
-//    let ATB = matrixVectorMultiply(AT, vectorB)
+    let AT = transpose(matrixA)
+    let ATA = matrixMultiply(AT, matrixA)
+    let ATB = matrixVectorMultiply(AT, vectorB)
     
-    guard let solution = solveLinearSystem(A, B) else {
+    guard let solution = solveLinearSystem(ATA, ATB) else {
         print(ErrorHandler.errorSolveLinearSystem.errorDescription!)
         return []
     }
@@ -58,13 +58,13 @@ func multilateration(data: [BeaconData]) -> [DetectedBeacon]{
             uuid: beacon.uuid,
             estimatedDitance: beacon.distance,
             euclideanDistance: euclideanDistance,
+            averageDistance: abs(beacon.distance+euclideanDistance) / 2,
             userPosition: estimatedPosition
         )
         
         detectedBeacons.append(detectedBeacon)
     }
-    print("data beacons: \(data)")
-    print("detectedBeacons: \(detectedBeacons)")
+    
     return Array(Set(detectedBeacons))
 }
 

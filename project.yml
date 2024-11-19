@@ -15,6 +15,9 @@ packages:
   Supabase:
     url: "https://github.com/supabase/supabase-swift.git"
     from: 2.0.0
+  SDWebImageSwiftUI:
+    url: https://github.com/SDWebImage/SDWebImageSwiftUI.git
+    from: 3.0.0
 targets:
   Kapal-Lawd:
     type: application
@@ -63,6 +66,7 @@ targets:
     dependencies:
         - package: SDBeaconScanner
         - package: Supabase
+        - package: SDWebImageSwiftUI
   Kapal-LawdTests:
     type: bundle.unit-test
     platform: iOS

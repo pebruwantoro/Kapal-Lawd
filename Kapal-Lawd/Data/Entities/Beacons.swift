@@ -41,6 +41,7 @@ struct DetectedBeacon {
     let uuid: String
     let estimatedDitance: Double
     let euclideanDistance: Double
+    let averageDistance: Double
     let userPosition: Point
 }
 

@@ -6,22 +6,25 @@
 //
 
 import SwiftUI
+import SDWebImageSwiftUI
 
 struct PlaylistView: View {
     @Binding var isExploring: Bool
     @Binding var collections: [Collections]
-    @Binding var list: [Playlist]
-    @EnvironmentObject private var audioPlayerViewModel: AudioPlayerViewModel
-    @EnvironmentObject private var playlistPlayerViewModel: PlaylistPlayerViewModel
-    @EnvironmentObject private var backgroundPlayerViewModel: BackgroundPlayerViewModel
+    @Binding var selectedBeaconId: String
+    @StateObject private var playlistPlayerViewModel: PlaylistPlayerViewModel = PlaylistPlayerViewModel()
+    @StateObject private var backgroundPlayerViewModel: BackgroundPlayerViewModel = BackgroundPlayerViewModel()
     @EnvironmentObject private var beaconScanner: IBeaconDetector
+    @EnvironmentObject private var audioPlayerViewModel: AudioPlayerViewModel
     @State var showAlert = false
     @State private var isBackgroundPlay = false
+    @State private var isBack = false
+    @State private var list: [Playlist] = []
     
     var body: some View {
         Group {
             NavigationStack {
-                if self.beaconScanner.isBeaconFar {
+                if self.isBack {
                     VStack {
                         FindAuditagView(isExploring: self.$isExploring)
                             .onReceive(beaconScanner.$isFindBeacon) { isFind in
@@ -38,41 +41,48 @@ struct PlaylistView: View {
                 } else {
                     ZStack {
                         VStack {
-                            Image("headertitle")
-                                .resizable()
-                                .scaledToFit()
-                                .ignoresSafeArea()
-                            Spacer()
-                        }
-                        VStack {
-                            HStack {
-                                Button(action:  {
-                                    showAlert = true
-                                }, label: {
-                                    Image("BackButton")
-                                        .frame(maxWidth: 28, maxHeight: 28)
-                                })
-                                .alert(isPresented: $showAlert) {
-                                    Alert(
-                                        title: Text("End Exploration Session"),
-                                        message: Text("By stopping the session, your device will not perform AudiTag scanning"),
-                                        primaryButton: .default(Text("Continue Exploration")) {
-                                        },
-                                        secondaryButton: .destructive(Text("End Session")) {
-                                            isExploring = false
-                                            playlistPlayerViewModel.stopPlayback()
-                                            backgroundPlayerViewModel.stopBackground()
-                                        }
-                                    )
+                            ZStack(alignment: .topLeading) {
+                                VStack {
+                                    Image("headertitle")
+                                        .resizable()
+                                        .scaledToFit()
+                                        .ignoresSafeArea()
+                                    Spacer()
                                 }
                                 
+                                HStack {
+                                    Button(action:  {
+                                        showAlert = true
+                                        ButtonHaptic()
+                                    }, label: {
+                                        Image("BackButton")
+                                            .frame(maxWidth: 28, maxHeight: 28)
+                                    })
+                                    .alert(isPresented: $showAlert) {
+                                        Alert(
+                                            title: Text("End Exploration Session"),
+                                            message: Text("By stopping the session, your device will not perform AudiTag scanning"),
+                                            primaryButton: .default(Text("Continue Exploration")) {
+                                            },
+                                            secondaryButton: .destructive(Text("End Session")) {
+                                                isExploring = false
+                                                playlistPlayerViewModel.stopPlayback()
+                                                backgroundPlayerViewModel.stopBackground()
+                                            }
+                                        )
+                                    }
+                                    Spacer()
+                                }
+                                .padding(.leading, 16)
+                                .padding(.top, 16)
+                                .padding(.trailing, 50)
+                                .frame(maxWidth: .infinity, maxHeight: 50, alignment: .topLeading)
+                                
                             }
-                            .frame(maxWidth: .infinity, maxHeight: 50)
-                            .padding(.trailing, 50)
                             
                             if !collections.isEmpty {
                                 HStack (spacing: 16) {
-                                    Image("AppLogo") // TODO: NEED CHANGE HOW TO GET THE IMAGE
+                                    WebImage(url: URL(string: collections[0].icon))
                                         .resizable()
                                         .scaledToFit()
                                         .frame(width: 80, height: 80)
@@ -94,10 +104,39 @@ struct PlaylistView: View {
                                             .font(.footnote)
                                             .foregroundColor(.gray)
                                             .padding(.top, 8)
+                                        
+                                        HStack {
+                                            Button(action: {
+                                                if let url = URL(string: collections[0].appUrl) {
+                                                    UIApplication.shared.open(url)
+                                                }
+                                            }) {
+                                                Text("Buka di App Store")
+                                                    .font(.system(size: 16, weight: .bold))
+                                                    .foregroundColor(.white)
+                                                    .padding(.vertical, 12)
+                                                    .padding(.horizontal, 24)
+                                                    .background(Color.blue)
+                                                    .cornerRadius(20)
+                                                    .frame(width: 48, height: 48)
+                                            }
+                                            
+                                            Button(action: {
+                                                if let url = URL(string: collections[0].instagram) {
+                                                    UIApplication.shared.open(url)
+                                                }
+                                            }) {
+                                                Image("instagramIcon")
+                                                    .resizable()
+                                                    .scaledToFit()
+                                                    .frame(width: 48, height: 48)
+                                                    .padding(.trailing, 12)
+                                            }
+                                        }
                                     }
                                     .padding(.trailing, 36)
                                 }
-                                .frame(maxWidth: .infinity, maxHeight: 80)
+                                .frame(maxWidth: .infinity, maxHeight: 100)
                                 
                                 VStack {
                                     ScrollView {
@@ -167,6 +206,11 @@ struct PlaylistView: View {
                             }
                         }
                     }
+                    .onAppear{
+                        Task {
+                            self.list = await audioPlayerViewModel.fetchPlaylistByCollectionId(id: collections[0].uuid)
+                        }
+                    }
                 }
             }
         }
@@ -175,12 +219,10 @@ struct PlaylistView: View {
 
 #Preview {
     @Previewable var audioPlayerViewModel: AudioPlayerViewModel = AudioPlayerViewModel()
-    @Previewable var playlistPlayerViewModel: PlaylistPlayerViewModel = PlaylistPlayerViewModel()
-    @Previewable var backgroundPlayerViewModel: BackgroundPlayerViewModel = BackgroundPlayerViewModel()
     @Previewable var beaconScanner: IBeaconDetector = IBeaconDetector()
     
     PlaylistView(
-        isExploring: .constant(true),
+        isExploring: .constant(false),
         collections: .constant(
             [
                 Collections(
@@ -188,6 +230,10 @@ struct PlaylistView: View {
                     roomId: "String",
                     name: "String",
                     beaconId: "String",
+                    icon: "AppIcon",
+                    category: "Games",
+                    appUrl: "google.com",
+                    instagram: "test",
                     longContents: "String",
                     shortContents: "String",
                     authoredBy: "String",
@@ -195,12 +241,8 @@ struct PlaylistView: View {
                 )
             ]
         ),
-        list: .constant([
-            Playlist(uuid: "", collectionId: "", name: "", duration: "", url: "")
-        ])
+        selectedBeaconId: .constant("")
     )
     .environmentObject(audioPlayerViewModel)
-    .environmentObject(playlistPlayerViewModel)
-    .environmentObject(backgroundPlayerViewModel)
     .environmentObject(beaconScanner)
 }

@@ -45,17 +45,6 @@ struct OnboardingFirstView: View {
                 
                 HStack (spacing: 12) {
                     Button(action: {
-                        startOnboarding = true
-                    }, label: {
-                        Image(systemName: "arrow.left")
-                            .foregroundColor(Color("AppText"))
-                            .font(.body)
-                            .frame(maxWidth: 50, maxHeight: 50)
-                            .background(Color("AppGrey"))
-                            .cornerRadius(86)
-                    })
-                    
-                    Button(action: {
                         secondOnboarding = true
                         ButtonHaptic()
                     }, label: {
