@@ -105,20 +105,20 @@ struct PlaylistView: View {
                                             .foregroundColor(.gray)
                                             .padding(.top, 8)
                                         
-                                        HStack {
+                                        HStack (spacing: 20) {
                                             Button(action: {
                                                 if let url = URL(string: collections[0].appUrl) {
                                                     UIApplication.shared.open(url)
                                                 }
                                             }) {
                                                 Text("Buka di App Store")
-                                                    .font(.system(size: 16, weight: .bold))
+                                                    .font(.system(size: 16))
                                                     .foregroundColor(.white)
                                                     .padding(.vertical, 12)
                                                     .padding(.horizontal, 24)
-                                                    .background(Color.blue)
+                                                    .background(Color("AppBlue"))
                                                     .cornerRadius(20)
-                                                    .frame(width: 48, height: 48)
+                                                    .frame(width: 143, height: 28)
                                             }
                                             
                                             Button(action: {
@@ -129,7 +129,7 @@ struct PlaylistView: View {
                                                 Image("instagramIcon")
                                                     .resizable()
                                                     .scaledToFit()
-                                                    .frame(width: 48, height: 48)
+                                                    .frame(width: 28, height: 28)
                                                     .padding(.trailing, 12)
                                             }
                                         }
