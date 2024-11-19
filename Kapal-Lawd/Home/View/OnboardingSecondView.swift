@@ -49,6 +49,7 @@ struct OnboardingSecondView: View {
                                     .frame(width: 313, height: 50, alignment: .leading)
                             
                         }
+                        .foregroundColor(Color("AppText"))
                         .frame(width: 313, height: 144)
                         .padding(.bottom, 30)
                         
