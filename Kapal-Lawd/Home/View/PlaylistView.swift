@@ -60,14 +60,14 @@ struct PlaylistView: View {
                                     })
                                     .alert(isPresented: $showAlert) {
                                         Alert(
-                                            title: Text("End Exploration Session"),
-                                            message: Text("By stopping the session, your device will not perform AudiTag scanning"),
-                                            primaryButton: .default(Text("Continue Exploration")) {
-                                            },
-                                            secondaryButton: .destructive(Text("End Session")) {
+                                            title: Text("Keluar dari Booth?"),
+                                            message: Text("Kamu terdeteksi keluar dari area booth Audium. Kembali ke halaman scanning?"),
+                                            primaryButton: .destructive(Text("Keluar dari Booth")) {
                                                 isExploring = false
                                                 playlistPlayerViewModel.stopPlayback()
                                                 backgroundPlayerViewModel.stopBackground()
+                                            },
+                                            secondaryButton: .default(Text("Tetap di Booth")) {
                                             }
                                         )
                                     }
