@@ -17,49 +17,54 @@ struct GetStartedView: View {
         } else {
             Spacer()
             NavigationStack {
-                Image("header")
-                    .resizable().scaledToFill()
-                    .frame(width: 370, height: 210)
-                    .clipShape(HalfRoundedRectangle(cornerRadius: 36))
-                    .offset(y: -30)
-                
-                VStack {
-                    Text("Mulai Audium")
-                        .font(.title).bold()
-                        .frame(width: 313, alignment: .leading)
-                    
-                    VStack (spacing: 16) {
-                        Text("Menyiapkan pengalaman yang tak terlupakan untuk Anda.")
-                            .italic()
-                            .font(.subheadline)
-                            .frame(width: 313, alignment: .leading)
+                ZStack {
+                    Color("AppWhite")
+                    VStack {
+                        Image("header")
+                            .resizable().scaledToFill()
+                            .frame(width: 370, height: 210)
+                            .clipShape(HalfRoundedRectangle(cornerRadius: 36))
+                            .offset(y: -30)
                         
+                        VStack {
+                            Text("Mulai Audium")
+                                .font(.title).bold()
+                                .frame(width: 313, alignment: .leading)
+                            
+                            VStack (spacing: 16) {
+                                Text("Menyiapkan pengalaman yang tak terlupakan untuk Anda.")
+                                    .italic()
+                                    .font(.subheadline)
+                                    .frame(width: 313, alignment: .leading)
+                                
+                                
+                                Text("Ikuti langkah-langkah ini untuk merasakan pengalaman baru dalam mengunjungi pameran.")
+                                    .italic()
+                                    .font(.subheadline)
+                                    .frame(width: 313, alignment: .leading)
+                            }
+                        }
+                        .foregroundColor(Color("AppText"))
+                        .padding(.bottom, 25)
                         
-                        Text("Ikuti langkah-langkah ini untuk merasakan pengalaman baru dalam mengunjungi pameran.")
-                            .italic()
-                            .font(.subheadline)
-                            .frame(width: 313, alignment: .leading)
+                        VStack {
+                            Button(action: {
+                                startOnboarding = true
+                                ButtonHaptic()
+                                
+                            }, label: {
+                                Text("Start with Audium")
+                                    .foregroundColor(.white)
+                                    .font(.body)
+                                    .frame(maxWidth: .infinity, maxHeight: 50)
+                                    .background(.black)
+                                    .cornerRadius(86)
+                            })
+                            
+                        }
+                        .padding(.horizontal, 24)
                     }
                 }
-                .padding(.bottom, 25)
-                
-                VStack {
-                    Button(action: {
-                        startOnboarding = true
-                        ButtonHaptic()
-                        
-                    }, label: {
-                        Text("Start with Audium")
-                            .foregroundColor(.white)
-                            .font(.body)
-                            .frame(maxWidth: .infinity, maxHeight: 50)
-                            .background(.black)
-                            .cornerRadius(86)
-                    })
-                    
-                }
-                .padding(.horizontal, 24)
-                
             }
             .frame(maxWidth: .infinity, maxHeight: 480)
             .background(.white)

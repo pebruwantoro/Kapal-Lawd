@@ -50,7 +50,6 @@ struct OnboardingThirdView: View {
                                     .frame(width: 313, height: 50, alignment: .leading)
                      
                         }
-                        
                         .foregroundColor(Color("AppText"))
                         .padding(.bottom, 34)
                         
