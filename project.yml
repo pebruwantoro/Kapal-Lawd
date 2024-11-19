@@ -21,38 +21,38 @@ targets:
     platform: iOS
     deploymentTarget: "17.0"
     info:
-        path: Kapal-Lawd/Info.plist
-        properties:
-          Privacy - Location Always and When In Use Usage Description: "Audium uses your location to provide an immersive audio experience as you navigate the exhibition. By detecting your proximity to specific exhibits, the app can automatically play relevant audio narrations at the right moment. Continuous location access is required to ensure seamless playback as you explore different sections of the gallery without needing to interact with your device."
-          Privacy - Location When In Use Usage Description: "Audium requires access to your location while using the app to deliver a hands-free audio experience. When you approach an exhibit, Audium detects your proximity and plays a relevant audio narration. This location-based functionality allows for automatic, real-time content delivery without any additional interaction needed from you."
-          Privacy - Bluetooth Always Usage Description: "Audium uses Bluetooth to detect your proximity to exhibits equipped with iBeacon. This allows the app to automatically play audio narrations when you approach each booth, enhancing your exhibition experience with hands-free interactions. Bluetooth detection is essential for delivering seamless, location-based audio content during your visit."
-          Privacy - Bluetooth Peripheral Usage Description: "Audium requires Bluetooth access to connect with iBeacons at the exhibition. These beacons signal your proximity to different exhibits, allowing the app to automatically play relevant audio narrations as you move through the gallery. This enhances your experience by providing hands-free, location-aware content for each exhibit you encounter."
-          NSLocationWhenInUseUsageDescription: "Audium requires access to your location while using the app to deliver a hands-free audio experience. When you approach an exhibit, Audium detects your proximity and plays a relevant audio narration. This location-based functionality allows for automatic, real-time content delivery without any additional interaction needed from you."
-          NSLocationAlwaysAndWhenInUseUsageDescription: "Audium uses your location to provide an immersive audio experience as you navigate the exhibition. By detecting your proximity to specific exhibits, the app can automatically play relevant audio narrations at the right moment. Continuous location access is required to ensure seamless playback as you explore different sections of the gallery without needing to interact with your device."
-          NSBluetoothAlwaysUsageDescription: "Audium uses Bluetooth to detect your proximity to exhibits equipped with iBeacon. This allows the app to automatically play audio narrations when you approach each booth, enhancing your exhibition experience with hands-free interactions. Bluetooth detection is essential for delivering seamless, location-based audio content during your visit."
-          NSBluetoothPeripheralUsageDescription: "Audium requires Bluetooth access to connect with iBeacons at the exhibition. These beacons signal your proximity to different exhibits, allowing the app to automatically play relevant audio narrations as you move through the gallery. This enhances your experience by providing hands-free, location-aware content for each exhibit you encounter."
-          NSAppTransportSecurity:
-            NSAllowsArbitraryLoads: true
-          UIBackgroundModes:
-            - location
-            - audio
-            - bluetooth-central
-            - processing
-            - fetch
-          BGTaskSchedulerPermittedIdentifiers:
-            - "com.Kapal-Lawd.Kapal-Lawd.refresh"
-            - "com.Kapal-Lawd.Kapal-Lawd.processing"
-          UILaunchScreen:
-            UIImageName: ""
-          UISupportedInterfaceOrientations:
-            - UIInterfaceOrientationPortrait
-            - UIInterfaceOrientationPortraitUpsideDown
-            - UIInterfaceOrientationLandscapeLeft
-            - UIInterfaceOrientationLandscapeRight
-          CFBundleIconName: "AppIcon"
-          CFBundleDisplayName: "Audium"
-          SUPABASE_API_KEY: ${SUPABASE_API_KEY}
-          SUPABASE_BASE_URL: ${SUPABASE_BASE_URL}
+      path: Kapal-Lawd/Info.plist
+      properties:
+        Privacy - Location Always and When In Use Usage Description: "Audium uses your location to provide an immersive audio experience as you navigate the exhibition. By detecting your proximity to specific exhibits, the app can automatically play relevant audio narrations at the right moment. Continuous location access is required to ensure seamless playback as you explore different sections of the gallery without needing to interact with your device."
+        Privacy - Location When In Use Usage Description: "Audium requires access to your location while using the app to deliver a hands-free audio experience. When you approach an exhibit, Audium detects your proximity and plays a relevant audio narration. This location-based functionality allows for automatic, real-time content delivery without any additional interaction needed from you."
+        Privacy - Bluetooth Always Usage Description: "Audium uses Bluetooth to detect your proximity to exhibits equipped with iBeacon. This allows the app to automatically play audio narrations when you approach each booth, enhancing your exhibition experience with hands-free interactions. Bluetooth detection is essential for delivering seamless, location-based audio content during your visit."
+        Privacy - Bluetooth Peripheral Usage Description: "Audium requires Bluetooth access to connect with iBeacons at the exhibition. These beacons signal your proximity to different exhibits, allowing the app to automatically play relevant audio narrations as you move through the gallery. This enhances your experience by providing hands-free, location-aware content for each exhibit you encounter."
+        NSLocationWhenInUseUsageDescription: "Audium requires access to your location while using the app to deliver a hands-free audio experience. When you approach an exhibit, Audium detects your proximity and plays a relevant audio narration. This location-based functionality allows for automatic, real-time content delivery without any additional interaction needed from you."
+        NSLocationAlwaysAndWhenInUseUsageDescription: "Audium uses your location to provide an immersive audio experience as you navigate the exhibition. By detecting your proximity to specific exhibits, the app can automatically play relevant audio narrations at the right moment. Continuous location access is required to ensure seamless playback as you explore different sections of the gallery without needing to interact with your device."
+        NSBluetoothAlwaysUsageDescription: "Audium uses Bluetooth to detect your proximity to exhibits equipped with iBeacon. This allows the app to automatically play audio narrations when you approach each booth, enhancing your exhibition experience with hands-free interactions. Bluetooth detection is essential for delivering seamless, location-based audio content during your visit."
+        NSBluetoothPeripheralUsageDescription: "Audium requires Bluetooth access to connect with iBeacons at the exhibition. These beacons signal your proximity to different exhibits, allowing the app to automatically play relevant audio narrations as you move through the gallery. This enhances your experience by providing hands-free, location-aware content for each exhibit you encounter."
+        NSAppTransportSecurity:
+          NSAllowsArbitraryLoads: true
+        UIBackgroundModes:
+          - location
+          - audio
+          - bluetooth-central
+          - processing
+          - fetch
+        BGTaskSchedulerPermittedIdentifiers:
+          - "com.Kapal-Lawd.Kapal-Lawd.refresh"
+          - "com.Kapal-Lawd.Kapal-Lawd.processing"
+        UILaunchScreen:
+          UIImageName: ""
+        UISupportedInterfaceOrientations:
+          - UIInterfaceOrientationPortrait
+          - UIInterfaceOrientationPortraitUpsideDown
+          - UIInterfaceOrientationLandscapeLeft
+          - UIInterfaceOrientationLandscapeRight
+        CFBundleIconName: "AppIcon"
+        CFBundleDisplayName: "Audium"
+        SUPABASE_API_KEY: ${SUPABASE_API_KEY}
+        SUPABASE_BASE_URL: ${SUPABASE_BASE_URL}
     sources: [Kapal-Lawd]
     resources: [Resources]
     settings:
@@ -61,8 +61,8 @@ targets:
       GENERATE_INFOPLIST_FILE: true
       DEVELOPMENT_TEAM: ${DEVELOPMENT_TEAM_ID}
     dependencies:
-        - package: SDBeaconScanner
-        - package: Supabase
+      - package: SDBeaconScanner
+      - package: Supabase
   Kapal-LawdTests:
     type: bundle.unit-test
     platform: iOS
@@ -84,5 +84,5 @@ schemes:
         Kapal-LawdTests: all
     test:
       targets:
-      - name: Kapal-LawdTests
+        - name: Kapal-LawdTests
       gatherCoverageData: true
