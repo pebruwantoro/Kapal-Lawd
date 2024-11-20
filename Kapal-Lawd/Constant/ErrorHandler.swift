@@ -14,6 +14,10 @@ enum ErrorHandler: LocalizedError {
     case dataCorrupted
     case networkError(Error)
     case unknownError(Error)
+    case errorMultilateration
+    case errorMultilaterationLessThanThree
+    case errorSolveLinearSystem
+    case errorRSSIZeroValue
 
     var errorDescription: String? {
         switch self {
@@ -29,6 +33,14 @@ enum ErrorHandler: LocalizedError {
             return "Network error: \(error.localizedDescription)"
         case .unknownError(let error):
             return "An unknown error occurred: \(error.localizedDescription)"
+        case .errorMultilateration:
+            return "Need at least 3 beacons for multilateration"
+        case .errorMultilaterationLessThanThree:
+            return "Need at least 1 beacons for multilateration"
+        case .errorSolveLinearSystem:
+            return "Unable to solve linear system."
+        case .errorRSSIZeroValue:
+            return "RSSI is zero, cannot calculate distance."
         }
     }
 }

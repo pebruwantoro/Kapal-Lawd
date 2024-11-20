@@ -15,18 +15,13 @@ class IBeaconDetector: NSObject, ObservableObject, CLLocationManagerDelegate {
     private var beaconData: Beacons?
     private var lastTargetVolume: Float? = nil
     private var currentVolumeLevel: VolumeLevel = .none
-    var dataBeacons: [Beacons] = []
-    var beaconBLE: [String: CLBeacon] = [:]
+    private var beaconsData = [BeaconData]()
     @ObservedObject private var audioPlayerManager = AVManager.shared
     @Published var isFindBeacon = false
-    @Published var isBeaconFar = true
-    @Published var isBeaconChange = false
-    @Published var backgroundSound: String = ""
-    @Published var detectedBeacons: [CLBeacon] = []
+    @Published var detectedMultilaterationBeacons: [DetectedBeacon] = []
     @Published var closestBeacon: CLBeacon?
     @Published var isSessionActive: Bool = false
-    @Published var currentSongTitle: String?
-    @Published var currentBeaconId: String?
+    @Published var dataBeacons: [Beacons] = []
     
     override init() {
         super.init()
@@ -126,43 +121,62 @@ class IBeaconDetector: NSObject, ObservableObject, CLLocationManagerDelegate {
     }
     
     func locationManager(_ manager: CLLocationManager, didRange beacons: [CLBeacon], satisfying beaconConstraint: CLBeaconIdentityConstraint) {
+        delay(8) {
+            self.startMonitoring()
+        }
+        
         delay(2) {
-            for beacon in beacons {
-                if let dataBeacon = self.dataBeacons.first(where: { $0.uuid == beacon.uuid.uuidString.lowercased()}) {
-                    self.beaconData = dataBeacon
-                    if beacon.rssi != 0 && Double(beacon.rssi) >= dataBeacon.maxRssi {
-                        self.beaconBLE[beacon.uuid.uuidString.lowercased()] = beacon
-                    } else {
-                        self.beaconBLE[beacon.uuid.uuidString.lowercased()] = beacon
+            if !self.dataBeacons.isEmpty {
+                for beacon in beacons {
+                    let tempBeacon = self.dataBeacons.first{ $0.uuid == beacon.uuid.uuidString.lowercased() }
+                    
+                    let distance = self.distanceFromRSSI(rssi: Double(beacon.rssi))
+                    
+                    if distance != -1 {
+                        let beaconData = BeaconData(
+                            uuid: beacon.uuid.uuidString.lowercased(),
+                            rssi: Double(beacon.rssi),
+                            distance: distance,
+                            position: Point(xPosition: tempBeacon!.xPosition, yPosition: tempBeacon!.yPosition)
+                        )
+                        
+                        self.beaconsData.append(beaconData)
                     }
                 }
-            }
-            
-            if let nearestBeacon = self.beaconBLE.values.max(by: { $0.rssi < $1.rssi }) {
-                if self.currentBeaconId != nearestBeacon.uuid.uuidString {
-                    self.isBeaconChange = true
-                    self.currentBeaconId = nearestBeacon.uuid.uuidString
-                    self.closestBeacon = nearestBeacon
-                } else {
-                    self.isBeaconChange = false
-                    self.currentBeaconId = nearestBeacon.uuid.uuidString
-                    self.closestBeacon = nearestBeacon
+                
+                self.beaconsData.sort(by: { $0.distance < $1.distance})
+                let tempData = Array(Set(self.beaconsData))
+                
+                switch tempData.count {
+                    case 1...2:
+                    self.detectedMultilaterationBeacons = multilaterationForLessThanThreeBeacons(data: tempData)
+                    case let count where count >= 3:
+                        self.detectedMultilaterationBeacons = multilateration(data: tempData)
+                    default:
+                        break
                 }
+               
+                
+                self.detectedMultilaterationBeacons.sort(by: { $0.averageDistance < $1.averageDistance })
+                let nearestBeacon = self.detectedMultilaterationBeacons.min { $0.averageDistance < $1.averageDistance }
+               
+                self.closestBeacon = beacons.first { $0.uuid.uuidString.lowercased() == nearestBeacon?.uuid }
                 
                 self.makeActive()
-                
-                self.adjustAudioForRSSI(rssi: Double(nearestBeacon.rssi), maxRssi: self.beaconData!.maxRssi, minRssi: self.beaconData!.minRssi)
+            } else {
+                self.makeDisactive()
             }
+            
         }
+        self.detectedMultilaterationBeacons.removeAll()
+//        self.beaconsData.removeAll()
     }
     
     private func makeActive() {
-        self.isBeaconFar = false
         self.isFindBeacon = true
     }
     
     private func makeDisactive() {
-        self.isBeaconFar = true
         self.isFindBeacon = false
     }
     
@@ -244,6 +258,18 @@ class IBeaconDetector: NSObject, ObservableObject, CLLocationManagerDelegate {
                 currentVolumeLevel = newVolumeLevel
             }
         }
+    }
+    
+    func distanceFromRSSI(rssi: Double) -> Double {
+        guard rssi != 0 else {
+            print(ErrorHandler.errorRSSIZeroValue)
+            return -1.0
+        }
+        
+        let ratio = (-59 - rssi) / (10 * 2)
+        let distance = pow(10, ratio)
+        
+        return distance
     }
 }
 

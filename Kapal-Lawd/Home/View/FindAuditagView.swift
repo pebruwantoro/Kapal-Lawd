@@ -14,48 +14,34 @@ struct FindAuditagView: View {
     @State private var collections: [Collections] = []
     @State private var playlists: [Playlist] = []
     @State var pulseScan = Animation.easeOut(duration: 2).repeatForever(autoreverses: true)
-    @StateObject private var audioPlayerViewModel: AudioPlayerViewModel = AudioPlayerViewModel()
-    @StateObject private var playlistPlayerViewModel: PlaylistPlayerViewModel = PlaylistPlayerViewModel()
-    @StateObject private var backgroundPlayerViewModel: BackgroundPlayerViewModel = BackgroundPlayerViewModel()
-    @StateObject private var interactionPlayerViewModel: InteractionPlayerViewModel = InteractionPlayerViewModel()
-    @StateObject private var beaconScanner: IBeaconDetector = IBeaconDetector()
     @State private var isPlayInteraction = false
     @State private var isContentReady = false
     @State private var showModal = false
+    @State private var isBack = false
+    @StateObject private var beaconScanner: IBeaconDetector = IBeaconDetector()
     
     var body: some View {
-        ZStack {
-            Color("AppBlue").ignoresSafeArea()
-            
-            VStack {
-                Button(action: {
-                    
-                }, label: {
-                    Image("BackButton")
-                        .frame(maxWidth: .infinity, alignment: .leading)
-                        .padding(.horizontal, 16)
-                        .padding(.top, 40)
-                })
-                Spacer()
-            }
-            
-            Group {
+        if isBack {
+            SpotHomepageView(spotHomepage: .constant(false))
+        } else {
+            ZStack {
+                Color("AppBlue").ignoresSafeArea()
                 
-                if isContentReady {
-                    PlaylistView(isExploring: self.$isExploring, collections: $collections, list: $playlists)
-                        .onReceive(beaconScanner.$isFindBeacon) { value in
-                            if !isPlayInteraction {
-                                interactionPlayerViewModel.startInteractionSound(song: DeafultSong.interaction.rawValue)
-                                isPlayInteraction = value
-                            }
-                        }
-                        .environmentObject(audioPlayerViewModel)
-                        .environmentObject(playlistPlayerViewModel)
-                        .environmentObject(backgroundPlayerViewModel)
-                        .environmentObject(beaconScanner)
-                } else {
+                VStack {
+                    Button(action: {
+                        isBack = true
+                        ButtonHaptic()
+                    }, label: {
+                        Image("BackButton")
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                            .padding(.horizontal, 16)
+                            .padding(.top, 40)
+                    })
+                    Spacer()
+                }
+                
+                Group {
                     VStack(spacing: 16) {
-                        
                         ZStack {
                             Circle()
                                 .fill(Color("AppWhite").opacity(0.2))
@@ -76,6 +62,9 @@ struct FindAuditagView: View {
                             withAnimation(.easeOut(duration: 0.8)) {
                                 cardOpacity = 1.0
                             }
+                        }
+                        .onDisappear{
+                            self.isScanning = false
                         }
                         
                         VStack {
@@ -102,33 +91,17 @@ struct FindAuditagView: View {
                         .frame(maxWidth: 313)
                     }
                 }
+                
             }
-        }
-        .onReceive(beaconScanner.$isFindBeacon) { isFind in
-            if !isFind {
-                self.playlistPlayerViewModel.stopPlayback()
-                self.backgroundPlayerViewModel.stopBackground()
-                self.beaconScanner.startMonitoring()
-                self.playlistPlayerViewModel.playlistPlayerManager.removeTimeObserver()
-                self.isContentReady = false
-            } else {
-                Task {
-                    let id = beaconScanner.closestBeacon?.uuid.uuidString.lowercased() ?? ""
-                    let collectionsResult = await audioPlayerViewModel.fetchCollectionByBeaconId(id: id)
-                    if collectionsResult.count > 0 {
-                        let playlistsResult = await audioPlayerViewModel.fetchPlaylistByCollectionId(id: collectionsResult[0].uuid)
-                        await MainActor.run {
-                            self.collections = collectionsResult
-                            self.playlists = playlistsResult
-                            self.isContentReady = true
-                            self.showModal = true
-                        }
-                    }
+            .onReceive(beaconScanner.$isFindBeacon) {isFind in
+                if isFind && beaconScanner.detectedMultilaterationBeacons.count >= 1 {
+                        showModal = true
                 }
             }
-        }
-        .sheet(isPresented: $showModal) {
-            SelectLocationView()
+            .sheet(isPresented: $showModal) {
+                SelectLocationView()
+                    .environmentObject(beaconScanner)
+            }
         }
     }
 }

@@ -47,10 +47,10 @@ struct SpotHomepageView: View {
                             ButtonHaptic()
                         }, label: {
                             Text("Mulai Memindai AudiTag™")
-                                .foregroundColor(.white)
+                                .foregroundColor(Color("ButtonText"))
                                 .font(.body)
                                 .frame(maxWidth: .infinity, maxHeight: 50)
-                                .background(.black)
+                                .background(Color("AppButton"))
                                 .cornerRadius(86)
                         })
                     }

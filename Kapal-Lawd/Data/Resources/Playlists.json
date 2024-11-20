@@ -3,21 +3,21 @@
         "uuid": "ae2f36cb-55bd-4c50-91f7-1cff2da00c4e",
         "collection_id": "1be649c9-c897-4f62-bc97-895eef69d46b",
         "name": "1. Galeri Zen1",
-        "url": "/audio/audio1.wav",
+        "url": "http://192.168.0.119:7070/audio/audio1.wav",
         "duration": "01:54"
     },
     {
         "uuid": "180da7b1-a5e6-44d7-ad84-9698a1c03655",
         "collection_id": "1be649c9-c897-4f62-bc97-895eef69d46b",
         "name": "2. Audium App",
-        "url": "/audio/audio2.wav",
+        "url": "http://192.168.0.119:7070/audio/audio2.wav",
         "duration": "01:17"
     },
     {
         "uuid": "795158c7-3e24-43d6-af11-f594ad48402e",
         "collection_id": "1be649c9-c897-4f62-bc97-895eef69d46b",
         "name": "3. Let's Start Exploration",
-        "url": "/audio/audio3.wav",
+        "url": "http://192.168.0.119:7070/audio/audio3.wav",
         "duration": "00:30"
     },
     
@@ -25,63 +25,63 @@
         "uuid": "590fc00d-4b01-4328-866f-236a6b4fb1d4",
         "collection_id": "4cb46a79-5f62-470f-b31c-98bd5169b22c",
         "name": "4. Andry Boy Kurniawan",
-        "url": "/audio/audio4.wav",
+        "url": "http://192.168.0.119:7070/audio/audio4.wav",
         "duration": "00:41"
     },
     {
         "uuid": "c10d0469-c4ce-4571-b8b5-3ea3d3081fca",
         "collection_id": "4cb46a79-5f62-470f-b31c-98bd5169b22c",
         "name": "5. The Last Innkeeper",
-        "url": "/audio/audio5.wav",
+        "url": "http://192.168.0.119:7070/audio/audio5.wav",
         "duration": "01:34"
     },
     {
         "uuid": "cb531f5c-9fcd-4b52-a0c5-f096d53062e3",
         "collection_id": "4cb46a79-5f62-470f-b31c-98bd5169b22c",
         "name": "6. Arief Witjaksana",
-        "url": "/audio/audio6.wav",
+        "url": "http://192.168.0.119:7070/audio/audio6.wav",
         "duration": "00:43"
     },
     {
         "uuid": "fc9a8a00-1fef-403e-84aa-d46206595456",
         "collection_id": "4cb46a79-5f62-470f-b31c-98bd5169b22c",
         "name": "7. E(X)it",
-        "url": "/audio/audio7.wav",
+        "url": "http://192.168.0.119:7070/audio/audio7.wav",
         "duration": "01:12"
     },
     {
         "uuid": "8b44e41e-994b-47e7-ad5d-3bb8ea22aef9",
         "collection_id": "4cb46a79-5f62-470f-b31c-98bd5169b22c",
         "name": "8. Pray",
-        "url": "/audio/audio8.wav",
+        "url": "http://192.168.0.119:7070/audio/audio8.wav",
         "duration": "01:10"
     },
     {
         "uuid": "f80feaa0-2d28-445a-bfc4-483abd8f3b5c",
         "collection_id": "bd322d14-698c-4434-aa7b-2112b75ec5f9",
         "name": "9. Radetyo \"Itok\" Sindhu Utomo",
-        "url": "/audio/audio9.wav",
+        "url": "http://192.168.0.119:7070/audio/audio9.wav",
         "duration": "00:46"
     },
     {
         "uuid": "0464ee08-9d7e-4033-ad83-a23e04a8e079",
         "collection_id": "bd322d14-698c-4434-aa7b-2112b75ec5f9",
         "name": "10. Stay With Me",
-        "url": "/audio/audio10.wav",
+        "url": "http://192.168.0.119:7070/audio/audio10.wav",
         "duration": "01:14"
     },
     {
         "uuid": "8d8ac62a-9404-47f3-9314-09d89e861fef",
         "collection_id": "ee1dd565-fb64-429f-b54e-2ef25631bb19",
         "name": "11. Hasrat Perjalanan",
-        "url": "/audio/audio11.wav",
+        "url": "http://192.168.0.119:7070/audio/audio11.wav",
         "duration": "01:16"
     },
     {
         "uuid": "8fae58b6-dce8-4099-a19e-eca8db925be9",
         "collection_id": "ee1dd565-fb64-429f-b54e-2ef25631bb19",
         "name": "12. Penjaga Sarang",
-        "url": "/audio/audio12.wav",
+        "url": "http://192.168.0.119:7070/audio/audio12.wav",
         "duration": "01:22"
     }
 ]

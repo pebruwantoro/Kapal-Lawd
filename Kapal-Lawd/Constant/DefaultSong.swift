@@ -9,12 +9,6 @@ enum DeafultSong: String {
     case interaction = "AudiumTagConnect"
 }
 
-enum DefaultDelay: Double {
-    case interaction = 2.80
-    case backSound = 2.90
-    case song = 3
-}
-
 enum VolumeLevel: Int {
     case none = 0
     case level1 = 1

@@ -12,6 +12,10 @@ struct Collections: Codable {
     let roomId: String
     let name: String
     let beaconId: String
+    let icon: String
+    let category: String
+    let appUrl: String
+    let instagram: String
     let longContents: String
     let shortContents: String
     let authoredBy: String
@@ -22,6 +26,10 @@ struct Collections: Codable {
         case roomId = "room_id"
         case name
         case beaconId = "beacon_id"
+        case icon
+        case category
+        case appUrl = "app_url"
+        case instagram
         case longContents = "long_contents"
         case shortContents = "short_contents"
         case authoredBy = "authored_by"
