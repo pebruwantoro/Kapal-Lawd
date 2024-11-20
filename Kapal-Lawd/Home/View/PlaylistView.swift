@@ -217,32 +217,32 @@ struct PlaylistView: View {
     }
 }
 
-#Preview {
-    @Previewable var audioPlayerViewModel: AudioPlayerViewModel = AudioPlayerViewModel()
-    @Previewable var beaconScanner: IBeaconDetector = IBeaconDetector()
-    
-    PlaylistView(
-        isExploring: .constant(false),
-        collections: .constant(
-            [
-                Collections(
-                    uuid: "String",
-                    roomId: "String",
-                    name: "String",
-                    beaconId: "String",
-                    icon: "AppIcon",
-                    category: "Games",
-                    appUrl: "google.com",
-                    instagram: "test",
-                    longContents: "String",
-                    shortContents: "String",
-                    authoredBy: "String",
-                    authoredAt: "2024-10-10"
-                )
-            ]
-        ),
-        selectedBeaconId: .constant("")
-    )
-    .environmentObject(audioPlayerViewModel)
-    .environmentObject(beaconScanner)
-}
+//#Preview {
+//    @Previewable var audioPlayerViewModel: AudioPlayerViewModel = AudioPlayerViewModel()
+//    @Previewable var beaconScanner: IBeaconDetector = IBeaconDetector()
+//    
+//    PlaylistView(
+//        isExploring: .constant(false),
+//        collections: .constant(
+//            [
+//                Collections(
+//                    uuid: "String",
+//                    roomId: "String",
+//                    name: "String",
+//                    beaconId: "String",
+//                    icon: "AppIcon",
+//                    category: "Games",
+//                    appUrl: "google.com",
+//                    instagram: "test",
+//                    longContents: "String",
+//                    shortContents: "String",
+//                    authoredBy: "String",
+//                    authoredAt: "2024-10-10"
+//                )
+//            ]
+//        ),
+//        selectedBeaconId: .constant("")
+//    )
+//    .environmentObject(audioPlayerViewModel)
+//    .environmentObject(beaconScanner)
+//}

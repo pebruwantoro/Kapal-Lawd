@@ -153,9 +153,9 @@ struct SelectLocationView: View {
     }
 }
 
-#Preview {
-    @Previewable var beaconScanner: IBeaconDetector = IBeaconDetector()
-    
-    SelectLocationView()
-        .environmentObject(beaconScanner)
-}
+//#Preview {
+//    @Previewable var beaconScanner: IBeaconDetector = IBeaconDetector()
+//    
+//    SelectLocationView()
+//        .environmentObject(beaconScanner)
+//}
