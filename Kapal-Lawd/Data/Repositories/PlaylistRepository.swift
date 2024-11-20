@@ -42,6 +42,7 @@ internal final class SupabasePlaylistRepository: PlaylistRepository {
             let playlist: [Playlist] = try await supabaseClient
                 .from("playlists")
                 .select("uuid, collection_id, name, duration, url")
+                .order("name", ascending: true)
                 .execute()
                 .value
             return playlist
@@ -56,6 +57,7 @@ internal final class SupabasePlaylistRepository: PlaylistRepository {
                 .from("playlists")
                 .select("uuid, collection_id, name, duration, url")
                 .eq("collection_id", value: req.collectionId)
+                .order("name", ascending: true)
                 .execute()
                 .value
             return playlist

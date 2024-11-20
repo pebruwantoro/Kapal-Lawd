@@ -27,11 +27,6 @@ struct SelectLocationView: View {
                 collections: Binding(get: { collections.first(where: { $0.beaconId == self.$selectedBeaconId.wrappedValue }) }, set: { _ in }),
                 selectedBeaconId: self.$selectedBeaconId
             )
-            .onAppear {
-                print("selected beacon on select view: \(self.selectedBeaconId)")
-                print("collections on select view: \(collections.filter({ $0.beaconId == self.$selectedBeaconId.wrappedValue }))")
-                
-            }
             .onDisappear {
                 self.isUserPressButton = false
             }

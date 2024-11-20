@@ -42,21 +42,15 @@ struct PlaylistView: View {
                     ZStack {
                         VStack {
                             ZStack(alignment: .topLeading) {
-//                                VStack {
-//                                    Image("headertitle")
-//                                        .resizable()
-//                                        .scaledToFit()
-//                                        .ignoresSafeArea()
-//                                    Spacer()
-//                                }
-                                Image("headertitle")
-                                    .resizable()
-                                    .scaledToFit()
-                                    .ignoresSafeArea()
-                                    .frame(maxWidth: .infinity)
-                                
-                                Spacer()
-                                
+                                VStack {
+                                    Image("headertitle")
+                                        .resizable()
+                                        .scaledToFit()
+                                        .ignoresSafeArea()
+                                        .frame(maxWidth: .infinity)
+                                    Spacer()
+                                }
+                                 
                                 HStack {
                                     Button(action:  {
                                         showAlert = true
@@ -276,8 +270,7 @@ struct PlaylistView: View {
                 authoredAt: "2024-10-10"
             )
         ),
-//        selectedBeaconId: .constant("9d38c8b0-77f8-4e23-8dba-1546c4d035a4")
-        selectedBeaconId: .constant("")
+        selectedBeaconId: .constant("9d38c8b0-77f8-4e23-8dba-1546c4d035a4")
     )
     .environmentObject(audioPlayerViewModel)
     .environmentObject(beaconScanner)
