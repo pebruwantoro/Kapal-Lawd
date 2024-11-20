@@ -67,6 +67,8 @@ targets:
         - package: SDBeaconScanner
         - package: Supabase
         - package: SDWebImageSwiftUI
+        - framework: Metal
+        - framework: MetalKit
   Kapal-LawdTests:
     type: bundle.unit-test
     platform: iOS

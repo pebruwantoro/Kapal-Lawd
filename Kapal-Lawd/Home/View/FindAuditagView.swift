@@ -63,6 +63,9 @@ struct FindAuditagView: View {
                                 cardOpacity = 1.0
                             }
                         }
+                        .onDisappear{
+                            self.isScanning = false
+                        }
                         
                         VStack {
                             Text("Memindai AudiTag™")
@@ -98,9 +101,6 @@ struct FindAuditagView: View {
             .sheet(isPresented: $showModal) {
                 SelectLocationView()
                     .environmentObject(beaconScanner)
-                    .onDisappear{
-                        showModal = false
-                    }
             }
         }
     }

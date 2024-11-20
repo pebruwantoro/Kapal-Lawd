@@ -26,90 +26,92 @@ struct PlayerView: View {
         Spacer()
         ZStack {
             VStack {
-                VStack {
-                    Text(self.currentSong)
-                        .frame(maxWidth: .infinity, alignment: .leading)
-                        .font(.body)
+                if !list.isEmpty {
+                    VStack {
+                        Text(self.currentSong)
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                            .font(.body)
+                            .foregroundColor(.gray)
+                        
+                        ProgressView("", value: self.trackBar, total: self.totalDuration)
+                            .accentColor(Color("AppBlue"))
+                            .scaleEffect(x: 1, y: 1.5, anchor: .bottom)
+                        
+                        HStack {
+                            Text(self.currentSecond)
+                                .font(.subheadline)
+                            
+                            Spacer()
+                            Text(list[playlistPlayerViewModel.playlistPlayerManager.currentPlaylistIndex].duration)
+                                .font(.subheadline)
+                        }
                         .foregroundColor(.gray)
-                    
-                    ProgressView("", value: self.trackBar, total: self.totalDuration)
-                        .accentColor(Color("AppBlue"))
-                        .scaleEffect(x: 1, y: 1.5, anchor: .bottom)
-                    
-                    HStack {
-                        Text(self.currentSecond)
-                            .font(.subheadline)
                         
-                        Spacer()
-                        Text(list[playlistPlayerViewModel.playlistPlayerManager.currentPlaylistIndex].duration)
-                            .font(.subheadline)
-                    }
-                    .foregroundColor(.gray)
-                    
-                    HStack (spacing: 16) {
-                        Button(action:  {
-                            playlistPlayerViewModel.previousPlaylist()
-                            ButtonHaptic()
-                        }, label:  {
-                            Image(systemName: "backward")
-                                .foregroundColor(Color("AppPlayer"))
-                        })
-                        .frame(width: 50, height: 50)
-                        
-                        
-                        Button(action:  {
-                            playlistPlayerViewModel.seekBackward()
-                            ButtonHaptic()
-                        }, label:  {
-                            Image(systemName: "15.arrow.trianglehead.counterclockwise")
-                                .foregroundColor(Color("AppPlayer"))
-                        })
-                        .frame(width: 50, height: 50)
-                        
-                        ZStack {
-                            Circle()
-                                .foregroundColor(Color("AppPlayer"))
+                        HStack (spacing: 16) {
+                            Button(action:  {
+                                playlistPlayerViewModel.previousPlaylist()
+                                ButtonHaptic()
+                            }, label:  {
+                                Image(systemName: "backward")
+                                    .foregroundColor(Color("AppPlayer"))
+                            })
+                            .frame(width: 50, height: 50)
+                            
                             
                             Button(action:  {
-                                if !self.isPlaying {
-                                    playlistPlayerViewModel.resumePlayback()
-                                    self.isPlaying = true
-                                    ButtonHaptic()
-                                } else {
-                                    playlistPlayerViewModel.pausePlayback()
-                                    self.isPlaying = false
-                                    ButtonHaptic()
-                                }
+                                playlistPlayerViewModel.seekBackward()
+                                ButtonHaptic()
                             }, label:  {
-                                Image(systemName: self.isPlaying ? "pause.fill" : "play.fill")
-                                    .foregroundColor(.white)
+                                Image(systemName: "15.arrow.trianglehead.counterclockwise")
+                                    .foregroundColor(Color("AppPlayer"))
                             })
+                            .frame(width: 50, height: 50)
+                            
+                            ZStack {
+                                Circle()
+                                    .foregroundColor(Color("AppPlayer"))
+                                
+                                Button(action:  {
+                                    if !self.isPlaying {
+                                        playlistPlayerViewModel.resumePlayback()
+                                        self.isPlaying = true
+                                        ButtonHaptic()
+                                    } else {
+                                        playlistPlayerViewModel.pausePlayback()
+                                        self.isPlaying = false
+                                        ButtonHaptic()
+                                    }
+                                }, label:  {
+                                    Image(systemName: self.isPlaying ? "pause.fill" : "play.fill")
+                                        .foregroundColor(.white)
+                                })
+                            }
+                            .frame(width: 50, height: 50)
+                            
+                            Button(action:  {
+                                playlistPlayerViewModel.seekForward()
+                                ButtonHaptic()
+                            }, label:  {
+                                Image(systemName: "15.arrow.trianglehead.clockwise")
+                                    .foregroundColor(Color("AppPlayer"))
+                            })
+                            .frame(width: 50, height: 50)
+                            
+                            Button(action:  {
+                                playlistPlayerViewModel.nextPlaylist()
+                                ButtonHaptic()
+                            }, label:  {
+                                Image(systemName: "forward")
+                                    .foregroundColor(Color("AppPlayer"))
+                            })
+                            .frame(width: 50, height: 50)
+                            
                         }
-                        .frame(width: 50, height: 50)
-                        
-                        Button(action:  {
-                            playlistPlayerViewModel.seekForward()
-                            ButtonHaptic()
-                        }, label:  {
-                            Image(systemName: "15.arrow.trianglehead.clockwise")
-                                .foregroundColor(Color("AppPlayer"))
-                        })
-                        .frame(width: 50, height: 50)
-                        
-                        Button(action:  {
-                            playlistPlayerViewModel.nextPlaylist()
-                            ButtonHaptic()
-                        }, label:  {
-                            Image(systemName: "forward")
-                                .foregroundColor(Color("AppPlayer"))
-                        })
-                        .frame(width: 50, height: 50)
-                        
+                        .font(.title3)
+                        .frame(maxWidth: .infinity)
                     }
-                    .font(.title3)
                     .frame(maxWidth: .infinity)
                 }
-                .frame(maxWidth: .infinity)
             }
         }
         .padding(.horizontal, 24)
@@ -158,17 +160,17 @@ struct PlayerView: View {
 
     PlayerView(
         isPlaying: .constant(true),
-        list: .constant([Playlist(
-        uuid: "123e4567-e89b-12d3-a456-426614174000",
-        collectionId: "collection-001",
-        name: "My Playlist",
-        duration: "04:30",
-        url: "")]
+        list: .constant(
+            [
+                Playlist(
+                    uuid: "123e4567-e89b-12d3-a456-426614174000",
+                    collectionId: "collection-001",
+                    name: "My Playlist",
+                    duration: "04:30",
+                    url: ""
+                )
+            ]
     )
-//        beaconScanner: beaconScanner,
-//        audioPlayerViewModel: audioPlayerViewModel,
-//        playlistPlayerViewModel: playlistPlayerViewModel,
-//        backgroundPlayerViewModel: backgroundPlayerViewModel
     )
     .environmentObject(audioPlayerViewModel)
     .environmentObject(playlistPlayerViewModel)

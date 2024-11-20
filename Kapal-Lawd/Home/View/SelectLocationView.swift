@@ -21,7 +21,6 @@ struct SelectLocationView: View {
     
     var body: some View {
         if self.isUserPressButton {
-            
             PlaylistView(
                 isExploring: .constant(true),
                 collections: Binding(get: { collections.first(where: { $0.beaconId == self.$selectedBeaconId.wrappedValue }) }, set: { _ in }),
@@ -60,7 +59,7 @@ struct SelectLocationView: View {
                                                     .frame(width: 74, height: 74)
                                                 
                                                 VStack(alignment: .leading, spacing: 2) {
-                                                    Text(collection.roomId + "--" + collection.beaconId)
+                                                    Text(collection.roomId)
                                                         .font(.footnote)
                                                         .padding(.horizontal, 6)
                                                     
