@@ -49,9 +49,9 @@
 	<key>Privacy - Location When In Use Usage Description</key>
 	<string>Audium requires access to your location while using the app to deliver a hands-free audio experience. When you approach an exhibit, Audium detects your proximity and plays a relevant audio narration. This location-based functionality allows for automatic, real-time content delivery without any additional interaction needed from you.</string>
 	<key>SUPABASE_API_KEY</key>
-	<string>eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxhdHB3eWN3c2F2aGx5ZGRrcWRnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzE2NzE1NjYsImV4cCI6MjA0NzI0NzU2Nn0.zLMY-K495Uv7RIaZqFshiKXIybdWWQ4tBPfvC-60rLo</string>
+	<string>${SUPABASE_API_}</string>
 	<key>SUPABASE_BASE_URL</key>
-	<string>https://latpwycwsavhlyddkqdg.supabase.co</string>
+	<string>${SUPABASE_BASE_URL}</string>
 	<key>UIBackgroundModes</key>
 	<array>
 		<string>location</string>
