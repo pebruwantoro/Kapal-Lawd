@@ -15,6 +15,7 @@ enum ErrorHandler: LocalizedError {
     case networkError(Error)
     case unknownError(Error)
     case errorMultilateration
+    case errorMultilaterationLessThanThree
     case errorSolveLinearSystem
     case errorRSSIZeroValue
 
@@ -34,6 +35,8 @@ enum ErrorHandler: LocalizedError {
             return "An unknown error occurred: \(error.localizedDescription)"
         case .errorMultilateration:
             return "Need at least 3 beacons for multilateration"
+        case .errorMultilaterationLessThanThree:
+            return "Need at least 1 beacons for multilateration"
         case .errorSolveLinearSystem:
             return "Unable to solve linear system."
         case .errorRSSIZeroValue:

@@ -16,7 +16,6 @@ func multilateration(data: [BeaconData]) -> [DetectedBeacon]{
     var A = [[Double]]()
     var B = [Double]()
     
-//    let refPoint = data[0].position
     let refPoint = Point(xPosition: 0.0, yPosition: 0.0)
     let d1 = data[0].distance
     
@@ -66,6 +65,58 @@ func multilateration(data: [BeaconData]) -> [DetectedBeacon]{
     }
     
     return Array(Set(detectedBeacons))
+}
+
+func multilaterationForLessThanThreeBeacons(data: [BeaconData]) -> [DetectedBeacon] {
+    guard data.count > 0 else {
+        print(ErrorHandler.errorMultilaterationLessThanThree.errorDescription!)
+        return []
+    }
+    
+    if data.count == 1 {
+        let beacon = data[0]
+        let detectedBeacon = DetectedBeacon(
+            uuid: beacon.uuid,
+            estimatedDitance: beacon.distance,
+            euclideanDistance: beacon.distance,
+            averageDistance: beacon.distance,
+            userPosition: beacon.position
+        )
+        return [detectedBeacon]
+    }
+    
+    if data.count == 2 {
+        let beacon1 = data[0]
+        let beacon2 = data[1]
+        
+        let midpoint = Point(
+            xPosition: (beacon1.position.xPosition + beacon2.position.xPosition) / 2,
+            yPosition: (beacon1.position.yPosition + beacon2.position.yPosition) / 2
+        )
+        
+        let distanceToMidpoint1 = euclideanDistanace(beaconPosition: beacon1.position, targetPosition: midpoint)
+        let distanceToMidpoint2 = euclideanDistanace(beaconPosition: beacon2.position, targetPosition: midpoint)
+        
+        let detectedBeacon1 = DetectedBeacon(
+            uuid: beacon1.uuid,
+            estimatedDitance: beacon1.distance,
+            euclideanDistance: distanceToMidpoint1,
+            averageDistance: abs(beacon1.distance + distanceToMidpoint1) / 2,
+            userPosition: midpoint
+        )
+        
+        let detectedBeacon2 = DetectedBeacon(
+            uuid: beacon2.uuid,
+            estimatedDitance: beacon2.distance,
+            euclideanDistance: distanceToMidpoint2,
+            averageDistance: abs(beacon2.distance + distanceToMidpoint2) / 2,
+            userPosition: midpoint
+        )
+        
+        return [detectedBeacon1, detectedBeacon2]
+    }
+    
+    return []
 }
 
 private func euclideanDistanace(beaconPosition: Point, targetPosition: Point) -> Double {

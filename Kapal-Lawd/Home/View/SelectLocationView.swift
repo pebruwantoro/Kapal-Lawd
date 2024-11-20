@@ -15,43 +15,31 @@ struct SelectLocationView: View {
     @State private var beacons: [DetectedBeacon] = []
     @State private var isBeaconCollected = false
     @State private var selectedBeaconId: String = ""
-    @State private var selectedCollection: [Collections] = []
     @State private var isUserPressButton = false
-    @EnvironmentObject private var beaconScanner: IBeaconDetector
+    @EnvironmentObject var beaconScanner: IBeaconDetector
     @StateObject private var audioPlayerViewModel: AudioPlayerViewModel = AudioPlayerViewModel()
-    
     
     var body: some View {
         if self.isUserPressButton {
-            if self.selectedCollection.isEmpty {
-                
-                ProgressView()
-                    .onAppear{
-                        print("selected collection is empty")
-                        let data = collections.filter({ $0.beaconId == self.selectedBeaconId })
-                        selectedCollection = data
-                    }
-                    .onDisappear{
-                        self.isUserPressButton = false
-                    }
-            } else {
-                PlaylistView(
-                    isExploring: .constant(true),
-                    collections: self.$selectedCollection,
-                    selectedBeaconId: self.$selectedBeaconId
-                )
-                .environmentObject(audioPlayerViewModel)
-                .environmentObject(beaconScanner)
-                .onAppear{
-                    print("selected collection is not empty")
-                    
-                }
-            }
             
+            PlaylistView(
+                isExploring: .constant(true),
+                collections: Binding(get: { collections.first(where: { $0.beaconId == self.$selectedBeaconId.wrappedValue }) }, set: { _ in }),
+                selectedBeaconId: self.$selectedBeaconId
+            )
+            .onAppear {
+                print("selected beacon on select view: \(self.selectedBeaconId)")
+                print("collections on select view: \(collections.filter({ $0.beaconId == self.$selectedBeaconId.wrappedValue }))")
+                
+            }
+            .onDisappear {
+                self.isUserPressButton = false
+            }
+            .environmentObject(audioPlayerViewModel)
+            .environmentObject(beaconScanner)
         } else {
             VStack {
                 Spacer()
-                
                 VStack(spacing: 16) {
                     if !beacons.isEmpty {
                         Spacer()
@@ -62,68 +50,59 @@ struct SelectLocationView: View {
                             .foregroundColor(.gray)
                         
                         ForEach(Array(beacons.enumerated()), id: \.offset) { idx, beacon in
-                            if collections.isEmpty {
-                                ProgressView()
-                                    .onAppear{
-                                        Task {
-                                            let collection = await audioPlayerViewModel.fetchCollectionByBeaconId(id: beacon.uuid)
-                                            
-                                            self.collections.append(collection[0])
-                                        }
-                                    }
-                            } else if collections.count == beacons.count {
-                                Button(action: {
-                                    ButtonHaptic()
-                                    print("Button tapped for beacon id: \(beacon.uuid), & collection id: \(String(describing: collections.first{ $0.beaconId == beacon.uuid }?.uuid))")
-                                    self.isUserPressButton = true
-                                    self.selectedBeaconId = beacon.uuid
-                                }) {
-                                    VStack(alignment: .leading){
-                                        HStack {
-                                            WebImage(url: URL(string: collections[idx].icon))
-                                                .resizable()
-                                                .scaledToFit()
-                                                .frame(width: 74, height: 74)
-                                            
-                                            VStack(alignment: .leading, spacing: 2) {
-                                                Text(collections[idx].roomId)
-                                                    .font(.footnote)
-                                                    .padding(.horizontal, 6)
+                            if !collections.isEmpty {
+                                if let collection = collections.first(where: { $0.beaconId == beacon.uuid }) {
+                                    Button(action: {
+                                        ButtonHaptic()
+                                        self.isUserPressButton = true
+                                        self.selectedBeaconId = beacon.uuid
+                                    }) {
+                                        VStack(alignment: .leading){
+                                            HStack {
+                                                WebImage(url: URL(string: collection.icon))
+                                                    .resizable()
+                                                    .scaledToFit()
+                                                    .frame(width: 74, height: 74)
                                                 
-                                                Text(collections[idx].name)
-                                                    .font(.headline)
-                                                    .padding(.horizontal, 6)
+                                                VStack(alignment: .leading, spacing: 2) {
+                                                    Text(collection.roomId + "--" + collection.beaconId)
+                                                        .font(.footnote)
+                                                        .padding(.horizontal, 6)
+                                                    
+                                                    Text(collection.name)
+                                                        .font(.headline)
+                                                        .padding(.horizontal, 6)
+                                                    
+                                                    Text(collection.category)
+                                                        .font(.caption).italic()
+                                                        .padding(.horizontal, 6)
+                                                }
+                                                .frame(width: 180, height: 54, alignment: .leading)
                                                 
-                                                Text(collections[idx].category)
-                                                    .font(.caption).italic()
-                                                    .padding(.horizontal, 6)
+                                                HStack (spacing: 1) {
+                                                    Spacer()
+                                                    Text(String(format: "%.2f m", beacon.averageDistance))
+                                                        .font(.footnote)
+                                                        .frame(width: 38)
+                                                    Image(systemName: "chevron.forward")
+                                                }
+                                                .frame(maxWidth: .infinity)
+                                                .foregroundColor(.gray)
                                             }
-                                            .frame(width: 180, height: 54, alignment: .leading)
-                                            
-                                            HStack (spacing: 1) {
-                                                Spacer()
-                                                Text(String(format: "%.2f m", beacon.averageDistance))
-                                                    .font(.footnote)
-                                                    .frame(width: 38)
-                                                Image(systemName: "chevron.forward")
-                                            }
-                                            .frame(maxWidth: .infinity)
-                                            .foregroundColor(.gray)
+                                            Text(collection.longContents)
+                                                .font(.caption)
+                                                .multilineTextAlignment(.leading)
+                                                .padding(.top, 4)
                                         }
-                                        Text(collections[idx].longContents)
-                                            .font(.caption)
-                                            .multilineTextAlignment(.leading)
-                                            .padding(.top, 4)
+                                        .frame(maxWidth: .infinity, maxHeight: 155)
+                                        .foregroundColor(.black)
+                                        .padding(.horizontal, 12)
+                                        .cornerRadius(16)
+                                        .overlay(
+                                            RoundedRectangle(cornerRadius: 16)
+                                                .stroke(Color.gray, lineWidth: 0.5)
+                                        )
                                     }
-                                    .frame(maxWidth: .infinity, maxHeight: 155)
-                                    .foregroundColor(.black)
-                                    .padding(.horizontal, 12)
-                                    .cornerRadius(16)
-                                    .overlay(
-                                        RoundedRectangle(cornerRadius: 16)
-                                            .stroke(Color.gray, lineWidth: 0.5)
-                                    )
-                                    
                                 }
                             }
                         }
@@ -142,11 +121,22 @@ struct SelectLocationView: View {
                         isVisible = true
                     }
                 }
+                .onAppear {
+                    if !self.beacons.isEmpty {
+                        for beacon in beacons {
+                            Task {
+                                let collection = await audioPlayerViewModel.fetchCollectionByBeaconId(id: beacon.uuid)
+
+                                self.collections.append(collection[0])
+                            }
+                        }
+                    }
+                }
             }
             .ignoresSafeArea()
-            .onReceive(beaconScanner.$isFindBeacon) { isFind in
-                if isFind && !self.isBeaconCollected {
-                    self.beacons = beaconScanner.detectedMultilaterationBeacons
+            .onReceive(beaconScanner.$detectedMultilaterationBeacons) { value in
+                if value.count > 0 {
+                    self.beacons = value
                 }
             }
         }

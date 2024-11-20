@@ -118,23 +118,23 @@ struct PlayerView: View {
         .cornerRadius(36)
         .shadow(radius: 5)
         .padding(.horizontal, 16)
-        .onReceive(beaconScanner.$isBeaconChange) { isChange in
-            if isChange {
-                self.isFirstPlaylistPlay = false
-                self.trackBar = 0.0
-            }
+        .onDisappear {
+            self.isFirstPlaylistPlay = false
+            self.isPlaying = false
+            self.trackBar = 0.0
+            playlistPlayerViewModel.stopPlayback()
+            playlistPlayerViewModel.playlistPlayerManager.removeTimeObserver()
         }
-        .onReceive(beaconScanner.$isFindBeacon) { isFind in
-            delay(DefaultDelay.interaction.rawValue) {
-                if isFind && !self.isFirstPlaylistPlay {
-                    self.isFirstPlaylistPlay = true
-                    playlistPlayerViewModel.startPlayback(song: list[0].name, url: list[0].url)
-                }
+        .onAppear {
+            if !self.isFirstPlaylistPlay {
+                self.isFirstPlaylistPlay = true
+                playlistPlayerViewModel.startPlayback(song: list[0].name, url: list[0].url)
             }
             
             self.playlistPlayerViewModel.playlistPlayerManager.playlist = list
-            
             self.totalDuration = convertToSeconds(from: list[playlistPlayerViewModel.playlistPlayerManager.currentPlaylistIndex].duration)!
+            self.currentSong = playlistPlayerViewModel.playlistPlayerManager.currentSongTitle ?? "none"
+            
         }
         .onReceive(playlistPlayerViewModel.playlistPlayerManager.$currentSongTitle) { song in
             if let audio = song {
@@ -146,24 +146,30 @@ struct PlayerView: View {
                 self.currentSecond = convertSecondsToTimeString(seconds: time)
                 self.trackBar = time
             }
-            
         }
     }
 }
 
 #Preview {
-    @Previewable var audioPlayerViewModel: AudioPlayerViewModel = AudioPlayerViewModel()
-    @Previewable var playlistPlayerViewModel: PlaylistPlayerViewModel = PlaylistPlayerViewModel()
-    @Previewable var backgroundPlayerViewModel: BackgroundPlayerViewModel = BackgroundPlayerViewModel()
-    @Previewable var beaconScanner: IBeaconDetector = IBeaconDetector()
+    @ObservedObject var audioPlayerViewModel: AudioPlayerViewModel = AudioPlayerViewModel()
+    @ObservedObject var playlistPlayerViewModel: PlaylistPlayerViewModel = PlaylistPlayerViewModel()
+    @ObservedObject var backgroundPlayerViewModel: BackgroundPlayerViewModel = BackgroundPlayerViewModel()
+    @ObservedObject var beaconScanner: IBeaconDetector = IBeaconDetector()
 
-    PlayerView(isPlaying: .constant(true), list: .constant([Playlist(
+    PlayerView(
+        isPlaying: .constant(true),
+        list: .constant([Playlist(
         uuid: "123e4567-e89b-12d3-a456-426614174000",
         collectionId: "collection-001",
         name: "My Playlist",
         duration: "04:30",
-        url: ""
-    )]))
+        url: "")]
+    )
+//        beaconScanner: beaconScanner,
+//        audioPlayerViewModel: audioPlayerViewModel,
+//        playlistPlayerViewModel: playlistPlayerViewModel,
+//        backgroundPlayerViewModel: backgroundPlayerViewModel
+    )
     .environmentObject(audioPlayerViewModel)
     .environmentObject(playlistPlayerViewModel)
     .environmentObject(backgroundPlayerViewModel)
