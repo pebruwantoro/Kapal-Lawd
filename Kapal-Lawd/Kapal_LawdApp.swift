@@ -11,7 +11,8 @@ import SwiftUI
 struct Kapal_LawdApp: App {
     var body: some Scene {
         WindowGroup {
-            OnboardingFirstView(startOnboarding: .constant(false))
+//            OnboardingFirstView(startOnboarding: .constant(false))
+            ContentView()
         }
     }
 }
