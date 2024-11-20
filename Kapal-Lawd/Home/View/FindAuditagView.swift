@@ -96,9 +96,11 @@ struct FindAuditagView: View {
                 }
             }
             .sheet(isPresented: $showModal) {
-//                SelectLocationView(beaconScanner: beaconScanner)
                 SelectLocationView()
                     .environmentObject(beaconScanner)
+                    .onDisappear{
+                        showModal = false
+                    }
             }
         }
     }

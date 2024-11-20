@@ -42,13 +42,20 @@ struct PlaylistView: View {
                     ZStack {
                         VStack {
                             ZStack(alignment: .topLeading) {
-                                VStack {
-                                    Image("headertitle")
-                                        .resizable()
-                                        .scaledToFit()
-                                        .ignoresSafeArea()
-                                    Spacer()
-                                }
+//                                VStack {
+//                                    Image("headertitle")
+//                                        .resizable()
+//                                        .scaledToFit()
+//                                        .ignoresSafeArea()
+//                                    Spacer()
+//                                }
+                                Image("headertitle")
+                                    .resizable()
+                                    .scaledToFit()
+                                    .ignoresSafeArea()
+                                    .frame(maxWidth: .infinity)
+                                
+                                Spacer()
                                 
                                 HStack {
                                     Button(action:  {
@@ -78,72 +85,79 @@ struct PlaylistView: View {
                                 .padding(.top, 16)
                                 .padding(.trailing, 50)
                                 .frame(maxWidth: .infinity, maxHeight: 50, alignment: .topLeading)
-                                
                             }
                             
                             if collections != nil {
-                                HStack (spacing: 16) {
-                                    WebImage(url: URL(string: collections!.icon))
-                                        .resizable()
-                                        .scaledToFit()
-                                        .frame(width: 80, height: 80)
-                                        .clipShape(RoundedRectangle(cornerRadius: 8))
-                                    
-                                    VStack (alignment: .leading) {
-                                        Text(collections!.name)
-                                            .fontWeight(.semibold)
-                                            .lineLimit(nil)
-                                            .multilineTextAlignment(.leading)
-                                            .frame(maxWidth: 350, alignment: .leading)
-                                            .fixedSize(horizontal: false, vertical: true)
-                                        
-                                        Text(collections!.authoredBy)
-                                            .font(.footnote)
-                                        
-                                        Text(collections!.beaconId)
-                                            .font(.footnote)
-                                        
-                                        Text(selectedBeaconId)
-                                            .font(.footnote)
-                                        
-                                        //TODO: date ganti jadi segmen tim
-                                        Text(formattedDate(collections!.authoredAt))
-                                            .font(.footnote)
-                                            .foregroundColor(.gray)
-                                            .padding(.top, 8)
-                                        
-                                        HStack {
-                                            Button(action: {
-                                                if let url = URL(string: collections!.appUrl) {
-                                                    UIApplication.shared.open(url)
-                                                }
-                                            }) {
-                                                Text("Buka di App Store")
-                                                    .font(.system(size: 16, weight: .bold))
-                                                    .foregroundColor(.white)
-                                                    .padding(.vertical, 12)
-                                                    .padding(.horizontal, 24)
-                                                    .background(Color.blue)
-                                                    .cornerRadius(20)
-                                                    .frame(width: 48, height: 48)
-                                            }
-                                            
-                                            Button(action: {
-                                                if let url = URL(string: collections!.instagram) {
-                                                    UIApplication.shared.open(url)
-                                                }
-                                            }) {
-                                                Image("instagramIcon")
+                                VStack(alignment: .leading, spacing: 16) {
+                                    HStack (alignment: .top, spacing: 16) {
+                                        Rectangle()
+                                            .foregroundColor(.clear)
+                                            .frame(width: 100, height: 100)
+                                            .background(
+                                                WebImage(url: URL(string: collections!.icon))
                                                     .resizable()
                                                     .scaledToFit()
-                                                    .frame(width: 48, height: 48)
-                                                    .padding(.trailing, 12)
+                                                    .frame(width: 100, height: 100)
+                                                    .clipShape(RoundedRectangle(cornerRadius: 8))
+                                            )
+                                        
+                                        VStack (alignment: .leading, spacing: 2) {
+                                            Text(collections!.roomId)
+                                                .font(.footnote)
+                                                .foregroundColor(.gray)
+                                            
+                                            Text(collections!.name)
+                                                .fontWeight(.bold)
+                                                .lineLimit(nil)
+                                                .multilineTextAlignment(.leading)
+                                                .frame(maxWidth: 350, alignment: .leading)
+                                                .fixedSize(horizontal: false, vertical: true)
+                                            
+                                            Text("oleh \(collections!.authoredBy)")
+                                                .font(.footnote)
+                                                .foregroundColor(.gray)
+                                            
+                                            Text(collections!.category)
+                                                .font(.footnote)
+                                                .foregroundColor(.gray)
+                                            
+                                            HStack(alignment: .center) {
+                                                Button(action: {
+                                                    if let url = URL(string: collections!.appUrl) {
+                                                        UIApplication.shared.open(url)
+                                                    }
+                                                }) {
+                                                    Text("Buka di App Store")
+                                                        .font(.system(size: 12, weight: .light))
+                                                        .foregroundColor(.white)
+                                                        .padding(.vertical, 10)
+                                                        .padding(.horizontal, 20)
+                                                        .background(Color.blue)
+                                                        .cornerRadius(20)
+                                                }
+                                                .frame(height: 48)
+                                                
+                                                Spacer()
+                                                
+                                                Button(action: {
+                                                    if let url = URL(string: collections!.instagram) {
+                                                        UIApplication.shared.open(url)
+                                                    }
+                                                }) {
+                                                    Image("instagramIcon")
+                                                        .resizable()
+                                                        .scaledToFit()
+                                                        .frame(width: 48, height: 48)
+                                                }
                                             }
+                                            .frame(maxWidth: .infinity, alignment: .center)
+                                            .padding(0)
                                         }
+                                        .padding(.trailing, 36)
                                     }
-                                    .padding(.trailing, 36)
+                                    .frame(maxWidth: .infinity, maxHeight: 100)
                                 }
-                                .frame(maxWidth: .infinity, maxHeight: 100)
+                                
                                 
                                 VStack {
                                     ScrollView {
@@ -216,10 +230,6 @@ struct PlaylistView: View {
                             
                         }
                     }
-                    .onAppear {
-                        print("selected beacon on playlist view: \(self.selectedBeaconId)")
-                        print("collections on playlist view: \(self.collections!)")
-                    }
                     .onAppear{
                         Task {
                             self.list = await audioPlayerViewModel.fetchPlaylistByCollectionId(id: collections!.uuid)
@@ -250,23 +260,23 @@ struct PlaylistView: View {
     
     PlaylistView(
         isExploring: .constant(false),
-        
         collections: .constant(
             Collections(
-                uuid: "String",
-                roomId: "String",
-                name: "String",
-                beaconId: "String",
-                icon: "AppIcon",
-                category: "Games",
-                appUrl: "google.com",
-                instagram: "test",
-                longContents: "String",
-                shortContents: "String",
-                authoredBy: "String",
+                uuid: "1be649c9-c897-4f62-bc97-895eef69d46b",
+                roomId: "Section-1",
+                name: "Dynamic Lines of Life",
+                beaconId: "9d38c8b0-77f8-4e23-8dba-1546c4d035a4",
+                icon: "https://drive.google.com/uc?id=1BPMUA3QNDFIhSm2vaJs6FC5VZQcNBZQJ",
+                category: "Social Impact",
+                appUrl: "https://apple.co/3UUZOEJ",
+                instagram: "https://www.instagram.com/audiumexperience?igsh=ZjB6OHd6aTY5NG92",
+                longContents: "In this section, visitors are introduced to Galeri Zen1—a sanctuary born from the passion of an art enthusiast with over a decade of experience. The gallery serves as a hub for both local and international contemporary artists, featuring a futuristic, minimalist, and industrial interior design. Additionally, visitors are introduced to the Audium App, an innovative technology that provides automatic audio narratives to enhance the visiting experience.",
+                shortContents: "Experience the evolution of modern art.",
+                authoredBy: "Audium",
                 authoredAt: "2024-10-10"
             )
         ),
+//        selectedBeaconId: .constant("9d38c8b0-77f8-4e23-8dba-1546c4d035a4")
         selectedBeaconId: .constant("")
     )
     .environmentObject(audioPlayerViewModel)
