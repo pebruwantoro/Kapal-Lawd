@@ -29,6 +29,7 @@ class IBeaconDetector: NSObject, ObservableObject, CLLocationManagerDelegate {
     @Published var isSessionActive: Bool = false
     @Published var currentSongTitle: String?
     @Published var currentBeaconId: String?
+    @Published var isBeaconMultilateration: Bool = false
     
     override init() {
         super.init()
@@ -149,6 +150,10 @@ class IBeaconDetector: NSObject, ObservableObject, CLLocationManagerDelegate {
                 }
                 self.beaconsData.sort(by: { $0.distance < $1.distance})
                 self.detectedMultilaterationBeacons = multilateration(data: Array(Set(self.beaconsData)))
+                
+                if self.detectedMultilaterationBeacons == [] {
+                    self.isBeaconMultilateration = false
+                }
                 
                 self.detectedMultilaterationBeacons.sort(by: { $0.averageDistance < $1.averageDistance })
                 let nearestBeacon = self.detectedMultilaterationBeacons.min { $0.averageDistance < $1.averageDistance }
