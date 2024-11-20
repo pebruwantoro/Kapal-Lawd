@@ -14,10 +14,10 @@ struct FindAuditagView: View {
     @State private var collections: [Collections] = []
     @State private var playlists: [Playlist] = []
     @State var pulseScan = Animation.easeOut(duration: 2).repeatForever(autoreverses: true)
-//    @StateObject private var audioPlayerViewModel: AudioPlayerViewModel = AudioPlayerViewModel()
-//    @StateObject private var playlistPlayerViewModel: PlaylistPlayerViewModel = PlaylistPlayerViewModel()
-//    @StateObject private var backgroundPlayerViewModel: BackgroundPlayerViewModel = BackgroundPlayerViewModel()
-//    @StateObject private var interactionPlayerViewModel: InteractionPlayerViewModel = InteractionPlayerViewModel()
+    //    @StateObject private var audioPlayerViewModel: AudioPlayerViewModel = AudioPlayerViewModel()
+    //    @StateObject private var playlistPlayerViewModel: PlaylistPlayerViewModel = PlaylistPlayerViewModel()
+    //    @StateObject private var backgroundPlayerViewModel: BackgroundPlayerViewModel = BackgroundPlayerViewModel()
+    //    @StateObject private var interactionPlayerViewModel: InteractionPlayerViewModel = InteractionPlayerViewModel()
     @StateObject private var beaconScanner: IBeaconDetector = IBeaconDetector()
     @State private var isPlayInteraction = false
     @State private var isContentReady = false
@@ -94,39 +94,39 @@ struct FindAuditagView: View {
                 }
                 
             }
-//            .onReceive(beaconScanner.$isFindBeacon) { isFind in
-//                if !isFind {
-//                    self.playlistPlayerViewModel.stopPlayback()
-//                    self.backgroundPlayerViewModel.stopBackground()
-//                    self.beaconScanner.startMonitoring()
-//                    self.playlistPlayerViewModel.playlistPlayerManager.removeTimeObserver()
-//                    self.isContentReady = false
-//                } else {
-//                    Task {
-//                        let id = beaconScanner.closestBeacon?.uuid.uuidString.lowercased() ?? ""
-//                        let collectionsResult = await audioPlayerViewModel.fetchCollectionByBeaconId(id: id)
-//                        if collectionsResult.count > 0 {
-//                            let playlistsResult = await audioPlayerViewModel.fetchPlaylistByCollectionId(id: collectionsResult[0].uuid)
-//                            await MainActor.run {
-//                                self.collections = collectionsResult
-//                                self.playlists = playlistsResult
-//                                self.isContentReady = true
-//                                self.showModal = true
-//                            }
-//                        }
-//                    }
-//                }
-//            }
+            //            .onReceive(beaconScanner.$isFindBeacon) { isFind in
+            //                if !isFind {
+            //                    self.playlistPlayerViewModel.stopPlayback()
+            //                    self.backgroundPlayerViewModel.stopBackground()
+            //                    self.beaconScanner.startMonitoring()
+            //                    self.playlistPlayerViewModel.playlistPlayerManager.removeTimeObserver()
+            //                    self.isContentReady = false
+            //                } else {
+            //                    Task {
+            //                        let id = beaconScanner.closestBeacon?.uuid.uuidString.lowercased() ?? ""
+            //                        let collectionsResult = await audioPlayerViewModel.fetchCollectionByBeaconId(id: id)
+            //                        if collectionsResult.count > 0 {
+            //                            let playlistsResult = await audioPlayerViewModel.fetchPlaylistByCollectionId(id: collectionsResult[0].uuid)
+            //                            await MainActor.run {
+            //                                self.collections = collectionsResult
+            //                                self.playlists = playlistsResult
+            //                                self.isContentReady = true
+            //                                self.showModal = true
+            //                            }
+            //                        }
+            //                    }
+            //                }
+            //            }
             .onReceive(beaconScanner.$isFindBeacon) {isFind in
-                    if isFind {
-                        showModal = true
+                if isFind {
+                    showModal = true
                 }
             }
             .sheet(isPresented: $showModal) {
                 SelectLocationView()
                     .environmentObject(beaconScanner)
-                    .frame(maxWidth: .infinity)
-                    .presentationDetents([.height(413)])
+                //                    .frame(maxWidth: .infinity)
+                    .presentationDetents([.medium, .large])
             }
         }
     }
