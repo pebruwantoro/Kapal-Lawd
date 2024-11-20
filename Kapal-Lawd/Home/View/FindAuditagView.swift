@@ -21,7 +21,7 @@ struct FindAuditagView: View {
     @StateObject private var beaconScanner: IBeaconDetector = IBeaconDetector()
     @State private var isPlayInteraction = false
     @State private var isContentReady = false
-    @State private var showModal = false
+    @State private var showModal = true
     @State private var isBack = false
     
     var body: some View {
@@ -125,6 +125,8 @@ struct FindAuditagView: View {
             .sheet(isPresented: $showModal) {
                 SelectLocationView()
                     .environmentObject(beaconScanner)
+                    .frame(maxWidth: .infinity)
+                    .presentationDetents([.height(413)])
             }
         }
     }
