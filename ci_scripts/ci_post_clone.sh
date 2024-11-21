@@ -73,7 +73,7 @@ touch Kapal-Lawd.xcodeproj/project.xcworkspace/xcshareddata/swiftpm/Package.reso
 echo "Creating Package.resolved..."
 cat <<EOL > Kapal-Lawd.xcodeproj/project.xcworkspace/xcshareddata/swiftpm/Package.resolved
 {
-  "originHash" : "04c19fbbf2e3b911933c8c85d19cf193e0a802c75b5cad57a6af6f3faf87e10e",
+  "originHash" : "1ef7de7a8a8b9b85f2b739b5d371c877edfbe950cbcfb386c5d3374d9b121481",
   "pins" : [
     {
       "identity" : "sdbeaconscanner",
@@ -82,6 +82,24 @@ cat <<EOL > Kapal-Lawd.xcodeproj/project.xcworkspace/xcshareddata/swiftpm/Packag
       "state" : {
         "revision" : "1b9ce5a1ba30691f7c4d404e6efd8c9ed02c230e",
         "version" : "0.0.2"
+      }
+    },
+    {
+      "identity" : "sdwebimage",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/SDWebImage/SDWebImage.git",
+      "state" : {
+        "revision" : "10d06f6a33bafae8c164fbfd1f03391f6d4692b3",
+        "version" : "5.20.0"
+      }
+    },
+    {
+      "identity" : "sdwebimageswiftui",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/SDWebImage/SDWebImageSwiftUI",
+      "state" : {
+        "revision" : "451c6dfd5ecec2cf626d1d9ca81c2d4a60355172",
+        "version" : "3.1.3"
       }
     },
     {
