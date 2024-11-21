@@ -10,9 +10,11 @@ import SwiftUI
 struct PlayerView: View {
     @Binding var isPlaying: Bool
     @Binding var list: [Playlist]
+    @Binding var isExploring: Bool
     @State private var currentSecond: String = "00:00"
     @State private var currentSong: String = ""
     @State private var isFirstPlaylistPlay: Bool = false
+    @State private var isBack = false
     @State var trackBar: Double = 0.0
     @State var totalDuration: Double = 0.0
     @EnvironmentObject private var audioPlayerViewModel: AudioPlayerViewModel
@@ -24,44 +26,20 @@ struct PlayerView: View {
     var body: some View {
         Spacer()
         ZStack {
-            VStack {
+            VStack  {
                 if !list.isEmpty {
                     VStack {
-                        Text(self.currentSong)
-                            .frame(maxWidth: .infinity, alignment: .leading)
-                            .font(.body)
-                            .foregroundColor(.gray)
-                        
-                        ProgressView("", value: self.trackBar, total: self.totalDuration)
-                            .accentColor(Color("AppBlue"))
-                            .scaleEffect(x: 1, y: 1.5, anchor: .bottom)
-                        
-                        HStack {
-                            Text(self.currentSecond)
-                                .font(.subheadline)
-                            
-                            Spacer()
-                            Text(list[playlistPlayerViewModel.playlistPlayerManager.currentPlaylistIndex].duration)
-                                .font(.subheadline)
-                        }
-                        .foregroundColor(.gray)
-                        
                         HStack (spacing: 16) {
-                            Button(action:  {
-                                playlistPlayerViewModel.previousPlaylist()
-                                ButtonHaptic()
-                            }, label:  {
-                                Image(systemName: "backward")
-                                    .foregroundColor(Color("AppPlayer"))
-                            })
-                            .frame(width: 50, height: 50)
-                            
+                            Text(self.currentSong)
+                                .frame(maxWidth: 214, alignment: .leading)
+                                .font(.body).bold()
+                                .foregroundColor(Color("AppText"))
                             
                             Button(action:  {
-                                playlistPlayerViewModel.seekBackward()
+                                playlistPlayerViewModel.nextPlaylist()
                                 ButtonHaptic()
                             }, label:  {
-                                Image(systemName: "15.arrow.trianglehead.counterclockwise")
+                                Image(systemName: "forward")
                                     .foregroundColor(Color("AppPlayer"))
                             })
                             .frame(width: 50, height: 50)
@@ -86,30 +64,27 @@ struct PlayerView: View {
                                 })
                             }
                             .frame(width: 50, height: 50)
-                            
-                            Button(action:  {
-                                playlistPlayerViewModel.seekForward()
-                                ButtonHaptic()
-                            }, label:  {
-                                Image(systemName: "15.arrow.trianglehead.clockwise")
-                                    .foregroundColor(Color("AppPlayer"))
-                            })
-                            .frame(width: 50, height: 50)
-                            
-                            Button(action:  {
-                                playlistPlayerViewModel.nextPlaylist()
-                                ButtonHaptic()
-                            }, label:  {
-                                Image(systemName: "forward")
-                                    .foregroundColor(Color("AppPlayer"))
-                            })
-                            .frame(width: 50, height: 50)
-                            
                         }
                         .font(.title3)
-                        .frame(maxWidth: .infinity)
+                        .frame(maxWidth: .infinity, alignment: .trailing)
+                     
+                        Button(action: {
+                            self.isExploring = false
+                            self.isBack = true
+                        }, label: {
+                            HStack {
+                                Image(systemName: "rectangle.portrait.and.arrow.right")
+                                Text("Pindah ke Booth Lain")
+                            }
+                            .foregroundColor(Color("AppBlue"))
+                            .font(.body)
+                            .frame(maxWidth: .infinity, maxHeight: 50)
+                            .background(Color("ButtonGrey"))
+                            .cornerRadius(86)
+                        })
+                        
                     }
-                    .frame(maxWidth: .infinity)
+                    .frame(maxWidth: .infinity, maxHeight: 112)
                 }
             }
         }
@@ -155,7 +130,7 @@ struct PlayerView: View {
     @ObservedObject var audioPlayerViewModel: AudioPlayerViewModel = AudioPlayerViewModel()
     @ObservedObject var playlistPlayerViewModel: PlaylistPlayerViewModel = PlaylistPlayerViewModel()
     @ObservedObject var backgroundPlayerViewModel: BackgroundPlayerViewModel = BackgroundPlayerViewModel()
-
+    
     PlayerView(
         isPlaying: .constant(true),
         list: .constant(
@@ -168,7 +143,7 @@ struct PlayerView: View {
                     url: ""
                 )
             ]
-    )
+        ), isExploring: .constant(false)
     )
     .environmentObject(audioPlayerViewModel)
     .environmentObject(playlistPlayerViewModel)
