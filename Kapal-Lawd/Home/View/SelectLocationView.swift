@@ -105,9 +105,6 @@ struct SelectLocationView: View {
                         Spacer().frame(height: 10)
                     }
                 }
-                .refreshable {
-                    await refreshData()
-                }
                 .frame(maxWidth: .infinity, maxHeight: 431)
                 .padding(.horizontal, 16)
                 .background(Color.white)
@@ -120,30 +117,40 @@ struct SelectLocationView: View {
                         isVisible = true
                     }
                 }
-                .onAppear {
-                    if !self.beacons.isEmpty {
-                        for beacon in beacons {
-                            Task {
-                                let collection = await audioPlayerViewModel.fetchCollectionByBeaconId(id: beacon.uuid)
-
-                                self.collections.append(collection[0])
-                            }
-                        }
-                    }
+                .task {
+                    await reloadCollections()
                 }
             }
             .ignoresSafeArea()
             .onReceive(beaconScanner.$detectedMultilaterationBeacons) { value in
-                if value.count > 0 {
+                if value.count > 0 && value.count != self.beacons.count {
                     self.beacons = value
                 }
+            }
+            .refreshable {
+                await refreshData()
             }
         }
     }
     
     func refreshData() async {
-        // do work to asyncronously refresh your data here
-        try? await Task.sleep(nanoseconds: 2_000_000_000)
+        collections.removeAll()
+        do {
+            await reloadCollections()
+        } catch {
+            print(error)
+        }
+    }
+    
+    func reloadCollections() async {
+        for beacon in beacons {
+            Task {
+                let collection = await audioPlayerViewModel.fetchCollectionByBeaconId(id: beacon.uuid)
+
+                self.collections.append(collection[0])
+            }
+        }
+
     }
 }
 
