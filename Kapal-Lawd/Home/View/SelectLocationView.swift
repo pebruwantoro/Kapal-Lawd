@@ -78,7 +78,7 @@ struct SelectLocationView: View {
                                                         Spacer()
                                                         Text(String(format: "%.2f m", beacon.averageDistance))
                                                             .font(.footnote)
-                                                            .frame(width: 38)
+                                                            .frame(width: 55)
                                                         Image(systemName: "chevron.forward")
                                                     }
                                                     .frame(maxWidth: .infinity)
@@ -104,6 +104,9 @@ struct SelectLocationView: View {
                         }
                         Spacer().frame(height: 10)
                     }
+                }
+                .refreshable {
+                    await refreshData()
                 }
                 .frame(maxWidth: .infinity, maxHeight: 431)
                 .padding(.horizontal, 16)
@@ -136,6 +139,11 @@ struct SelectLocationView: View {
                 }
             }
         }
+    }
+    
+    func refreshData() async {
+        // do work to asyncronously refresh your data here
+        try? await Task.sleep(nanoseconds: 2_000_000_000)
     }
 }
 
