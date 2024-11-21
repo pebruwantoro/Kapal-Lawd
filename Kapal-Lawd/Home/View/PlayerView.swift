@@ -18,7 +18,6 @@ struct PlayerView: View {
     @EnvironmentObject private var audioPlayerViewModel: AudioPlayerViewModel
     @EnvironmentObject private var playlistPlayerViewModel: PlaylistPlayerViewModel
     @EnvironmentObject private var backgroundPlayerViewModel: BackgroundPlayerViewModel
-    @EnvironmentObject private var beaconScanner: IBeaconDetector
     
     let timer = Timer.publish(every: 0.1, on: .main, in: .common).autoconnect()
     
@@ -156,7 +155,6 @@ struct PlayerView: View {
     @ObservedObject var audioPlayerViewModel: AudioPlayerViewModel = AudioPlayerViewModel()
     @ObservedObject var playlistPlayerViewModel: PlaylistPlayerViewModel = PlaylistPlayerViewModel()
     @ObservedObject var backgroundPlayerViewModel: BackgroundPlayerViewModel = BackgroundPlayerViewModel()
-    @ObservedObject var beaconScanner: IBeaconDetector = IBeaconDetector()
 
     PlayerView(
         isPlaying: .constant(true),
@@ -175,5 +173,4 @@ struct PlayerView: View {
     .environmentObject(audioPlayerViewModel)
     .environmentObject(playlistPlayerViewModel)
     .environmentObject(backgroundPlayerViewModel)
-    .environmentObject(beaconScanner)
 }
