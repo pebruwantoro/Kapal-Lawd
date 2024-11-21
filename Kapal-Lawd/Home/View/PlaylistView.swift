@@ -230,6 +230,7 @@ struct PlaylistView: View {
             .onAppear{
                 Task {
                     self.list = await audioPlayerViewModel.fetchPlaylistByCollectionId(id: collections!.uuid)
+                    self.initializeData = true
                 }
             }
             .threeOptionAlert(
