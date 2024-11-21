@@ -40,6 +40,7 @@ struct SelectLocationView: View {
                                                 collections: Binding(get: { collections.first(where: { $0.beaconId == beacon.uuid }) }, set: { _ in }),
                                                 selectedBeaconId: .constant(beacon.uuid)
                                             )
+                                            .navigationBarHidden(true)
                                             .environmentObject(audioPlayerViewModel)
                                             .environmentObject(beaconScanner)
                                             .environmentObject(playlistPlayerViewModel)
