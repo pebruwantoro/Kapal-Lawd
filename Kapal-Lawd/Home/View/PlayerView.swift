@@ -21,23 +21,11 @@ struct PlayerView: View {
     @EnvironmentObject private var audioPlayerViewModel: AudioPlayerViewModel
     @EnvironmentObject private var playlistPlayerViewModel: PlaylistPlayerViewModel
     @EnvironmentObject private var backgroundPlayerViewModel: BackgroundPlayerViewModel
+    @Environment(\.dismiss) var dismiss
     
     let timer = Timer.publish(every: 0.1, on: .main, in: .common).autoconnect()
     
     var body: some View {
-        if self.isBack {
-            VStack {
-                FindAuditagView(isExploring: self.$isExploring)
-                    .onAppear {
-                        playlistPlayerViewModel.playlistPlayerManager.removeTimeObserver()
-                        playlistPlayerViewModel.resetAsset()
-                        backgroundPlayerViewModel.stopBackground()
-                        self.collections = nil
-                        self.list.removeAll()
-                    }
-            }
-        }
-        else {
             Spacer()
             ZStack {
                 VStack  {
@@ -83,7 +71,12 @@ struct PlayerView: View {
                             .frame(maxWidth: .infinity, alignment: .trailing)
                             
                             Button(action: {
-                                self.isBack = true
+//                                self.isBack = true
+                                self.isExploring = false
+                                playlistPlayerViewModel.stopPlayback()
+                                backgroundPlayerViewModel.stopBackground()
+                                dismiss()
+            
                             }, label: {
                                 HStack {
                                     Image(systemName: "rectangle.portrait.and.arrow.right")
@@ -136,7 +129,7 @@ struct PlayerView: View {
                     self.trackBar = time
                 }
             }
-        }
+        
     }
 }
 
