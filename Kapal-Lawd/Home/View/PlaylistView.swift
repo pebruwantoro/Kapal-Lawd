@@ -201,13 +201,13 @@ struct PlaylistView: View {
                             if !self.list.isEmpty && !self.isBack {
                                 PlayerView(
                                     isPlaying: $playlistPlayerViewModel.playlistPlayerManager.isPlaying,
-                                    list: $list
+                                    list: $list, isExploring: self.$isExploring
                                 )
                                 .environmentObject(playlistPlayerViewModel)
                                 .environmentObject(audioPlayerViewModel)
                                 .environmentObject(backgroundPlayerViewModel)
                             }
-                        }.padding(.bottom, 16)
+                        }
                     }
                     
                 }
