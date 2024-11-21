@@ -15,7 +15,6 @@ struct PlaylistView: View {
     @State private var selectedBeacon: DetectedBeacon?
     @StateObject private var playlistPlayerViewModel: PlaylistPlayerViewModel = PlaylistPlayerViewModel()
     @StateObject private var backgroundPlayerViewModel: BackgroundPlayerViewModel = BackgroundPlayerViewModel()
-//    @EnvironmentObject private var beaconScanner: IBeaconDetector
     @EnvironmentObject private var audioPlayerViewModel: AudioPlayerViewModel
     @State var showAlert = false
     @State var showAlertDistance = false
@@ -52,7 +51,7 @@ struct PlaylistView: View {
                         HStack {
                             Button(action:  {
                                 showAlert = true
-//                                ButtonHaptic()
+                               ButtonHaptic()
                             }, label: {
                                 Image("BackButton")
                                     .frame(maxWidth: 28, maxHeight: 28)
@@ -181,7 +180,7 @@ struct PlaylistView: View {
                                             
                                             Button(action: {
                                                 playlistPlayerViewModel.startPlayback(song: playlist.name, url: playlist.url)
-//                                                ButtonHaptic()
+                                               ButtonHaptic()
                                             })
                                             {
                                                 if playlistPlayerViewModel.playlistPlayerManager.isPlaying && playlist.name == playlistPlayerViewModel.playlistPlayerManager.currentSongTitle {
@@ -207,9 +206,8 @@ struct PlaylistView: View {
                                 .environmentObject(playlistPlayerViewModel)
                                 .environmentObject(audioPlayerViewModel)
                                 .environmentObject(backgroundPlayerViewModel)
-//                                .environmentObject(beaconScanner)
                             }
-                        }
+                        }.padding(.bottom, 16)
                     }
                     
                 }
