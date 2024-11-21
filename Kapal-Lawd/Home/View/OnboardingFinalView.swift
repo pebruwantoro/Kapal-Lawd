@@ -43,12 +43,12 @@ struct OnboardingFinalView: View {
                             }
                             .frame(width: 313, height: 78)
                             .padding(.top, 8)
-                                
-                                
-                                Text("Jelajahi pameran dengan bebas, dan Audium akan menangani sisanya, memberikan pengalaman yang mulus dan kaya di setiap langkah.")
-                                    .font(.caption)
-                                    .frame(width: 313, height: 50, alignment: .leading)
-                          
+                            
+                            
+                            Text("Jelajahi pameran dengan bebas, dan Audium akan menangani sisanya, memberikan pengalaman yang mulus dan kaya di setiap langkah.")
+                                .font(.caption)
+                                .frame(width: 313, height: 50, alignment: .leading)
+                            
                         }
                         .foregroundColor(Color("AppText"))
                         .padding(.bottom, 30)

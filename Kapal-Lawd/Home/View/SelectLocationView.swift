@@ -13,37 +13,38 @@ struct SelectLocationView: View {
     @State private var collections: [Collections] = []
     @State private var beacons: [DetectedBeacon] = []
     @State private var selectedBeaconId: String = ""
-    @EnvironmentObject var beaconScanner: IBeaconDetector
+    @State private var initializeData = false
     @StateObject private var audioPlayerViewModel: AudioPlayerViewModel = AudioPlayerViewModel()
     @StateObject private var playlistPlayerViewModel: PlaylistPlayerViewModel = PlaylistPlayerViewModel()
-
+    @EnvironmentObject var beaconScanner: IBeaconDetector
+    
     var body: some View {
         NavigationStack {
             VStack {
                 Spacer()
                 ScrollView {
                     VStack(spacing: 16) {
-                        if !beacons.isEmpty {
+                        if !beacons.isEmpty && self.initializeData {
                             Spacer()
                             Text("\(beacons.count) booth terdekat")
                                 .frame(maxWidth: .infinity, alignment: .leading)
                                 .font(.subheadline)
                                 .padding(.bottom, 2)
                                 .foregroundColor(.gray)
-
+                            
                             ForEach(Array(beacons.enumerated()), id: \.offset) { idx, beacon in
                                 if !collections.isEmpty {
                                     if let collection = collections.first(where: { $0.beaconId == beacon.uuid }) {
                                         NavigationLink(destination:
-                                            PlaylistView(
-                                                isExploring: .constant(true),
-                                                collections: Binding(get: { collections.first(where: { $0.beaconId == beacon.uuid }) }, set: { _ in }),
-                                                selectedBeaconId: .constant(beacon.uuid)
-                                            )
-                                            .navigationBarHidden(true)
-                                            .environmentObject(audioPlayerViewModel)
-                                            .environmentObject(beaconScanner)
-                                            .environmentObject(playlistPlayerViewModel)
+                                                        PlaylistView(
+                                                            isExploring: .constant(true),
+                                                            collections: Binding(get: { collections.first(where: { $0.beaconId == beacon.uuid }) }, set: { _ in }),
+                                                            selectedBeaconId: .constant(beacon.uuid)
+                                                        )
+                                                            .navigationBarHidden(true)
+                                                            .environmentObject(audioPlayerViewModel)
+                                                            .environmentObject(beaconScanner)
+                                                            .environmentObject(playlistPlayerViewModel)
                                         ) {
                                             VStack(alignment: .leading){
                                                 HStack {
@@ -51,22 +52,22 @@ struct SelectLocationView: View {
                                                         .resizable()
                                                         .scaledToFit()
                                                         .frame(width: 74, height: 74)
-
+                                                    
                                                     VStack(alignment: .leading, spacing: 2) {
                                                         Text(collection.roomId)
                                                             .font(.footnote)
                                                             .padding(.horizontal, 6)
-
+                                                        
                                                         Text(collection.name)
                                                             .font(.headline)
                                                             .padding(.horizontal, 6)
-
+                                                        
                                                         Text(collection.category)
                                                             .font(.caption).italic()
                                                             .padding(.horizontal, 6)
                                                     }
                                                     .frame(width: 180, height: 54, alignment: .leading)
-
+                                                    
                                                     HStack (spacing: 1) {
                                                         Spacer()
                                                         Text(String(format: "%.2f m", beacon.averageDistance))
@@ -125,7 +126,7 @@ struct SelectLocationView: View {
             }
         }
     }
-
+    
     func refreshData() async {
         collections.removeAll()
         do {
@@ -134,22 +135,24 @@ struct SelectLocationView: View {
             print(error)
         }
     }
-
+    
     func reloadCollections() async {
         for beacon in beacons {
             Task {
                 let collection = await audioPlayerViewModel.fetchCollectionByBeaconId(id: beacon.uuid)
                 if !collection.isEmpty {
                     self.collections.append(collection[0])
+                    
                 }
             }
         }
+        self.initializeData = true
     }
 }
 
 #Preview {
     @Previewable var beaconScanner: IBeaconDetector = IBeaconDetector()
-
+    
     SelectLocationView()
         .environmentObject(beaconScanner)
 }

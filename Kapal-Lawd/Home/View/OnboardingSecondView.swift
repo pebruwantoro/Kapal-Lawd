@@ -43,10 +43,10 @@ struct OnboardingSecondView: View {
                             }
                             .frame(width: 313, height: 50)
                             .padding(.bottom, 12)
-                                
-                                Text("Audium menggunakan Bluetooth dan layanan lokasi untuk mendeteksi lokasi untuk memutar narasi secara otomatis berdasarkan posisi Anda.")
-                                    .font(.caption)
-                                    .frame(width: 313, height: 50, alignment: .leading)
+                            
+                            Text("Audium menggunakan Bluetooth dan layanan lokasi untuk mendeteksi lokasi untuk memutar narasi secara otomatis berdasarkan posisi Anda.")
+                                .font(.caption)
+                                .frame(width: 313, height: 50, alignment: .leading)
                             
                         }
                         .foregroundColor(Color("AppText"))
@@ -80,7 +80,6 @@ struct OnboardingSecondView: View {
                                 .cornerRadius(86)
                             })
                         }
-//                        .padding(.top, 10)
                         .padding(.horizontal, 24)
                     }
                 }

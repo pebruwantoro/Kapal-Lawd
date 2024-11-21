@@ -12,68 +12,36 @@ struct PlaylistView: View {
     @Binding var isExploring: Bool
     @Binding var collections: Collections?
     @Binding var selectedBeaconId: String
-    @EnvironmentObject private var playlistPlayerViewModel: PlaylistPlayerViewModel
+    @StateObject private var playlistPlayerViewModel: PlaylistPlayerViewModel = PlaylistPlayerViewModel()
     @StateObject private var backgroundPlayerViewModel: BackgroundPlayerViewModel = BackgroundPlayerViewModel()
     @EnvironmentObject private var audioPlayerViewModel: AudioPlayerViewModel
     @State var showAlert = false
-    @State var showAlertDistance = false
     @State private var isBackgroundPlay = false
     @State private var list: [Playlist] = []
     @State var initializeData: Bool = false
     @Environment(\.dismiss) var dismiss
-
+    
     var body: some View {
         VStack {
-            ZStack(alignment: .topLeading) {
-                VStack {
-                    Rectangle()
-                        .foregroundColor(.clear)
-                        .frame(width: UIScreen.main.bounds.width, height: 182)
-                        .background(
-                            WebImage(url: URL(string: collections?.appBanner ?? ""))
-                                .resizable()
-                                .scaledToFill()
-                                .ignoresSafeArea()
-                        )
-                    Spacer()
-                }
-
-//                HStack {
-//                    Button(action:  {
-//                        showAlert = true
-//                        ButtonHaptic()
-//                    }, label: {
-//                        Image("BackButton")
-//                            .frame(maxWidth: 28, maxHeight: 28)
-//                    })
-//                    .alert(isPresented: $showAlert) {
-//                        Alert(
-//                            title: Text("Keluar dari Booth?"),
-//                            message: Text("Kamu terdeteksi keluar dari area booth Audium. Kembali ke halaman scanning?"),
-//                            primaryButton: .destructive(Text("Keluar dari Booth")) {
-//                                self.isExploring = false
-//                                playlistPlayerViewModel.stopPlayback()
-//                                backgroundPlayerViewModel.stopBackground()
-//                                dismiss()
-//                            },
-//                            secondaryButton: .default(Text("Tetap di Booth")) {
-//                                self.showAlert = false
-//                            }
-//                        )
-//                    }
-//                    Spacer()
-//                }
-//                .padding(.leading, 16)
-//                .padding(.top, 16)
-//                .padding(.trailing, 50)
-//                .frame(maxWidth: .infinity, maxHeight: 50, alignment: .topLeading)
-            }
             if !initializeData {
                 ProgressView()
-            }
-            else {
+            } else {
                 if collections != nil {
-                    VStack(alignment: .leading, spacing: 16) {
+                    ZStack(alignment: .topLeading) {
+                        VStack {
+                            Rectangle()
+                                .foregroundColor(.clear)
+                                .background(
+                                    WebImage(url: URL(string: collections!.appBanner))
+                                        .resizable()
+                                        .scaledToFill()
+                                        .frame(width: UIScreen.main.bounds.width, height: 182)
+                                        .ignoresSafeArea()
+                                )
+                        }
+                    }
+                    
+                    VStack(alignment: .center, spacing: 16) {
                         HStack (alignment: .top, spacing: 16) {
                             Rectangle()
                                 .foregroundColor(.clear)
@@ -85,27 +53,27 @@ struct PlaylistView: View {
                                         .frame(width: 100, height: 100)
                                         .clipShape(RoundedRectangle(cornerRadius: 8))
                                 )
-
+                            
                             VStack (alignment: .leading, spacing: 2) {
                                 Text(collections!.roomId)
                                     .font(.footnote)
                                     .foregroundColor(.gray)
-
+                                
                                 Text(collections!.name)
                                     .fontWeight(.bold)
                                     .lineLimit(nil)
                                     .multilineTextAlignment(.leading)
                                     .frame(maxWidth: .infinity, alignment: .leading)
                                     .fixedSize(horizontal: false, vertical: true)
-
+                                
                                 Text("oleh \(collections!.authoredBy)")
                                     .font(.footnote)
                                     .foregroundColor(.gray)
-
+                                
                                 Text(collections!.category)
                                     .font(.footnote)
                                     .foregroundColor(.gray)
-
+                                
                                 HStack(alignment: .center) {
                                     Button(action: {
                                         if let url = URL(string: collections!.appUrl) {
@@ -121,9 +89,9 @@ struct PlaylistView: View {
                                             .cornerRadius(20)
                                     }
                                     .frame(height: 48)
-
+                                    
                                     Spacer()
-
+                                    
                                     Button(action: {
                                         if let url = URL(string: collections!.instagram) {
                                             UIApplication.shared.open(url)
@@ -142,8 +110,7 @@ struct PlaylistView: View {
                         }
                         .frame(maxWidth: .infinity, maxHeight: 118)
                     }
-
-
+                    
                     VStack {
                         ScrollView {
                             Text(collections!.longContents)
@@ -154,9 +121,8 @@ struct PlaylistView: View {
                     .frame(maxWidth: .infinity, maxHeight: 108)
                     .padding(.top, 12)
                     .padding(.bottom, 12)
-
+                    
                     VStack (spacing: 16) {
-
                         if !self.list.isEmpty {
                             List($list, id: \.uuid) { $playlist in
                                 HStack {
@@ -165,9 +131,9 @@ struct PlaylistView: View {
                                             .bold()
                                         Text(playlist.duration)
                                     }
-
+                                    
                                     Spacer()
-
+                                    
                                     Button(action: {
                                         playlistPlayerViewModel.startPlayback(song: playlist.name, url: playlist.url)
                                         ButtonHaptic()
@@ -187,12 +153,12 @@ struct PlaylistView: View {
                             .padding(.bottom, 16)
                         }
                     }.padding(.bottom, 16)
-
+                    
                     if !self.list.isEmpty {
                         PlayerView(
                             isPlaying: $playlistPlayerViewModel.playlistPlayerManager.isPlaying,
                             list: $list,
-                            isExploring: .constant(false), collections: $collections
+                            isExploring: .constant(false)
                         )
                         .environmentObject(playlistPlayerViewModel)
                         .environmentObject(audioPlayerViewModel)
@@ -200,7 +166,7 @@ struct PlaylistView: View {
                     }
                 }
             }
-
+            
         }
         .padding(.horizontal, 16)
         .onAppear {
@@ -222,7 +188,7 @@ struct PlaylistView: View {
             }
         }
         .threeOptionAlert(
-            isPresented: $showAlertDistance,
+            isPresented: $showAlert,
             title: DefaultContent.titleAlertDistance.rawValue,
             message: DefaultContent.messageAlertDistance.rawValue,
             option1: (
@@ -237,14 +203,14 @@ struct PlaylistView: View {
             option2: (
                 text: DefaultContent.secondOption.rawValue,
                 action: {
-                    self.showAlertDistance = false
+                    self.showAlert = false
                 }
             )
         )
         .onReceive(playlistPlayerViewModel.playlistPlayerManager.$isPlaying)
         { isPlaying in
             if !isPlaying && list.count-1 == playlistPlayerViewModel.playlistPlayerManager.currentPlaylistIndex {
-                self.showAlertDistance = true
+                self.showAlert = true
             }
         }
     }
@@ -253,7 +219,7 @@ struct PlaylistView: View {
 #Preview {
     @ObservedObject var beaconScanner: IBeaconDetector = IBeaconDetector()
     @ObservedObject var audioPlayerViewModel: AudioPlayerViewModel = AudioPlayerViewModel()
-
+    
     PlaylistView(
         isExploring: .constant(false),
         collections: .constant(
@@ -270,7 +236,7 @@ struct PlaylistView: View {
                 shortContents: "Experience the evolution of modern art.",
                 authoredBy: "Audium",
                 authoredAt: "2024-10-10",
-                appBanner: ""
+                appBanner: "https://drive.google.com/uc?id=1Va4Jr5896GKaZGpee0XvW0wb3np45TZS"
             )
         ),
         selectedBeaconId: .constant("9d38c8b0-77f8-4e23-8dba-1546c4d035a4")

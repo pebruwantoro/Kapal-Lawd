@@ -11,11 +11,7 @@ struct FindAuditagView: View {
     @Binding var isExploring: Bool
     @State private var isScanning = false
     @State private var cardOpacity = 0.0
-    @State private var collections: [Collections] = []
-    @State private var playlists: [Playlist] = []
     @State var pulseScan = Animation.easeOut(duration: 2).repeatForever(autoreverses: true)
-    @State private var isPlayInteraction = false
-    @State private var isContentReady = false
     @State private var showModal = false
     @State private var isBack = false
     @StateObject private var beaconScanner: IBeaconDetector = IBeaconDetector()
@@ -106,9 +102,9 @@ struct FindAuditagView: View {
                 }
                 
             }
-            .onReceive(beaconScanner.$isFindBeacon) {isFind in
+            .onReceive(beaconScanner.$isFindBeacon) { isFind in
                 if isFind && beaconScanner.detectedMultilaterationBeacons.count >= 1 {
-                        showModal = true
+                    showModal = true
                 }
             }
         }

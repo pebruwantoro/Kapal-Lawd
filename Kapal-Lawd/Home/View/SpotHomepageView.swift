@@ -11,9 +11,7 @@ struct SpotHomepageView: View {
     
     @Binding var spotHomepage: Bool
     @State private var isExploring = false
-    @ObservedObject private var playlistPlayerViewModel: PlaylistPlayerViewModel = PlaylistPlayerViewModel()
-    @ObservedObject private var backgroundPlayerViewModel: BackgroundPlayerViewModel = BackgroundPlayerViewModel()
-   
+    
     var body: some View {
         NavigationStack {
             if isExploring {
@@ -61,11 +59,6 @@ struct SpotHomepageView: View {
                 .cornerRadius(36)
                 .shadow(radius: 5)
                 .padding(.horizontal, 16)
-                .onAppear{
-                    playlistPlayerViewModel.playlistPlayerManager.removeTimeObserver()
-                    playlistPlayerViewModel.resetAsset()
-                    backgroundPlayerViewModel.stopBackground()
-                }
             }
         }
     }
