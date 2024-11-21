@@ -35,7 +35,7 @@ struct OnboardingThirdView: View {
                                 Text("Booth dengan AudiTag™")
                                     .font(.title).bold()
                                     .frame(width: 318, alignment: .leading)
-                        
+                                
                                 Text("Kunjungi booth dengan tanda Tersedia di Audium")
                                     .italic()
                                     .font(.subheadline)
@@ -43,12 +43,12 @@ struct OnboardingThirdView: View {
                             }
                             .frame(width: 313, height: 78)
                             .padding(.top, 6)
-                      
-                                
-                                Text("Dekati booth yang dilengkapi dengan AudiTag™, dan Audium akan memutar narasi saat Anda mendekat. Otomatis!")
-                                    .font(.caption)
-                                    .frame(width: 313, height: 50, alignment: .leading)
-                     
+                            
+                            
+                            Text("Dekati booth yang dilengkapi dengan AudiTag™, dan Audium akan memutar narasi saat Anda mendekat. Otomatis!")
+                                .font(.caption)
+                                .frame(width: 313, height: 50, alignment: .leading)
+                            
                         }
                         .foregroundColor(Color("AppText"))
                         .padding(.bottom, 34)
