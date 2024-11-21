@@ -20,6 +20,7 @@ struct Collections: Codable {
     let shortContents: String
     let authoredBy: String
     let authoredAt: String
+    let appBanner: String
 
     enum CodingKeys: String, CodingKey {
         case uuid
@@ -34,5 +35,6 @@ struct Collections: Codable {
         case shortContents = "short_contents"
         case authoredBy = "authored_by"
         case authoredAt = "authored_at"
+        case appBanner = "app_banner"
     }
 }

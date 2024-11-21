@@ -40,11 +40,15 @@ struct PlaylistView: View {
                 VStack {
                     ZStack(alignment: .topLeading) {
                         VStack {
-                            Image("headertitle")
+                            Rectangle()
+                                .foregroundColor(.clear)
+                                .frame(width: 402, height: 182)
+                                .background(
+                                    WebImage(url: URL(string: collections!.appBanner))
                                 .resizable()
-                                .scaledToFit()
+                                .scaledToFill()
                                 .ignoresSafeArea()
-                                .frame(maxWidth: .infinity)
+                             )
                             Spacer()
                         }
                         
@@ -286,7 +290,8 @@ struct PlaylistView: View {
                 longContents: "In this section, visitors are introduced to Galeri Zen1—a sanctuary born from the passion of an art enthusiast with over a decade of experience. The gallery serves as a hub for both local and international contemporary artists, featuring a futuristic, minimalist, and industrial interior design. Additionally, visitors are introduced to the Audium App, an innovative technology that provides automatic audio narratives to enhance the visiting experience.",
                 shortContents: "Experience the evolution of modern art.",
                 authoredBy: "Audium",
-                authoredAt: "2024-10-10"
+                authoredAt: "2024-10-10",
+                appBanner: ""
             )
         ),
         selectedBeaconId: .constant("9d38c8b0-77f8-4e23-8dba-1546c4d035a4")

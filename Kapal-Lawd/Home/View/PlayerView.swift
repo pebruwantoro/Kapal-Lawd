@@ -171,7 +171,8 @@ struct PlayerView: View {
                 longContents: "In this section, visitors are introduced to Galeri Zen1—a sanctuary born from the passion of an art enthusiast with over a decade of experience. The gallery serves as a hub for both local and international contemporary artists, featuring a futuristic, minimalist, and industrial interior design. Additionally, visitors are introduced to the Audium App, an innovative technology that provides automatic audio narratives to enhance the visiting experience.",
                 shortContents: "Experience the evolution of modern art.",
                 authoredBy: "Audium",
-                authoredAt: "2024-10-10"
+                authoredAt: "2024-10-10",
+                appBanner: ""
             )
         )
     )
