@@ -34,74 +34,76 @@ struct SelectLocationView: View {
         } else {
             VStack {
                 Spacer()
-                VStack(spacing: 16) {
-                    if !beacons.isEmpty {
-                        Spacer()
-                        Text("\(beacons.count) booth terdekat")
-                            .frame(maxWidth: .infinity, alignment: .leading)
-                            .font(.subheadline)
-                            .padding(.bottom, 2)
-                            .foregroundColor(.gray)
-                        
-                        ForEach(Array(beacons.enumerated()), id: \.offset) { idx, beacon in
-                            if !collections.isEmpty {
-                                if let collection = collections.first(where: { $0.beaconId == beacon.uuid }) {
-                                    Button(action: {
-                                        ButtonHaptic()
-                                        self.isUserPressButton = true
-                                        self.selectedBeaconId = beacon.uuid
-                                    }) {
-                                        VStack(alignment: .leading){
-                                            HStack {
-                                                WebImage(url: URL(string: collection.icon))
-                                                    .resizable()
-                                                    .scaledToFit()
-                                                    .frame(width: 74, height: 74)
-                                                
-                                                VStack(alignment: .leading, spacing: 2) {
-                                                    Text(collection.roomId)
-                                                        .font(.footnote)
-                                                        .padding(.horizontal, 6)
+                ScrollView {
+                    VStack(spacing: 16) {
+                        if !beacons.isEmpty {
+                            Spacer()
+                            Text("\(beacons.count) booth terdekat")
+                                .frame(maxWidth: .infinity, alignment: .leading)
+                                .font(.subheadline)
+                                .padding(.bottom, 2)
+                                .foregroundColor(.gray)
+                            
+                            ForEach(Array(beacons.enumerated()), id: \.offset) { idx, beacon in
+                                if !collections.isEmpty {
+                                    if let collection = collections.first(where: { $0.beaconId == beacon.uuid }) {
+                                        Button(action: {
+                                            ButtonHaptic()
+                                            self.isUserPressButton = true
+                                            self.selectedBeaconId = beacon.uuid
+                                        }) {
+                                            VStack(alignment: .leading){
+                                                HStack {
+                                                    WebImage(url: URL(string: collection.icon))
+                                                        .resizable()
+                                                        .scaledToFit()
+                                                        .frame(width: 74, height: 74)
                                                     
-                                                    Text(collection.name)
-                                                        .font(.headline)
-                                                        .padding(.horizontal, 6)
+                                                    VStack(alignment: .leading, spacing: 2) {
+                                                        Text(collection.roomId)
+                                                            .font(.footnote)
+                                                            .padding(.horizontal, 6)
+                                                        
+                                                        Text(collection.name)
+                                                            .font(.headline)
+                                                            .padding(.horizontal, 6)
+                                                        
+                                                        Text(collection.category)
+                                                            .font(.caption).italic()
+                                                            .padding(.horizontal, 6)
+                                                    }
+                                                    .frame(width: 180, height: 54, alignment: .leading)
                                                     
-                                                    Text(collection.category)
-                                                        .font(.caption).italic()
-                                                        .padding(.horizontal, 6)
+                                                    HStack (spacing: 1) {
+                                                        Spacer()
+                                                        Text(String(format: "%.2f m", beacon.averageDistance))
+                                                            .font(.footnote)
+                                                            .frame(width: 38)
+                                                        Image(systemName: "chevron.forward")
+                                                    }
+                                                    .frame(maxWidth: .infinity)
+                                                    .foregroundColor(.gray)
                                                 }
-                                                .frame(width: 180, height: 54, alignment: .leading)
-                                                
-                                                HStack (spacing: 1) {
-                                                    Spacer()
-                                                    Text(String(format: "%.2f m", beacon.averageDistance))
-                                                        .font(.footnote)
-                                                        .frame(width: 38)
-                                                    Image(systemName: "chevron.forward")
-                                                }
-                                                .frame(maxWidth: .infinity)
-                                                .foregroundColor(.gray)
+                                                Text(collection.longContents)
+                                                    .font(.caption)
+                                                    .multilineTextAlignment(.leading)
+                                                    .padding(.top, 4)
                                             }
-                                            Text(collection.longContents)
-                                                .font(.caption)
-                                                .multilineTextAlignment(.leading)
-                                                .padding(.top, 4)
+                                            .frame(maxWidth: .infinity, maxHeight: 155)
+                                            .foregroundColor(.black)
+                                            .padding(.horizontal, 12)
+                                            .cornerRadius(16)
+                                            .overlay(
+                                                RoundedRectangle(cornerRadius: 16)
+                                                    .stroke(Color.gray, lineWidth: 0.5)
+                                            )
                                         }
-                                        .frame(maxWidth: .infinity, maxHeight: 155)
-                                        .foregroundColor(.black)
-                                        .padding(.horizontal, 12)
-                                        .cornerRadius(16)
-                                        .overlay(
-                                            RoundedRectangle(cornerRadius: 16)
-                                                .stroke(Color.gray, lineWidth: 0.5)
-                                        )
                                     }
                                 }
                             }
                         }
+                        Spacer().frame(height: 10)
                     }
-                    Spacer().frame(height: 10)
                 }
                 .frame(maxWidth: .infinity, maxHeight: 431)
                 .padding(.horizontal, 16)
