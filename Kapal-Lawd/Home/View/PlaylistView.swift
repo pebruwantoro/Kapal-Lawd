@@ -119,11 +119,11 @@ struct PlaylistView: View {
                                             }
                                         }) {
                                             Text("Buka di App Store")
-                                                .font(.system(size: 12, weight: .light))
+                                                .font(.caption)
                                                 .foregroundColor(.white)
                                                 .padding(.vertical, 10)
                                                 .padding(.horizontal, 20)
-                                                .background(Color.blue)
+                                                .background(Color("AppBlue"))
                                                 .cornerRadius(20)
                                         }
                                         .frame(height: 48)
@@ -138,15 +138,15 @@ struct PlaylistView: View {
                                             Image("instagramIcon")
                                                 .resizable()
                                                 .scaledToFit()
-                                                .frame(width: 48, height: 48)
+                                                .frame(width: 28, height: 28)
                                         }
                                     }
                                     .frame(maxWidth: .infinity, alignment: .center)
                                     .padding(0)
                                 }
-                                .padding(.trailing, 36)
+                                .padding(.trailing, 24)
                             }
-                            .frame(maxWidth: .infinity, maxHeight: 100)
+                            .frame(maxWidth: .infinity, maxHeight: 118)
                         }
                         
                         
