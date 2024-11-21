@@ -139,10 +139,10 @@ struct PlaylistView: View {
                                                     UIApplication.shared.open(url)
                                                 }
                                             }) {
-                                                Image("instagramIcon")
+                                                Image(systemName: "network")
                                                     .resizable()
                                                     .scaledToFit()
-                                                    .frame(width: 48, height: 48)
+                                                    .frame(width: 29, height: 22)
                                             }
                                         }
                                         .frame(maxWidth: .infinity, alignment: .center)
@@ -201,7 +201,8 @@ struct PlaylistView: View {
                             if !self.list.isEmpty && !self.isBack {
                                 PlayerView(
                                     isPlaying: $playlistPlayerViewModel.playlistPlayerManager.isPlaying,
-                                    list: $list, isExploring: self.$isExploring
+                                    list: $list,
+                                    isExploring: .constant(false), collections: $collections
                                 )
                                 .environmentObject(playlistPlayerViewModel)
                                 .environmentObject(audioPlayerViewModel)
