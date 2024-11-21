@@ -15,7 +15,7 @@ struct PlaylistView: View {
     @State private var selectedBeacon: DetectedBeacon?
     @StateObject private var playlistPlayerViewModel: PlaylistPlayerViewModel = PlaylistPlayerViewModel()
     @StateObject private var backgroundPlayerViewModel: BackgroundPlayerViewModel = BackgroundPlayerViewModel()
-    @EnvironmentObject private var beaconScanner: IBeaconDetector
+//    @EnvironmentObject private var beaconScanner: IBeaconDetector
     @EnvironmentObject private var audioPlayerViewModel: AudioPlayerViewModel
     @State var showAlert = false
     @State var showAlertDistance = false
@@ -52,7 +52,7 @@ struct PlaylistView: View {
                         HStack {
                             Button(action:  {
                                 showAlert = true
-                                ButtonHaptic()
+//                                ButtonHaptic()
                             }, label: {
                                 Image("BackButton")
                                     .frame(maxWidth: 28, maxHeight: 28)
@@ -68,6 +68,7 @@ struct PlaylistView: View {
                                         backgroundPlayerViewModel.stopBackground()
                                     },
                                     secondaryButton: .default(Text("Tetap di Booth")) {
+                                        self.showAlert = false
                                     }
                                 )
                             }
@@ -180,7 +181,7 @@ struct PlaylistView: View {
                                             
                                             Button(action: {
                                                 playlistPlayerViewModel.startPlayback(song: playlist.name, url: playlist.url)
-                                                ButtonHaptic()
+//                                                ButtonHaptic()
                                             })
                                             {
                                                 if playlistPlayerViewModel.playlistPlayerManager.isPlaying && playlist.name == playlistPlayerViewModel.playlistPlayerManager.currentSongTitle {
@@ -206,7 +207,7 @@ struct PlaylistView: View {
                                 .environmentObject(playlistPlayerViewModel)
                                 .environmentObject(audioPlayerViewModel)
                                 .environmentObject(backgroundPlayerViewModel)
-                                .environmentObject(beaconScanner)
+//                                .environmentObject(beaconScanner)
                             }
                         }
                     }
@@ -240,33 +241,27 @@ struct PlaylistView: View {
                 option1: (
                     text: DefaultContent.firstOption.rawValue,
                     action: {
-                        delay(AlertDelay.showAlertDistance.rawValue) {
-                            self.showAlertDistance = true
-                        }
+                        self.isExploring = false
+                        self.isBack = true
+                        self.showAlertDistance = false
                     }
                 ),
                 option2: (
                     text: DefaultContent.secondOption.rawValue,
                     action: {
-                        self.isExploring = false
-                        self.isBack = true
                         self.showAlertDistance = false
                     }
                 )
             )
-            .onReceive(beaconScanner.$detectedMultilaterationBeacons) { beacons in
-                if let tempBeacon = beacons.first(where: { $0.uuid == self.selectedBeaconId }) {
-                    self.selectedBeacon = tempBeacon
-                }
-                
-                if self.selectedBeacon != nil {
-                    if self.selectedBeacon!.averageDistance > Beacon.maxInRange.rawValue {
-                        self.showAlertDistance = true
-                        print("beacon to far with distance: \(self.selectedBeacon!.averageDistance)")
-                    } else {
-                        self.showAlertDistance = false
-                        print("beacon in range with distance: \(self.selectedBeacon!.averageDistance)")
-                    }
+            .onReceive(playlistPlayerViewModel.playlistPlayerManager.$isPlaying)
+            { isPlaying in
+                print("Hello")
+                if !isPlaying && list.count-1 == playlistPlayerViewModel.playlistPlayerManager.currentPlaylistIndex {
+//                    delay(AlertDelay.showAlertDistance.rawValue){
+//                        self.showAlertDistance = true
+//                    }
+                    self.showAlertDistance = true
+                    print("Masuk EKO")
                 }
             }
         }
