@@ -9,6 +9,5 @@ enum DefaultContent: String {
     case titleAlertDistance = "Anda berada diluar area booth."
     case messageAlertDistance = "Mendekatlah ke booth untuk mendapatkan pengalaman mendengarkan yang lebih baik. Namun, Anda tetap dapat memilih untuk melanjutkan narasi."
     case firstOption = "Lanjut Mendengarkan"
-    case secondOption = "Ingatkan dalam 10 detik"
-    case thirdOption = "Pilih booth lain"
+    case secondOption = "Pilih booth lain"
 }

@@ -22,6 +22,7 @@ struct PlaylistView: View {
     @State private var isBackgroundPlay = false
     @State private var isBack = false
     @State private var list: [Playlist] = []
+    @State var initializeData: Bool = false
     
     var body: some View {
         if self.isBack {
@@ -77,134 +78,139 @@ struct PlaylistView: View {
                         .padding(.trailing, 50)
                         .frame(maxWidth: .infinity, maxHeight: 50, alignment: .topLeading)
                     }
-                    
-                    if collections != nil {
-                        VStack(alignment: .leading, spacing: 16) {
-                            HStack (alignment: .top, spacing: 16) {
-                                Rectangle()
-                                    .foregroundColor(.clear)
-                                    .frame(width: 100, height: 100)
-                                    .background(
-                                        WebImage(url: URL(string: collections!.icon))
-                                            .resizable()
-                                            .scaledToFit()
-                                            .frame(width: 100, height: 100)
-                                            .clipShape(RoundedRectangle(cornerRadius: 8))
-                                    )
-                                
-                                VStack (alignment: .leading, spacing: 2) {
-                                    Text(collections!.roomId)
-                                        .font(.footnote)
-                                        .foregroundColor(.gray)
-                                    
-                                    Text(collections!.name)
-                                        .fontWeight(.bold)
-                                        .lineLimit(nil)
-                                        .multilineTextAlignment(.leading)
-                                        .frame(maxWidth: 350, alignment: .leading)
-                                        .fixedSize(horizontal: false, vertical: true)
-                                    
-                                    Text("oleh \(collections!.authoredBy)")
-                                        .font(.footnote)
-                                        .foregroundColor(.gray)
-                                    
-                                    Text(collections!.category)
-                                        .font(.footnote)
-                                        .foregroundColor(.gray)
-                                    
-                                    HStack(alignment: .center) {
-                                        Button(action: {
-                                            if let url = URL(string: collections!.appUrl) {
-                                                UIApplication.shared.open(url)
-                                            }
-                                        }) {
-                                            Text("Buka di App Store")
-                                                .font(.caption)
-                                                .foregroundColor(.white)
-                                                .padding(.vertical, 10)
-                                                .padding(.horizontal, 20)
-                                                .background(Color("AppBlue"))
-                                                .cornerRadius(20)
-                                        }
-                                        .frame(height: 48)
-                                        
-                                        Spacer()
-                                        
-                                        Button(action: {
-                                            if let url = URL(string: collections!.instagram) {
-                                                UIApplication.shared.open(url)
-                                            }
-                                        }) {
-                                            Image("instagramIcon")
+                    if !initializeData {
+                        ProgressView()
+                    }
+                    else {
+                        if collections != nil {
+                            VStack(alignment: .leading, spacing: 16) {
+                                HStack (alignment: .top, spacing: 16) {
+                                    Rectangle()
+                                        .foregroundColor(.clear)
+                                        .frame(width: 100, height: 100)
+                                        .background(
+                                            WebImage(url: URL(string: collections!.icon))
                                                 .resizable()
                                                 .scaledToFit()
-                                                .frame(width: 28, height: 28)
-                                        }
-                                    }
-                                    .frame(maxWidth: .infinity, alignment: .center)
-                                    .padding(0)
-                                }
-                                .padding(.trailing, 24)
-                            }
-                            .frame(maxWidth: .infinity, maxHeight: 118)
-                        }
-                        
-                        
-                        VStack {
-                            ScrollView {
-                                Text(collections!.longContents)
-                                    .font(.footnote)
-                                    .padding(.horizontal, 8)
-                            }
-                        }
-                        .frame(maxWidth: .infinity, maxHeight: 108)
-                        .padding(.top, 12)
-                        .padding(.bottom, 12)
-                        
-                        VStack (spacing: 16) {
-                            
-                            if !self.list.isEmpty {
-                                List($list, id: \.uuid) { $playlist in
-                                    HStack {
-                                        VStack (alignment: .leading) {
-                                            Text(playlist.name)
-                                                .bold()
-                                            Text(playlist.duration)
-                                        }
+                                                .frame(width: 100, height: 100)
+                                                .clipShape(RoundedRectangle(cornerRadius: 8))
+                                        )
+                                    
+                                    VStack (alignment: .leading, spacing: 2) {
+                                        Text(collections!.roomId)
+                                            .font(.footnote)
+                                            .foregroundColor(.gray)
                                         
-                                        Spacer()
+                                        Text(collections!.name)
+                                            .fontWeight(.bold)
+                                            .lineLimit(nil)
+                                            .multilineTextAlignment(.leading)
+                                            .frame(maxWidth: 350, alignment: .leading)
+                                            .fixedSize(horizontal: false, vertical: true)
                                         
-                                        Button(action: {
-                                            playlistPlayerViewModel.startPlayback(song: playlist.name, url: playlist.url)
-                                            ButtonHaptic()
-                                        })
-                                        {
-                                            if playlistPlayerViewModel.playlistPlayerManager.isPlaying && playlist.name == playlistPlayerViewModel.playlistPlayerManager.currentSongTitle {
-                                                Image("sounds")
-                                            } else {
-                                                Image(systemName: "play")
-                                                    .foregroundColor(Color("AppLabel"))
+                                        Text("oleh \(collections!.authoredBy)")
+                                            .font(.footnote)
+                                            .foregroundColor(.gray)
+                                        
+                                        Text(collections!.category)
+                                            .font(.footnote)
+                                            .foregroundColor(.gray)
+                                        
+                                        HStack(alignment: .center) {
+                                            Button(action: {
+                                                if let url = URL(string: collections!.appUrl) {
+                                                    UIApplication.shared.open(url)
+                                                }
+                                            }) {
+                                                Text("Buka di App Store")
+                                                    .font(.system(size: 12, weight: .light))
+                                                    .foregroundColor(.white)
+                                                    .padding(.vertical, 10)
+                                                    .padding(.horizontal, 20)
+                                                    .background(Color.blue)
+                                                    .cornerRadius(20)
+                                            }
+                                            .frame(height: 48)
+                                            
+                                            Spacer()
+                                            
+                                            Button(action: {
+                                                if let url = URL(string: collections!.instagram) {
+                                                    UIApplication.shared.open(url)
+                                                }
+                                            }) {
+                                                Image("instagramIcon")
+                                                    .resizable()
+                                                    .scaledToFit()
+                                                    .frame(width: 48, height: 48)
                                             }
                                         }
+                                        .frame(maxWidth: .infinity, alignment: .center)
+                                        .padding(0)
                                     }
-                                    .frame(maxWidth: .infinity, maxHeight: 60)
+                                    .padding(.trailing, 24)
                                 }
-                                .listStyle(.plain)
-                                .padding(.bottom, 16)
+                                .frame(maxWidth: .infinity, maxHeight: 118)
                             }
-                        }.padding(.bottom, 16)
-                        
-                        if !self.list.isEmpty && !self.isBack {
-                            PlayerView(
-                                isPlaying: $playlistPlayerViewModel.playlistPlayerManager.isPlaying,
-                                list: $list
-                            )
-                            .environmentObject(playlistPlayerViewModel)
-                            .environmentObject(audioPlayerViewModel)
-                            .environmentObject(backgroundPlayerViewModel)
-                            .environmentObject(beaconScanner)
+                            
+                            
+                            VStack {
+                                ScrollView {
+                                    Text(collections!.longContents)
+                                        .font(.footnote)
+                                        .padding(.horizontal, 8)
+                                }
+                            }
+                            .frame(maxWidth: .infinity, maxHeight: 108)
+                            .padding(.top, 12)
+                            .padding(.bottom, 12)
+                            
+                            VStack (spacing: 16) {
+                                
+                                if !self.list.isEmpty {
+                                    List($list, id: \.uuid) { $playlist in
+                                        HStack {
+                                            VStack (alignment: .leading) {
+                                                Text(playlist.name)
+                                                    .bold()
+                                                Text(playlist.duration)
+                                            }
+                                            
+                                            Spacer()
+                                            
+                                            Button(action: {
+                                                playlistPlayerViewModel.startPlayback(song: playlist.name, url: playlist.url)
+                                                ButtonHaptic()
+                                            })
+                                            {
+                                                if playlistPlayerViewModel.playlistPlayerManager.isPlaying && playlist.name == playlistPlayerViewModel.playlistPlayerManager.currentSongTitle {
+                                                    Image("sounds")
+                                                } else {
+                                                    Image(systemName: "play")
+                                                        .foregroundColor(Color("AppLabel"))
+                                                }
+                                            }
+                                        }
+                                        .frame(maxWidth: .infinity, maxHeight: 60)
+                                    }
+                                    .listStyle(.plain)
+                                    .padding(.bottom, 16)
+                                }
+                            }.padding(.bottom, 16)
+                            
+                            if !self.list.isEmpty && !self.isBack {
+                                PlayerView(
+                                    isPlaying: $playlistPlayerViewModel.playlistPlayerManager.isPlaying,
+                                    list: $list
+                                )
+                                .environmentObject(playlistPlayerViewModel)
+                                .environmentObject(audioPlayerViewModel)
+                                .environmentObject(backgroundPlayerViewModel)
+                                .environmentObject(beaconScanner)
+                            }
                         }
                     }
+                    
                 }
                 .padding(.horizontal, 16)
                 .onAppear {
@@ -224,6 +230,7 @@ struct PlaylistView: View {
             .onAppear{
                 Task {
                     self.list = await audioPlayerViewModel.fetchPlaylistByCollectionId(id: collections!.uuid)
+                    self.initializeData = true
                 }
             }
             .threeOptionAlert(
@@ -233,22 +240,17 @@ struct PlaylistView: View {
                 option1: (
                     text: DefaultContent.firstOption.rawValue,
                     action: {
-                        self.showAlertDistance = false
-                    }
-                ),
-                option2: (
-                    text: DefaultContent.secondOption.rawValue,
-                    action: {
                         delay(AlertDelay.showAlertDistance.rawValue) {
                             self.showAlertDistance = true
                         }
                     }
                 ),
-                option3: (
-                    text: DefaultContent.thirdOption.rawValue,
+                option2: (
+                    text: DefaultContent.secondOption.rawValue,
                     action: {
                         self.isExploring = false
                         self.isBack = true
+                        self.showAlertDistance = false
                     }
                 )
             )
