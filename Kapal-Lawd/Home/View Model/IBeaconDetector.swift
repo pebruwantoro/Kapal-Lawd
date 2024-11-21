@@ -141,6 +141,8 @@ class IBeaconDetector: NSObject, ObservableObject, CLLocationManagerDelegate {
                         )
                         
                         self.beaconsData.append(beaconData)
+                    } else {
+                        self.beaconsData.removeAll(where: { $0.uuid == beacon.uuid.uuidString.lowercased() })
                     }
                 }
                 
@@ -159,7 +161,6 @@ class IBeaconDetector: NSObject, ObservableObject, CLLocationManagerDelegate {
                 
                 self.detectedMultilaterationBeacons.sort(by: { $0.averageDistance < $1.averageDistance })
                 let nearestBeacon = self.detectedMultilaterationBeacons.min { $0.averageDistance < $1.averageDistance }
-               
                 self.closestBeacon = beacons.first { $0.uuid.uuidString.lowercased() == nearestBeacon?.uuid }
                 
                 self.makeActive()
@@ -168,8 +169,8 @@ class IBeaconDetector: NSObject, ObservableObject, CLLocationManagerDelegate {
             }
             
         }
+        
         self.detectedMultilaterationBeacons.removeAll()
-//        self.beaconsData.removeAll()
     }
     
     private func makeActive() {
