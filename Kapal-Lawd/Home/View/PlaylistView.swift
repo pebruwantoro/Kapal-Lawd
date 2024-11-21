@@ -150,7 +150,7 @@ struct PlaylistView: View {
                                     }
                                     .padding(.trailing, 24)
                                 }
-                                .frame(maxWidth: .infinity, maxHeight: 100)
+                                .frame(maxWidth: .infinity, maxHeight: 118)
                             }
                             
                             
