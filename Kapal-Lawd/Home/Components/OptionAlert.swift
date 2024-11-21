@@ -20,7 +20,7 @@ struct OptionAlertView: ViewModifier {
                 title: Text(title),
                 message: Text(message),
                 primaryButton: .default(Text(option1.text), action: option1.action),
-                secondaryButton: .destructive(Text(option2.text), action: option2.action)
+                secondaryButton: .default(Text(option2.text), action: option2.action)
             )
         }
     }

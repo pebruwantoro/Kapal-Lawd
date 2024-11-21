@@ -124,7 +124,10 @@ class AVManager: ObservableObject {
             removeTimeObserver()
             self.currentPlaylistIndex += 1
             startPlayback(songTitle: playlist[currentPlaylistIndex].name, url: playlist[currentPlaylistIndex].url)
+        } else {
+            stopPlayback()
         }
+        
     }
 
     func previousPlaylist() {
