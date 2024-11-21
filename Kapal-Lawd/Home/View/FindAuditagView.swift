@@ -92,15 +92,24 @@ struct FindAuditagView: View {
                     }
                 }
                 
+                if showModal {
+                    VStack {
+                        Spacer()
+                        SelectLocationView()
+                            .environmentObject(beaconScanner)
+                            .cornerRadius(16)
+                            .shadow(radius: 5)
+                            .transition(.move(edge: .bottom))
+                    }
+                    .edgesIgnoringSafeArea(.bottom)
+                    .animation(.easeInOut, value: showModal)
+                }
+                
             }
             .onReceive(beaconScanner.$isFindBeacon) {isFind in
                 if isFind && beaconScanner.detectedMultilaterationBeacons.count >= 1 {
                         showModal = true
                 }
-            }
-            .sheet(isPresented: $showModal) {
-                SelectLocationView()
-                    .environmentObject(beaconScanner)
             }
         }
     }
