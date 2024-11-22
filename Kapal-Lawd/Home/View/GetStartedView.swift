@@ -11,66 +11,76 @@ struct GetStartedView: View {
     
     @State private var startOnboarding = false
     
-    var body: some View {
+    var body: some View {     
         if startOnboarding {
             OnboardingFirstView(startOnboarding: self.$startOnboarding)
         } else {
-            Spacer()
-            NavigationStack {
-                ZStack {
-                    Color("AppWhite")
-                    VStack {
-                        Image("header")
-                            .resizable().scaledToFill()
-                            .frame(width: 370, height: 210)
-                            .clipShape(HalfRoundedRectangle(cornerRadius: 36))
-                            .offset(y: -30)
-                        
+            VStack {
+                Spacer()
+                NavigationStack {
+                    ZStack {
+                        Color("AppWhite")
                         VStack {
-                            Text("Mulai Audium")
-                                .font(.title).bold()
-                                .frame(width: 313, alignment: .leading)
+                            Image("header")
+                                .resizable().scaledToFill()
+                                .frame(width: 370, height: 210)
+                                .clipShape(HalfRoundedRectangle(cornerRadius: 36))
+                                .offset(y: -30)
                             
-                            VStack (spacing: 16) {
-                                Text("Menyiapkan pengalaman yang tak terlupakan untuk Anda.")
-                                    .italic()
-                                    .font(.subheadline)
+                            VStack {
+                                Text("Mulai Audium")
+                                    .font(.title).bold()
                                     .frame(width: 313, alignment: .leading)
                                 
-                                
-                                Text("Ikuti langkah-langkah ini untuk merasakan pengalaman baru dalam mengunjungi pameran.")
-                                    .italic()
-                                    .font(.subheadline)
-                                    .frame(width: 313, alignment: .leading)
+                                VStack (spacing: 16) {
+                                    Text("Menyiapkan pengalaman yang tak terlupakan untuk Anda.")
+                                        .italic()
+                                        .font(.subheadline)
+                                        .frame(width: 313, alignment: .leading)
+                                    
+                                    
+                                    Text("Ikuti langkah-langkah ini untuk merasakan pengalaman baru dalam mengunjungi pameran.")
+                                        .italic()
+                                        .font(.subheadline)
+                                        .frame(width: 313, alignment: .leading)
+                                }
                             }
-                        }
-                        .foregroundColor(Color("AppText"))
-                        .padding(.bottom, 25)
-                        
-                        VStack {
-                            Button(action: {
-                                startOnboarding = true
-                                ButtonHaptic()
-                                
-                            }, label: {
-                                Text("Start with Audium")
-                                    .foregroundColor(.white)
-                                    .font(.body)
-                                    .frame(maxWidth: .infinity, maxHeight: 50)
-                                    .background(.black)
-                                    .cornerRadius(86)
-                            })
+                            .foregroundColor(Color("AppText"))
+                            .padding(.bottom, 25)
                             
+                            VStack {
+                                Button(action: {
+                                    startOnboarding = true
+                                    ButtonHaptic()
+                                    
+                                }, label: {
+                                    Text("Start with Audium")
+                                        .foregroundColor(.white)
+                                        .font(.body)
+                                        .frame(maxWidth: .infinity, maxHeight: 50)
+                                        .background(.black)
+                                        .cornerRadius(86)
+                                })
+                                
+                            }
+                            .padding(.horizontal, 24)
                         }
-                        .padding(.horizontal, 24)
                     }
                 }
+                .frame(maxWidth: .infinity, maxHeight: 480)
+                .background(.white)
+                .cornerRadius(36)
+                .shadow(radius: 5)
+                .padding(.horizontal, 16)
+
             }
-            .frame(maxWidth: .infinity, maxHeight: 480)
-            .background(.white)
-            .cornerRadius(36)
-            .shadow(radius: 5)
-            .padding(.horizontal, 16)
+            .background {
+                Image("Background")
+                    .resizable()
+                    .scaledToFill()
+                    .ignoresSafeArea()
+                    .frame(width: UIScreen.main.bounds.width, height: UIScreen.main.bounds.height)
+            }
         }
     }
 }
