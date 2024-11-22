@@ -15,11 +15,11 @@ class IBeaconDetector: NSObject, ObservableObject, CLLocationManagerDelegate {
     private var beaconData: Beacons?
     private var lastTargetVolume: Float? = nil
     private var currentVolumeLevel: VolumeLevel = .none
-    private var beaconsData = [BeaconData]()
     private var isStop = false
+    private var tempClosestBeacons: [DetectedBeacon] = []
     @ObservedObject private var audioPlayerManager = AVManager.shared
     @Published var isFindBeacon = false
-    @Published var detectedMultilaterationBeacons: [DetectedBeacon] = []
+    @Published var threeClosestBeacons : [DetectedBeacon] = []
     @Published var closestBeacon: CLBeacon?
     @Published var isSessionActive: Bool = false
     @Published var dataBeacons: [Beacons] = []
@@ -128,8 +128,8 @@ class IBeaconDetector: NSObject, ObservableObject, CLLocationManagerDelegate {
     }
     
     func locationManager(_ manager: CLLocationManager, didRange beacons: [CLBeacon], satisfying beaconConstraint: CLBeaconIdentityConstraint) {
-        if !self.isStop {            
-            delay(2) {
+        if !self.isStop {
+            delay(10) {
                 if !self.dataBeacons.isEmpty {
                     for beacon in beacons {
                         let tempBeacon = self.dataBeacons.first{ $0.uuid == beacon.uuid.uuidString.lowercased() }
@@ -137,47 +137,33 @@ class IBeaconDetector: NSObject, ObservableObject, CLLocationManagerDelegate {
                         let distance = self.distanceFromRSSI(rssi: Double(beacon.rssi))
                         
                         if distance != -1 {
-                            let beaconData = BeaconData(
+                            let temp = DetectedBeacon(
                                 uuid: beacon.uuid.uuidString.lowercased(),
-                                rssi: Double(beacon.rssi),
-                                distance: distance,
-                                position: Point(xPosition: tempBeacon!.xPosition, yPosition: tempBeacon!.yPosition)
+                                estimatedDitance: distance,
+                                euclideanDistance: distance,
+                                averageDistance: distance,
+                                userPosition: Point(
+                                    xPosition: tempBeacon!.xPosition,
+                                    yPosition: tempBeacon!.yPosition)
                             )
-                            
-                            self.beaconsData.append(beaconData)
+                            self.tempClosestBeacons.append(temp)
                         } else {
-                            self.beaconsData.removeAll(where: { $0.uuid == beacon.uuid.uuidString.lowercased() })
-                            self.detectedMultilaterationBeacons.sort(by: { $0.averageDistance < $1.averageDistance })
+                            self.threeClosestBeacons.removeAll(where: { $0.uuid == beacon.uuid.uuidString.lowercased() })
                         }
                     }
                     
-                    self.beaconsData.sort(by: { $0.distance < $1.distance})
-                    let tempData = Array(Set(self.beaconsData))
-                    
-                    switch tempData.count {
-                        case 1...2:
-                        self.detectedMultilaterationBeacons = multilaterationForLessThanThreeBeacons(data: tempData)
-                        case let count where count >= 3:
-                            self.detectedMultilaterationBeacons = multilateration(data: tempData)
-                        default:
-                            break
-                    }
-                   
-                    
-                    self.detectedMultilaterationBeacons.sort(by: { $0.averageDistance < $1.averageDistance })
-                    let nearestBeacon = self.detectedMultilaterationBeacons.min { $0.averageDistance < $1.averageDistance }
-                    self.closestBeacon = beacons.first { $0.uuid.uuidString.lowercased() == nearestBeacon?.uuid }
+                    self.threeClosestBeacons = Array(Set(self.tempClosestBeacons.sorted(by: { $0.estimatedDitance < $1.estimatedDitance })))
                     
                     self.makeActive()
                 } else {
                     self.makeDisactive()
                 }
-                
             }
             
-            self.detectedMultilaterationBeacons.removeAll()
+//            delay(10) {
+//                self.threeClosestBeacons.removeAll()
+//            }
         }
-        
     }
     
     private func makeActive() {

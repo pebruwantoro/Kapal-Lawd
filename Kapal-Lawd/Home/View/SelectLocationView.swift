@@ -120,9 +120,9 @@ struct SelectLocationView: View {
                 }
             }
             .ignoresSafeArea()
-            .onReceive(beaconScanner.$detectedMultilaterationBeacons) { value in
+            .onReceive(beaconScanner.$threeClosestBeacons) { value in
                 if value.count > 0 && value.count != self.beacons.count {
-                    self.beacons = value.filter( { $0.averageDistance <= Beacon.maxInRange.rawValue })
+                    self.beacons = Array(Set(value.sorted(by: { $0.estimatedDitance < $1.estimatedDitance }).prefix(3)))
                 }
             }
             .refreshable {
