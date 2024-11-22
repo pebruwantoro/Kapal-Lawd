@@ -74,7 +74,7 @@ struct SelectLocationView: View {
                                                     
                                                     HStack (spacing: 1) {
                                                         Spacer()
-                                                        Text(String(format: "%.2f m", beacon.averageDistance))
+                                                        Text("< 3 m")
                                                             .font(.footnote)
                                                             .frame(width: 55)
                                                         Image(systemName: "chevron.forward")
@@ -120,9 +120,13 @@ struct SelectLocationView: View {
                 }
             }
             .ignoresSafeArea()
-            .onReceive(beaconScanner.$detectedMultilaterationBeacons) { value in
+            .onReceive(beaconScanner.$detectedMultilaterationBeacons.debounce(for: .seconds(0.5), scheduler: DispatchQueue.main)) { value in
                 if value.count > 0 && value.count != self.beacons.count {
-                    self.beacons = value.filter( { $0.averageDistance <= Beacon.maxInRange.rawValue })
+                    let newBeacons = Array(Set(value.sorted(by: { $0.estimatedDitance < $1.estimatedDitance }).prefix(3)))
+                    withAnimation(.easeInOut(duration: 0.5)) {
+                        self.beacons = newBeacons
+                    }
+                    
                 }
             }
             .refreshable {

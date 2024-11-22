@@ -16,7 +16,7 @@ func multilateration(data: [BeaconData]) -> [DetectedBeacon]{
     var A = [[Double]]()
     var B = [Double]()
     
-    let refPoint = Point(xPosition: 0.0, yPosition: 0.0)
+    let refPoint = Point(xPosition: data[0].position.xPosition, yPosition: data[0].position.yPosition)
     let d1 = data[0].distance
     
     for i in 1..<data.count{
