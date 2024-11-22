@@ -122,15 +122,12 @@ struct SelectLocationView: View {
             .ignoresSafeArea()
             .onReceive(beaconScanner.$detectedMultilaterationBeacons) { value in
                 if value.count > 0 && value.count != self.beacons.count {
-                    self.beacons = value
+                    self.beacons = value.filter( { $0.averageDistance <= Beacon.maxInRange.rawValue })
                 }
             }
             .refreshable {
                 await refreshData()
             }
-        }
-        .onAppear() {
-            self.beaconScanner.startMonitoring()
         }
     }
     
@@ -149,7 +146,6 @@ struct SelectLocationView: View {
                 let collection = await audioPlayerViewModel.fetchCollectionByBeaconId(id: beacon.uuid)
                 if !collection.isEmpty {
                     self.collections.append(collection[0])
-                    
                 }
             }
         }
