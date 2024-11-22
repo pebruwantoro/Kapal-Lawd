@@ -51,7 +51,7 @@
 	<key>SUPABASE_API_KEY</key>
 	<string>${SUPABASE_API_KEY}</string>
 	<key>SUPABASE_BASE_URL</key>
-	<string>$SUPABASE_BASE_URL}</string>
+	<string>${SUPABASE_BASE_URL}</string>
 	<key>UIBackgroundModes</key>
 	<array>
 		<string>location</string>

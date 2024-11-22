@@ -45,6 +45,10 @@ struct SelectLocationView: View {
                                                             .environmentObject(audioPlayerViewModel)
                                                             .environmentObject(beaconScanner)
                                                             .environmentObject(playlistPlayerViewModel)
+                                                            .onAppear {
+                                                                beaconScanner.stopMonitoring()
+                                                            }
+                                                       
                                         ) {
                                             VStack(alignment: .leading){
                                                 HStack {
@@ -124,6 +128,9 @@ struct SelectLocationView: View {
             .refreshable {
                 await refreshData()
             }
+        }
+        .onAppear() {
+            self.beaconScanner.startMonitoring()
         }
     }
     
