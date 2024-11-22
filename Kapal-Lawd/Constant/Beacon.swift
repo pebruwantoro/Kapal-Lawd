@@ -6,5 +6,5 @@
 //
 
 enum Beacon: Double {
-    case maxInRange = 2.0
+    case maxInRange = 3.0
 }

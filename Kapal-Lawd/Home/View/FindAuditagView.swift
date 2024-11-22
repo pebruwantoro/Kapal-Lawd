@@ -96,11 +96,17 @@ struct FindAuditagView: View {
                             .cornerRadius(16)
                             .shadow(radius: 5)
                             .transition(.move(edge: .bottom))
+                            .onDisappear {
+                                showModal = false
+                            }
                     }
                     .edgesIgnoringSafeArea(.bottom)
                     .animation(.easeInOut, value: showModal)
                 }
                 
+            }
+            .onAppear() {
+                self.beaconScanner.startMonitoring()
             }
             .onReceive(beaconScanner.$isFindBeacon) { isFind in
                 if isFind && beaconScanner.detectedMultilaterationBeacons.count >= 1 {
