@@ -109,7 +109,7 @@ struct FindAuditagView: View {
                 self.beaconScanner.startMonitoring()
             }
             .onReceive(beaconScanner.$isFindBeacon) { isFind in
-                if isFind && beaconScanner.detectedMultilaterationBeacons.count >= 1 {
+                if isFind && beaconScanner.detectedBeacons.count >= 1 {
                     showModal = true
                 }
             }
