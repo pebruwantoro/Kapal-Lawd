@@ -120,9 +120,35 @@ struct SelectLocationView: View {
                 }
             }
             .ignoresSafeArea()
-            .onReceive(beaconScanner.$threeClosestBeacons) { value in
-                if value.count > 0 && value.count != self.beacons.count {
-                    self.beacons = Array(Set(value.sorted(by: { $0.estimatedDitance < $1.estimatedDitance }).prefix(3)))
+            .onReceive(beaconScanner.$detectedBeacons) { value in
+                
+                if value.count > 0 {
+                    let newBeacons = Array(Set(value.sorted(by: { $0.estimatedDitance < $1.estimatedDitance })))
+
+                    withAnimation(.easeInOut(duration: 0.5)) {
+                        self.beacons = newBeacons.sorted(by: { $0.estimatedDitance < $1.estimatedDitance && $0.estimatedDitance < Beacon.maxInRange.rawValue })
+                        
+                        let isBeaconHaveCollections = self.beacons.allSatisfy { b in
+                            self.collections.contains { c in c.beaconId == b.uuid }
+                        }
+                        
+                        if !isBeaconHaveCollections {
+                            let temp = self.beacons.filter { b in
+                                !self.collections.contains { c in c.beaconId == b.uuid }
+                            }
+                            
+                            let beaconDoNotHaveCollections = temp.map({ $0.uuid })
+                            
+                            Task {
+                                let collection = await audioPlayerViewModel.fetchCollectionByBeaconId(id: beaconDoNotHaveCollections[0])
+                                if !collection.isEmpty {
+                                    self.collections.append(collection[0])
+                                }
+                            }
+                        }
+                    }
+                } else {
+                    self.beacons.removeAll()
                 }
             }
             .refreshable {
